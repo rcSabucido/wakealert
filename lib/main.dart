@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wakealert/pages/contacts.dart';
 import 'package:wakealert/pages/home.dart';
+import 'package:wakealert/pages/onboarding.dart';
 import 'package:wakealert/pages/settings.dart';
 
 void main() {
@@ -136,6 +137,7 @@ class _AppScreenState extends State<AppScreen> {
     HomePage(),
     ContactsPage(),
     SettingsPage(),
+    OnboardingPage(),
   ];
 
   Widget buildNavigationItem(IconData? iconData, int index) {
@@ -181,6 +183,7 @@ class _AppScreenState extends State<AppScreen> {
               buildNavigationItem(Icons.home, 0),
               buildNavigationItem(Icons.contacts, 1),
               buildNavigationItem(Icons.settings, 2),
+              buildNavigationItem(Icons.person_pin_circle, 3),
             ],
           ),
         ),
