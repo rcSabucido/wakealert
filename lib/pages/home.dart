@@ -134,6 +134,29 @@ class _HomePageState extends State<HomePage> {
                   )
                 )
               )
+            ),
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                color: const Color(0xFFF4EEEE),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.1),
+                    blurRadius: 3,
+                    spreadRadius: 1,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Padding(
+                padding: EdgeInsets.only(left: 35, right: 35, top: 11, bottom: 11),
+                child: Text("Pairing", style: TextStyle(
+                  color: const Color(0xFFFF6961),
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                )
+                )
+              )
             )
           ],
         ),
