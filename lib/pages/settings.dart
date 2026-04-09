@@ -28,7 +28,8 @@ class _SettingsPageState extends State<SettingsPage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return Scaffold(
-      body: Center(
+      body: Padding(
+        padding: EdgeInsets.only(top: 32.0),
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
         child: Column(
@@ -45,7 +46,6 @@ class _SettingsPageState extends State<SettingsPage> {
           // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
           // action in the IDE, or press "p" in the console), to see the
           // wireframe for each widget.
-          mainAxisAlignment: .center,
           children: [
             FullWidthHeader(
               text: "SETTINGS",
