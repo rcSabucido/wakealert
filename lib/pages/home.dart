@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:simple_ripple_animation/simple_ripple_animation.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -102,6 +103,38 @@ class _HomePageState extends State<HomePage> {
           // wireframe for each widget.
           mainAxisAlignment: .center,
           children: [
+            Text("Pair your WakeAlert device to your Bluetooth",
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+            ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(top: 50, bottom: 40),
+              child: RippleAnimation(
+                color: const Color(0xFFFF6961),
+                delay: const Duration(milliseconds: 300),
+                repeat: true,
+                minRadius: 64,
+                maxRadius: 80,
+                ripplesCount: 6,
+                duration: const Duration(milliseconds: 3000),
+                child: CircleAvatar(
+                  minRadius: 110,
+                  maxRadius: 110,
+                  child: SizedBox.expand(
+                    child: FittedBox(
+                      fit: BoxFit.fill,
+                      child: Padding(
+                        padding: EdgeInsets.all(10),
+                        child: Icon(Icons.bluetooth),
+                      ),
+                    )
+                  )
+                )
+              )
+            )
           ],
         ),
       ),
