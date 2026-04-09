@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:wakealert/components/fullWidthHeader.dart';
 import 'package:wakealert/components/fullWidthIconButton.dart';
+import 'package:wakealert/components/settingsRedirect.dart';
 import 'package:wakealert/components/subsectionHeader.dart';
+import 'package:wakealert/pages/labeledDropdown.dart';
 import 'package:wakealert/pages/labeledTextBox.dart';
 
 class SettingsInformationPage extends StatefulWidget {
@@ -29,6 +31,8 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
   final TextEditingController lastNameController = new TextEditingController();
   final TextEditingController editController = new TextEditingController();
 
+  String? pregnancyStatusOption;
+
   _SettingsInformationPageState(this.onBack);
 
   @override
@@ -42,17 +46,20 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
     return Scaffold(
       body: Padding(
         padding: EdgeInsets.only(top: 32.0, left: 8.0, right: 8.0),
-        child: Column(
+        child: ListView(
           children: [
             SubsectionHeader(
               title: "Information",
               onBack: onBack,
             ),
-            Text(
-              "User Information",
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+            Padding(
+              padding: EdgeInsets.only(left: 8.0, right: 8.0),
+              child: Text(
+                "User Information:",
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             LabeledTextBox(
@@ -67,9 +74,17 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
               label: "Birth Date",
               controller: editController,
             ),
-            LabeledTextBox(
+            LabeledDropdown<String>(
               label: "Pregnancy Status",
-              controller: editController,
+              value: pregnancyStatusOption,
+              items: [
+                DropdownMenuItem(value: "Yes", child: Text("Yes")),
+                DropdownMenuItem(value: "No", child: Text("No")),
+                DropdownMenuItem(value: "Unknown", child: Text("Unknown")),
+              ],
+              onChanged: (value) {
+                pregnancyStatusOption = value;
+              },
             ),
             LabeledTextBox(
               label: "Organ Donor",
@@ -78,6 +93,24 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
             LabeledTextBox(
               label: "Blood Type",
               controller: editController,
+            ),
+            Padding(
+              padding: EdgeInsets.only(left: 8.0, right: 8.0),
+              child: Text(
+                "Additional Information",
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            SettingsRedirect(
+              title: "User Address",
+              onPressed: onBack,
+            ),
+            SettingsRedirect(
+              title: "User Medical Information",
+              onPressed: onBack,
             ),
           ],
         ),
