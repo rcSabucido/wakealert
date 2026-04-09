@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wakealert/components/fullWidthHeader.dart';
 import 'package:wakealert/components/fullWidthIconButton.dart';
+import 'package:wakealert/pages/settingsInformation.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -19,6 +20,12 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+  int _currentIndex = -1;
+
+  final List<Widget> _pages = [
+    SettingsInformationPage()
+  ];
+
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -28,7 +35,7 @@ class _SettingsPageState extends State<SettingsPage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return Scaffold(
-      body: Padding(
+      body: _currentIndex >= 0 ? _pages[_currentIndex] : Padding(
         padding: EdgeInsets.only(top: 32.0),
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
@@ -54,7 +61,9 @@ class _SettingsPageState extends State<SettingsPage> {
               text: "Information",
               icon: Icons.info_outline,
               onPressed: () {
-                print("Button pressed!");
+                setState(() {
+                  _currentIndex = 0;
+                });
               },
             ),
             FullWidthIconButton(
