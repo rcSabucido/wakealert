@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wakealert/signUp/sign_Up.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -17,7 +18,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false, // No default back arrow
+      //  automaticallyImplyLeading: false, // No default back arrow
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
@@ -89,7 +90,7 @@ class _LoginPageState extends State<LoginPage> {
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blueAccent,
+                    backgroundColor: Colors.redAccent,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 15),
                   ),
@@ -116,7 +117,10 @@ class _LoginPageState extends State<LoginPage> {
                   const Text("Don't have an account? "),
                   GestureDetector(
                     onTap: () {
-                      // TODO: Navigate to Sign Up page
+                       Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const SignUpPage()),
+                  ); 
                     },
                     child: const Text(
                       'Sign Up',
