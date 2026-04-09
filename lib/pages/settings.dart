@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:wakealert/components/fullWidthHeader.dart';
+import 'package:wakealert/components/fullWidthIconButton.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -39,15 +41,6 @@ class _SettingsPageState extends State<SettingsPage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the SettingsPage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text("Settings Page"),
-      ),
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
@@ -67,6 +60,30 @@ class _SettingsPageState extends State<SettingsPage> {
           // wireframe for each widget.
           mainAxisAlignment: .center,
           children: [
+            FullWidthHeader(
+              text: "Settings",
+            ),
+            FullWidthIconButton(
+              text: "Information",
+              icon: Icons.info_outline,
+              onPressed: () {
+                print("Button pressed!");
+              },
+            ),
+            FullWidthIconButton(
+              text: "Voice Settings",
+              icon: Icons.spatial_audio_off_rounded,
+              onPressed: () {
+                print("Button pressed!");
+              },
+            ),
+            FullWidthIconButton(
+              text: "Wellness Check",
+              icon: Icons.mood_sharp,
+              onPressed: () {
+                print("Button pressed!");
+              },
+            ),
             const Text('You have pushed the button this many times:'),
             Text(
               '$_counter',
