@@ -43,3 +43,14 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+*.sublime-workspace
+*.sublime-project
+
+.flutter.pid
+
+*.bak
+
+*.env
+*.env.local
+*.raw
