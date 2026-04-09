@@ -22,8 +22,14 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   int _currentIndex = -1;
 
-  final List<Widget> _pages = [
-    SettingsInformationPage()
+  void onBack() {
+    setState(() {
+      _currentIndex = -1;
+    });
+  }
+
+  late final List<Widget> _pages = [
+    SettingsInformationPage(onBack: onBack),
   ];
 
   @override
