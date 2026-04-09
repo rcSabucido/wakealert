@@ -17,18 +17,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,8 +27,61 @@ class _HomePageState extends State<HomePage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Color(0xFFFF6961),
+      appBar: PreferredSize(
+        preferredSize: const Size(double.infinity, 120),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 20),
+            child: Container(
+              height: 100,
+              decoration: BoxDecoration(
+                color: const Color(0xFFFF6961),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(24.0),
+                        child: DefaultTextStyle(
+                          style: const TextStyle(color: Colors.white),
+                          child: ListView(
+                            shrinkWrap: true,
+                            children: [
+                              Text(
+                                "Welcome back,",
+                                style: TextStyle(fontSize: 12)
+                                ),
+                                SizedBox(height: 1),
+                              Text(
+                                "John Doe",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 17,
+                                  ),
+                              )
+                            ],
+                          ),
+                        )
+                      )
+                    )
+                  ),
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 40.0),
+                      child: CircleAvatar(
+                        radius: 22,
+                        backgroundColor: Colors.white,
+                        child: Icon(Icons.person, size: 22)
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ),
+        )
       ),
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
@@ -61,18 +102,8 @@ class _HomePageState extends State<HomePage> {
           // wireframe for each widget.
           mainAxisAlignment: .center,
           children: [
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
       ),
     );
   }
