@@ -20,17 +20,19 @@ class _OnboardingPageState extends State {
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
+
             Container(
-              width: 100,
-              height: 100,
+              width: 120,
+              height: 120,
               decoration: BoxDecoration(
                 color: Colors.redAccent,
                 shape: BoxShape.rectangle,
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(20), // rounded corners
               ),
-              child: const Icon(Icons.alarm, color: Colors.white, size: 60),
+              child: const Icon(Icons.sos, color: Colors.white, size: 60),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 20), 
+
             const Text(
               'Welcome to WakeAlert',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -44,17 +46,14 @@ class _OnboardingPageState extends State {
         ),
       ),
 
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.all(5),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(10),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
           mainAxisSize: MainAxisSize.min,
           children: [
             // Login Button
             SizedBox(
-              height: 40,
-              width: double.infinity,
+              width: 335,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.redAccent,
@@ -76,8 +75,7 @@ class _OnboardingPageState extends State {
 
             // Sign Up Button
             SizedBox(
-              height: 40,
-              width: double.infinity,
+              width: 335,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.redAccent,
