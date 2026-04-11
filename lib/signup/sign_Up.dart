@@ -76,17 +76,17 @@ class _SignUpPageState extends State<SignUpPage> {
                     return 'Enter a valid email';
                   }
                   return null;
-                },
+                    },
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
-      
-
-              bottomNavigationBar: Padding(
-              padding: const EdgeInsets.all(10),
-              child: Row(
+          
+          // Bottom Navigation Buttons
+          bottomNavigationBar: Padding(
+            padding: const EdgeInsets.all(10),
+             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
               // Back Arrow Button (small)
@@ -95,7 +95,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   backgroundColor: Colors.redAccent,
                   foregroundColor: Colors.white,
                   shape: const CircleBorder(),
-                  padding: const EdgeInsets.all(18),
+                  padding: const EdgeInsets.all(10),
                 ),
                 onPressed: () {
                   Navigator.pop(context);
@@ -106,7 +106,6 @@ class _SignUpPageState extends State<SignUpPage> {
               // Next Button (bigger width)
               SizedBox(
               width: 130, 
-              height: 50,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.redAccent,
