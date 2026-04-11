@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wakealert/signup/permissions.dart';
 
 class PrimaryEmergencyContact extends StatefulWidget {
   const PrimaryEmergencyContact({super.key});
@@ -15,7 +16,7 @@ class _PrimaryEmergencyContactState extends State<PrimaryEmergencyContact> {
   final TextEditingController _numberController = TextEditingController();
 
   String? _selectedRelation;
-  final List<String> _relations = ['Family', 'Husband', 'Wife', 'Friend', 'Mother', 'Father', 'Sibling'];
+  final List<String> _relations = ['Family', 'Partner', 'Friend'];
 
   @override
   Widget build(BuildContext context) {
@@ -139,9 +140,15 @@ class _PrimaryEmergencyContactState extends State<PrimaryEmergencyContact> {
                 ),
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    // TODO: Navigate to the next page (e.g., SignUpPassword)
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const OnboardingPermissions(),
+                      ),
+                    );
                   }
                 },
+
                 child: const Text(
                   'Next',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
