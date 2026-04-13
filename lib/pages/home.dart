@@ -18,6 +18,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  bool _isPairing = false;
 
   @override
   Widget build(BuildContext context) {
@@ -112,7 +113,13 @@ class _HomePageState extends State<HomePage> {
             ),
             Padding(
               padding: EdgeInsets.only(top: 50, bottom: 40),
-              child: RippleAnimation(
+              child: _isPairing 
+              ? CircleAvatar(
+                minRadius: 110,
+                maxRadius: 110,
+                backgroundColor: Colors.grey[300],
+              ) 
+              : RippleAnimation(
                 color: const Color(0xFFFF6961),
                 delay: const Duration(milliseconds: 300),
                 repeat: true,
@@ -135,26 +142,35 @@ class _HomePageState extends State<HomePage> {
                 )
               )
             ),
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                color: const Color(0xFFF4EEEE),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
-                    blurRadius: 3,
-                    spreadRadius: 1,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Padding(
-                padding: EdgeInsets.only(left: 35, right: 35, top: 11, bottom: 11),
-                child: Text("Pairing", style: TextStyle(
-                  color: const Color(0xFFFF6961),
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                )
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  _isPairing = !_isPairing;
+                });
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: _isPairing ? const Color(0xFFFF6961) : const Color(0xFFF4EEEE),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 3,
+                      spreadRadius: 1,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Padding(
+                  padding: EdgeInsets.only(left: 35, right: 35, top: 11, bottom: 11),
+                  child: Text(
+                    _isPairing ? "Paired" : "Pairing", 
+                    style: TextStyle(
+                    color: _isPairing ? Colors.white : const Color(0xFFFF6961) ,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  )
+                  )
                 )
               )
             )
