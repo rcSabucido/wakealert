@@ -1,4 +1,6 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:liquid_progress_indicator_v2/liquid_progress_indicator.dart';
 import 'package:simple_ripple_animation/simple_ripple_animation.dart';
 
 class HomePage extends StatefulWidget {
@@ -18,7 +20,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  bool _isPairing = false;
+  bool _isPaired = false;
+  int batteryPercentage = 75;
 
   @override
   Widget build(BuildContext context) {
@@ -113,11 +116,29 @@ class _HomePageState extends State<HomePage> {
             ),
             Padding(
               padding: EdgeInsets.only(top: 50, bottom: 40),
-              child: _isPairing 
-              ? CircleAvatar(
-                minRadius: 110,
-                maxRadius: 110,
-                backgroundColor: Colors.grey[300],
+              child: _isPaired 
+              ? SizedBox(
+                width: 220,
+                height: 220,
+                child: LiquidCircularProgressIndicator(
+                  value: math.max(
+                    math.min(100.0, batteryPercentage / 100.0),
+                    0,
+                  ),
+                  valueColor: AlwaysStoppedAnimation(
+                    const Color(0xFFFF6961),
+                  ),
+                  backgroundColor: const Color(0xFFF4EEEE),
+                  direction: Axis.vertical,
+                  center: Text(
+                    "$batteryPercentage%",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 40,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  )
+                )
               ) 
               : RippleAnimation(
                 color: const Color(0xFFFF6961),
@@ -145,13 +166,13 @@ class _HomePageState extends State<HomePage> {
             GestureDetector(
               onTap: () {
                 setState(() {
-                  _isPairing = !_isPairing;
+                  _isPaired = !_isPaired;
                 });
               },
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
-                  color: _isPairing ? const Color(0xFFFF6961) : const Color(0xFFF4EEEE),
+                  color: _isPaired ? const Color(0xFFFF6961) : const Color(0xFFF4EEEE),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.1),
@@ -164,9 +185,9 @@ class _HomePageState extends State<HomePage> {
                 child: Padding(
                   padding: EdgeInsets.only(left: 35, right: 35, top: 11, bottom: 11),
                   child: Text(
-                    _isPairing ? "Paired" : "Pairing", 
+                    _isPaired ? "Paired" : "Pairing", 
                     style: TextStyle(
-                    color: _isPairing ? Colors.white : const Color(0xFFFF6961) ,
+                    color: _isPaired ? Colors.white : const Color(0xFFFF6961) ,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   )
