@@ -1,4 +1,7 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:liquid_progress_indicator_v2/liquid_progress_indicator.dart';
+import 'package:simple_ripple_animation/simple_ripple_animation.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -17,18 +20,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
+  bool _isPaired = false;
+  int batteryPercentage = 75;
 
   @override
   Widget build(BuildContext context) {
@@ -39,14 +32,61 @@ class _HomePageState extends State<HomePage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the HomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text("Home Page"),
+      appBar: PreferredSize(
+        preferredSize: const Size(double.infinity, 120),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 14),
+            child: Container(
+              height: 100,
+              decoration: BoxDecoration(
+                color: const Color(0xFFFF6961),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(24.0),
+                        child: DefaultTextStyle(
+                          style: const TextStyle(color: Colors.white),
+                          child: ListView(
+                            shrinkWrap: true,
+                            children: [
+                              Text(
+                                "Welcome back,",
+                                style: TextStyle(fontSize: 12)
+                                ),
+                                SizedBox(height: 1),
+                              Text(
+                                "John Doe",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 17,
+                                  ),
+                              )
+                            ],
+                          ),
+                        )
+                      )
+                    )
+                  ),
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 40.0),
+                      child: CircleAvatar(
+                        radius: 22,
+                        backgroundColor: Colors.white,
+                        child: Icon(Icons.person, size: 22)
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ),
+        )
       ),
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
@@ -65,20 +105,98 @@ class _HomePageState extends State<HomePage> {
           // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
           // action in the IDE, or press "p" in the console), to see the
           // wireframe for each widget.
-          mainAxisAlignment: .center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+            Text("Pair your WakeAlert device to your Bluetooth",
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
             ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(top: 50, bottom: 40),
+              child: _isPaired 
+              ? SizedBox(
+                width: 220,
+                height: 220,
+                child: LiquidCircularProgressIndicator(
+                  value: math.max(
+                    math.min(100.0, batteryPercentage / 100.0),
+                    0,
+                  ),
+                  valueColor: AlwaysStoppedAnimation(
+                    const Color(0xFFFF6961),
+                  ),
+                  backgroundColor: const Color(0xFFF4EEEE),
+                  direction: Axis.vertical,
+                  center: Text(
+                    "$batteryPercentage%",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 40,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  )
+                )
+              ) 
+              : RippleAnimation(
+                color: const Color(0xFFFF6961),
+                delay: const Duration(milliseconds: 300),
+                repeat: true,
+                minRadius: 64,
+                maxRadius: 80,
+                ripplesCount: 6,
+                duration: const Duration(milliseconds: 3000),
+                child: CircleAvatar(
+                  minRadius: 110,
+                  maxRadius: 110,
+                  child: SizedBox.expand(
+                    child: FittedBox(
+                      fit: BoxFit.fill,
+                      child: Padding(
+                        padding: EdgeInsets.all(10),
+                        child: Icon(Icons.bluetooth),
+                      ),
+                    )
+                  )
+                )
+              )
+            ),
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  _isPaired = !_isPaired;
+                });
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: _isPaired ? const Color(0xFFFF6961) : const Color(0xFFF4EEEE),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 3,
+                      spreadRadius: 1,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Padding(
+                  padding: EdgeInsets.only(left: 35, right: 35, top: 11, bottom: 11),
+                  child: Text(
+                    _isPaired ? "Paired" : "Pairing", 
+                    style: TextStyle(
+                    color: _isPaired ? Colors.white : const Color(0xFFFF6961) ,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  )
+                  )
+                )
+              )
+            )
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
       ),
     );
   }
