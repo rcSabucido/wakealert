@@ -36,7 +36,7 @@ class _HomePageState extends State<HomePage> {
         preferredSize: const Size(double.infinity, 120),
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.only(top: 20),
+            padding: const EdgeInsets.only(top: 14),
             child: Container(
               height: 100,
               decoration: BoxDecoration(
@@ -105,7 +105,7 @@ class _HomePageState extends State<HomePage> {
           // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
           // action in the IDE, or press "p" in the console), to see the
           // wireframe for each widget.
-          mainAxisAlignment: .center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text("Pair your WakeAlert device to your Bluetooth",
             textAlign: TextAlign.center,
