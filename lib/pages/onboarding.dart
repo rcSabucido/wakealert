@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:wakealert/Login/login.dart';
+import 'package:wakealert/login/login.dart';
 import 'package:wakealert/signup/sign_Up.dart';
 
 
