@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:wakealert/signUp/sign_Up.dart';
+import 'package:wakealert/signup/sign_Up.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
