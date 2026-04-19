@@ -10,9 +10,9 @@ class ContactsPage extends StatefulWidget {
 class _ContactsPageState extends State<ContactsPage> {
   late final List<Map<String, String>> _contacts = [
     {
-      'name': 'John Doe',
-      'phone': '555-0123',
-      'relationship': 'Family'
+      'name': 'Emergency Hotline',
+      'phone': '911',
+      'relationship': 'Emergency'
     },
     {
       'name': 'Jane Smith',
@@ -63,8 +63,10 @@ class _ContactsPageState extends State<ContactsPage> {
           itemBuilder: (context, index) {
             final contact = _contacts[index];
             return ListTile(
-              leading: const CircleAvatar(
-                child: Icon(Icons.person),
+              leading: CircleAvatar(
+                child: index == 0
+                ? const Icon(Icons.emergency)
+                : const Icon(Icons.person),
               ),
               title: Text(contact['name']!),
               subtitle: Column(
@@ -80,9 +82,17 @@ class _ContactsPageState extends State<ContactsPage> {
                   )
                 ],
               ),
-              trailing: IconButton(onPressed: () {}, icon: const Icon(Icons.more_vert)),
+              trailing: index == 0 
+              ? null
+              : IconButton(onPressed: () {}, icon: const Icon(Icons.more_vert)),
             );
           },
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {},
+          backgroundColor: const Color(0xFFFF6961),
+          foregroundColor: Colors.white,
+          child: const Icon(Icons.add),
         ),
     );
   }
