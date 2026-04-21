@@ -30,6 +30,25 @@ class _ContactsPageState extends State<ContactsPage> {
     },
   ];
 
+  void _setPrimaryContact(Map<String, dynamic> newContact) {
+    setState(() {
+      // If the new contact is marked as primary, unset the previous primary
+      if (newContact['isPrimary'] == true) {
+        for (var contact in _contacts) {
+          if (contact['isPrimary'] == true && contact != _contacts[0]) {
+            contact['isPrimary'] = false;
+            break;
+          }
+        }
+        // Add the new contact at index 1 (right after emergency hotline)
+        _contacts.insert(1, newContact);
+      } else {
+        // If not primary, add to the end
+        _contacts.add(newContact);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -107,9 +126,7 @@ class _ContactsPageState extends State<ContactsPage> {
               ),
             ).then((newContact) {
               if (newContact != null) {
-                setState(() {
-                  _contacts.add(newContact);
-                });
+                _setPrimaryContact(newContact);
               }
             });
           },
