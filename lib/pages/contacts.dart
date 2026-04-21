@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wakealert/pages/addContactView.dart';
 
 class ContactsPage extends StatefulWidget {
   const ContactsPage({super.key});
@@ -99,7 +100,19 @@ class _ContactsPageState extends State<ContactsPage> {
           },
         ),
         floatingActionButton: FloatingActionButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const AddContactView(),
+              ),
+            ).then((newContact) {
+              if (newContact != null) {
+                setState(() {
+                  _contacts.add(newContact);
+                });
+              }
+            });
+          },
           backgroundColor: const Color(0xFFFF6961),
           foregroundColor: Colors.white,
           child: const Icon(Icons.add),
