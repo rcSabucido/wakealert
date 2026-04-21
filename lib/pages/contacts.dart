@@ -8,21 +8,24 @@ class ContactsPage extends StatefulWidget {
 }
 
 class _ContactsPageState extends State<ContactsPage> {
-  late final List<Map<String, String>> _contacts = [
+  late final List<Map<String, dynamic>> _contacts = [
     {
       'name': 'Emergency Hotline',
       'phone': '911',
-      'relationship': 'Emergency'
+      'relationship': 'Emergency',
+      'isPrimary': false,
     },
     {
       'name': 'Jane Smith',
       'phone': '555-0456',
-      'relationship': 'Friend'
+      'relationship': 'Friend',
+      'isPrimary': true,
     },
     {
       'name': 'Emily Brown',
       'phone': '555-0789',
-      'relationship': 'Partner'
+      'relationship': 'Partner',
+      'isPrimary': false,
     },
   ];
 
@@ -64,9 +67,16 @@ class _ContactsPageState extends State<ContactsPage> {
             final contact = _contacts[index];
             return ListTile(
               leading: CircleAvatar(
+                backgroundColor: index == 0 
+                ? null
+                : (contact['isPrimary'] as bool? ?? false)
+                  ? null
+                  : Colors.grey[300],
                 child: index == 0
                 ? const Icon(Icons.emergency)
-                : const Icon(Icons.person),
+                : (contact['isPrimary'] as bool? ?? false)
+                  ? const Text('P', style: TextStyle(color: Color(0xFFFF1111)))
+                  : const Text('S'),
               ),
               title: Text(contact['name']!),
               subtitle: Column(
