@@ -118,7 +118,7 @@ class _AddContactViewState extends State<AddContactView> {
                     DropdownButtonFormField<String>(
                       initialValue: _selectedRelationship,
                       decoration: const InputDecoration(
-                        labelText: 'Relationship',
+                        labelText: 'Relations:',
                         border: OutlineInputBorder(),
                       ),
                       items: const [

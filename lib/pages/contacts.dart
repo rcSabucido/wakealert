@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wakealert/pages/addContactView.dart';
+import 'package:wakealert/pages/editContactView.dart';
 
 class ContactsPage extends StatefulWidget {
   const ContactsPage({super.key});
@@ -47,6 +48,115 @@ class _ContactsPageState extends State<ContactsPage> {
         _contacts.add(newContact);
       }
     });
+  }
+
+  void _deleteContact(int index) {
+    setState(() {
+      _contacts.removeAt(index);
+    });
+  }
+
+  void _updateContact(int index, Map<String, dynamic> updatedContact) {
+    setState(() {
+      _contacts[index] = updatedContact;
+    });
+  }
+
+  void _showContactOptions(BuildContext context, Map<String, dynamic> contact, int index) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext context) {
+        return Container(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                contact['name'] as String,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    Navigator.pop(context);
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => EditContactView(
+                          contact: contact,
+                          contactIndex: index,
+                        ),
+                      ),
+                    );
+                    if (result != null) {
+                      final updatedContact = result as Map<String, dynamic>;
+                      _updateContact(index, updatedContact);
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('${updatedContact['name']} updated'),
+                          ),
+                        );
+                      }
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text(
+                    'Edit',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _deleteContact(index);
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('${contact['name']} deleted'),
+                        ),
+                      );
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text(
+                    'Delete',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -114,7 +224,10 @@ class _ContactsPageState extends State<ContactsPage> {
               ),
               trailing: index == 0 
               ? null
-              : IconButton(onPressed: () {}, icon: const Icon(Icons.more_vert)),
+              : IconButton(
+                  onPressed: () => _showContactOptions(context, contact, index),
+                  icon: const Icon(Icons.more_vert),
+                ),
             );
           },
         ),
