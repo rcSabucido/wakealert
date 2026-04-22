@@ -3,6 +3,8 @@ import 'package:wakealert/components/fullWidthHeader.dart';
 import 'package:wakealert/components/fullWidthIconButton.dart';
 import 'package:wakealert/pages/settingsInformation.dart';
 import 'package:wakealert/pages/viewInformation.dart';
+import 'package:wakealert/pages/voiceSettings.dart';
+import 'package:wakealert/pages/wellnessCheckSettings.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -31,8 +33,8 @@ class _SettingsPageState extends State<SettingsPage> {
 
   late final List<Widget> _pages = [
     SettingsInformationPage(onBack: onBack),
-    SettingsInformationPage(onBack: onBack),
-    SettingsInformationPage(onBack: onBack),
+    VoiceSettingsPage(onBack: onBack),
+    WellnessCheckSettingsPage(onBack: onBack),
     ViewInformationPage(onBack: onBack),
   ];
 
@@ -80,14 +82,18 @@ class _SettingsPageState extends State<SettingsPage> {
               text: "Voice Settings",
               icon: Icons.spatial_audio_off_rounded,
               onPressed: () {
-                print("Button pressed!");
+                setState(() {
+                  _currentIndex = 1;
+                });
               },
             ),
             FullWidthIconButton(
               text: "Wellness Check",
               icon: Icons.mood_sharp,
               onPressed: () {
-                print("Button pressed!");
+                setState(() {
+                  _currentIndex = 2;
+                });
               },
             ),
             FullWidthIconButton(
