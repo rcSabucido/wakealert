@@ -5,6 +5,7 @@ import 'package:wakealert/components/labeledDropdown.dart';
 import 'package:wakealert/components/labeledTextBox.dart';
 import 'package:wakealert/components/fullWidthButton.dart';
 import 'package:wakealert/components/dropdown.dart';
+import 'package:wakealert/components/splitCard.dart';
 
 class WellnessCheckSettingsPage extends StatefulWidget {
   final VoidCallback onBack;
@@ -52,6 +53,14 @@ class _WellnessCheckSettingsPageState extends State<WellnessCheckSettingsPage> {
             SubsectionHeader(
               title: "Wellness Check Settings",
               onBack: onBack,
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+              child: SplitCard(
+                text: "At certain times, the system may ask for a response to confirm the user is present and in good condition. This feature is used to make sure everything is alright and you’re doing well!",
+                icon: Icons.info_outline,
+                height: 200,
+              ),
             ),
             Padding(
               padding: EdgeInsets.only(left: 8.0, right: 8.0),
