@@ -21,8 +21,10 @@ class _MedicalInfoScreenState extends State<MedicalInfoScreen> {
   void _showDiagnosisPicker() {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => DiagnosisModalPage(initialSelection: selectedDiagnosis),
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => DiagnosisModalPage(initialSelection: selectedDiagnosis),
+        transitionDuration: Duration.zero,
+        reverseTransitionDuration: Duration.zero,
       ),
     );
   }
@@ -30,8 +32,10 @@ class _MedicalInfoScreenState extends State<MedicalInfoScreen> {
   void _openAllergiesPicker() {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => AllergiesModalPage(initialSelection: selectedAllergies),
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => AllergiesModalPage(initialSelection: selectedAllergies),
+        transitionDuration: Duration.zero,
+        reverseTransitionDuration: Duration.zero,
       ),
     );
   }
@@ -39,8 +43,10 @@ class _MedicalInfoScreenState extends State<MedicalInfoScreen> {
   void _openHistoryPicker() {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => MedicalHistoryModalPage(initialSelection: selectedHistory),
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => MedicalHistoryModalPage(initialSelection: selectedHistory),
+        transitionDuration: Duration.zero,
+        reverseTransitionDuration: Duration.zero,
       ),
     );
   }
@@ -48,8 +54,10 @@ class _MedicalInfoScreenState extends State<MedicalInfoScreen> {
   void _openMedicationPicker() {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => CurrentMedicationModalPage(initialSelection: selectedMedications),
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => CurrentMedicationModalPage(initialSelection: selectedMedications),
+        transitionDuration: Duration.zero,
+        reverseTransitionDuration: Duration.zero,
       ),
     );
   }
