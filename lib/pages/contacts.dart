@@ -73,6 +73,7 @@ class _ContactsPageState extends State<ContactsPage> {
   void _showContactOptions(BuildContext context, Map<String, dynamic> contact, int index) {
     showModalBottomSheet(
       context: context,
+      backgroundColor: const Color(0xFFE35D56),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -88,6 +89,7 @@ class _ContactsPageState extends State<ContactsPage> {
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
               ),
               const SizedBox(height: 20),
@@ -118,12 +120,13 @@ class _ContactsPageState extends State<ContactsPage> {
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
+                    backgroundColor: const Color(0xFFFF6961),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 15),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
+                    elevation: 3.0,
                   ),
                   child: const Text(
                     'Edit',
@@ -147,8 +150,8 @@ class _ContactsPageState extends State<ContactsPage> {
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                    foregroundColor: Colors.white,
+                    backgroundColor: Colors.white,
+                    foregroundColor: const Color(0xFFFF6961),
                     padding: const EdgeInsets.symmetric(vertical: 15),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -156,7 +159,7 @@ class _ContactsPageState extends State<ContactsPage> {
                   ),
                   child: const Text(
                     'Delete',
-                    style: TextStyle(fontSize: 16),
+                    style: TextStyle(fontSize: 16, color: Color(0xFFFF6961)),
                   ),
                 ),
               ),
