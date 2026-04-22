@@ -1,67 +1,178 @@
 import 'package:flutter/material.dart';
-import 'package:wakealert/components/settingsRedirect.dart';
-import 'package:wakealert/components/subsectionHeader.dart';
-import 'package:wakealert/components/labeledDropdown.dart';
-import 'package:wakealert/components/labeledTextBox.dart';
+import 'package:wakealert/medicalInformation/medicalInformation.dart';
 
 class ViewInformationPage extends StatefulWidget {
   final VoidCallback onBack;
 
   const ViewInformationPage({super.key, required this.onBack});
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
   @override
-  State<ViewInformationPage> createState() => _ViewInformationPageState(onBack);
+  State<ViewInformationPage> createState() => _ViewInformationPageState();
 }
 
 class _ViewInformationPageState extends State<ViewInformationPage> {
-  late final VoidCallback onBack;
-
-  final TextEditingController firstNameController = new TextEditingController();
-  final TextEditingController lastNameController = new TextEditingController();
-  final TextEditingController editController = new TextEditingController();
-
-  String? pregnancyStatusOption;
-
-  _ViewInformationPageState(this.onBack);
-
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
-      body: Padding(
-        padding: EdgeInsets.only(top: 32.0, left: 8.0, right: 8.0),
-        child: ListView(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Column(
           children: [
-            SubsectionHeader(
-              title: "View Information",
-              onBack: onBack,
+            // Top Bar 
+            Container(
+              color: Colors.white, 
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 18),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFEF5350), // Active Tab
+                      ),
+                      child: const Text(
+                        "USER\nINFORMATION",
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 25, 
+                        ),
+                      ),
+                    ),
+                  ),
+                  // This is the small white space 
+                  const SizedBox(width: 3), 
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          PageRouteBuilder(
+                            // Targets the MedicalInfoScreen
+                            pageBuilder: (context, animation, secondaryAnimation) => const MedicalInfoScreen(),
+                            // Removes the entrance animation
+                            transitionDuration: Duration.zero,
+                            // Removes the exit animation (when pressing back)
+                            reverseTransitionDuration: Duration.zero,
+                          ),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 18),
+                        decoration: BoxDecoration(
+                          color: Colors.blueGrey[200], // Inactive Tab
+                        ),
+                        child: const Text(
+                          "MEDICAL\nINFORMATION",
+                          textAlign: TextAlign.right, // Better alignment for the "seamless" look
+                          style: TextStyle(
+                            color: Colors.blueGrey,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 25, // Adjusted so it doesn't overflow
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            Padding(
-              padding: EdgeInsets.only(left: 8.0, right: 8.0),
-              child: Text(
-                "User Information:",
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+
+            // SCROLLABLE CONTENT AREA
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.all(8),
+                children: [
+                  const Row(
+                    children: [
+                      Expanded(flex: 2, child: InfoTile(label: "Full Name", value: "Juan Dela Cruz")),
+                      SizedBox(width: 12),
+                      Expanded(flex: 1, child: InfoTile(label: "Blood Type", value: "A+")),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  const Row(
+                    children: [
+                      Expanded(flex: 2, child: InfoTile(label: "Date of Birth", value: "YYYY/MM/DD")),
+                      SizedBox(width: 12),
+                      Expanded(flex: 1, child: InfoTile(label: "Age", value: "21")),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  const Row(
+                    children: [
+                      Expanded(flex: 2, child: InfoTile(label: "Primary Contact", value: "09XXXXXXXXX")),
+                      SizedBox(width: 12),
+                      Expanded(flex: 1, child: InfoTile(label: "Relationship", value: "FAMILY")),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  const InfoTile(label: "Address", value: "Blk X Lot X Subdivision, Barangay, City"),
+                  const SizedBox(height: 16),
+                  const InfoTile(label: "Pregnancy Status", value: "Unknown"),
+                  const SizedBox(height: 16),
+                  const InfoTile(label: "Organ Donor", value: "Yes"),
+                ],
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class InfoTile extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const InfoTile({super.key, required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFF6B6B),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white, 
+              fontSize: 16, 
+              fontWeight: FontWeight.w500
+            ),
+          ),
+          const SizedBox(height: 6),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+            decoration: BoxDecoration(
+              color: const Color(0xFFE55A5A),
+              borderRadius: BorderRadius.circular(6),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  offset: const Offset(0, 2),
+                  blurRadius: 2,
+                ),
+              ],
+            ),
+            child: Text(
+              value,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 23,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
