@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:wakealert/components/settingsRedirect.dart';
 import 'package:wakealert/components/subsectionHeader.dart';
 import 'package:wakealert/components/labeledDropdown.dart';
+import 'package:wakealert/components/dropdown.dart';
 import 'package:wakealert/components/labeledTextBox.dart';
 
 class VoiceSettingsPage extends StatefulWidget {
@@ -29,7 +30,9 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
   final TextEditingController lastNameController = new TextEditingController();
   final TextEditingController editController = new TextEditingController();
 
-  String? pregnancyStatusOption;
+  String? voiceAccent;
+  String? voiceName;
+  Set<String> voiceSpeedSelection = {"A"};
 
   _VoiceSettingsPageState(this.onBack);
 
@@ -51,14 +54,102 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
               onBack: onBack,
             ),
             Padding(
-              padding: EdgeInsets.only(left: 8.0, right: 8.0),
+              padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
               child: Text(
-                "User Information:",
+                "Voice Accent",
                 style: const TextStyle(
-                  fontSize: 16,
+                  fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
               ),
+            ),
+            Dropdown<String>(
+              value: voiceAccent,
+              items: [
+                DropdownMenuItem(value: "en-PH", child: Text("Filipino")),
+                DropdownMenuItem(value: "en-US", child: Text("US English")),
+                DropdownMenuItem(value: "en-GB", child: Text("UK English")),
+              ],
+              onChanged: (value) {
+                voiceAccent = value;
+              },
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+              child: Text(
+                "Voice Name",
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            Dropdown<String>(
+              value: voiceName,
+              items: [
+                DropdownMenuItem(value: "rn", child: Text("Rosa Normal")),
+                DropdownMenuItem(value: "an", child: Text("Adrian Normal")),
+                DropdownMenuItem(value: "jn", child: Text("John Normal")),
+              ],
+              onChanged: (value) {
+                voiceName = value;
+              },
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+              child: Text(
+                "Voice Speed",
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            SizedBox(
+              width: double.infinity,
+              height: 60,
+              child: SegmentedButton<String>(
+                  segments: const [
+                    ButtonSegment(value: "Slow", label: Text('Slow')),
+                    ButtonSegment(value: "Medium", label: Text('Medium')),
+                    ButtonSegment(value: "Fast", label: Text('Fast')),
+                  ],
+                  selected: voiceSpeedSelection,
+                  onSelectionChanged: (newSelection) {
+                    setState(() {
+                      voiceSpeedSelection = newSelection;
+                    });
+                  },
+                  multiSelectionEnabled: false, // ensures only one is selected
+                ),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+              child: Text(
+                "Voice Pitch",
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            SizedBox(
+              width: double.infinity,
+              height: 60,
+              child: SegmentedButton<String>(
+                  segments: const [
+                    ButtonSegment(value: "Deep", label: Text('Deep')),
+                    ButtonSegment(value: "Average", label: Text('Average')),
+                    ButtonSegment(value: "High", label: Text('High')),
+                  ],
+                  selected: voiceSpeedSelection,
+                  onSelectionChanged: (newSelection) {
+                    setState(() {
+                      voiceSpeedSelection = newSelection;
+                    });
+                  },
+                  multiSelectionEnabled: false, // ensures only one is selected
+                ),
             ),
           ],
         ),
