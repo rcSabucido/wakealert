@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:wakealert/pages/contactConfirmedView.dart';
 
 class EditContactView extends StatefulWidget {
   final Map<String, dynamic> contact;
@@ -57,7 +58,19 @@ class _EditContactViewState extends State<EditContactView> {
         'relationship': _selectedRelationship,
         'isPrimary': _isPrimary,
       };
-      Navigator.pop(context, updatedContact);
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ContactConfirmedView(
+            contactName: updatedContact['name'] as String,
+            isEdit: true,
+          ),
+        ),
+      ).then((result) {
+        if (result == true) {
+          Navigator.pop(context, updatedContact);
+        }
+      });
     }
   }
 
