@@ -115,6 +115,24 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
               width: double.infinity,
               height: 60,
               child: SegmentedButton<String>(
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                      (Set<MaterialState> states) {
+                        if (states.contains(MaterialState.selected)){
+                          return const Color(0xFFFF6961);
+                        }
+                        return Colors.white;
+                      },
+                    ),
+                    foregroundColor: MaterialStateProperty.resolveWith<Color>(
+                      (Set<MaterialState> states) {
+                        if (states.contains(MaterialState.selected)){
+                          return Colors.white;
+                        }
+                        return const Color(0xFFFF6961);
+                      },
+                    ),
+                  ),
                   segments: const [
                     ButtonSegment(value: "Slow", label: Padding(
                       padding: EdgeInsets.all(20),
@@ -145,6 +163,24 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
               width: double.infinity,
               height: 60,
               child: SegmentedButton<String>(
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                      (Set<MaterialState> states) {
+                        if (states.contains(MaterialState.selected)){
+                          return const Color(0xFFFF6961);
+                        }
+                        return Colors.white;
+                      },
+                    ),
+                    foregroundColor: MaterialStateProperty.resolveWith<Color>(
+                      (Set<MaterialState> states) {
+                        if (states.contains(MaterialState.selected)){
+                          return Colors.white;
+                        }
+                        return const Color(0xFFFF6961);
+                      },
+                    ),
+                  ),
                   segments: const [
                     ButtonSegment(value: "Deep", label: Padding(
                       padding: EdgeInsets.all(20),
