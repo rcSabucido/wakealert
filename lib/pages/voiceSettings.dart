@@ -3,6 +3,7 @@ import 'package:wakealert/components/settingsRedirect.dart';
 import 'package:wakealert/components/subsectionHeader.dart';
 import 'package:wakealert/components/labeledDropdown.dart';
 import 'package:wakealert/components/dropdown.dart';
+import 'package:wakealert/components/fullWidthButton.dart';
 import 'package:wakealert/components/labeledTextBox.dart';
 
 class VoiceSettingsPage extends StatefulWidget {
@@ -55,7 +56,7 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
               onBack: onBack,
             ),
             Padding(
-              padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+              padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
               child: Text(
                 "Voice Accent",
                 style: const TextStyle(
@@ -78,7 +79,7 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
               },
             ),
             Padding(
-              padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+              padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
               child: Text(
                 "Voice Name",
                 style: const TextStyle(
@@ -101,7 +102,7 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
               },
             ),
             Padding(
-              padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+              padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
               child: Text(
                 "Voice Speed",
                 style: const TextStyle(
@@ -131,7 +132,7 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
                 ),
             ),
             Padding(
-              padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+              padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
               child: Text(
                 "Voice Pitch",
                 style: const TextStyle(
@@ -158,6 +159,13 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
                     });
                   },
                   multiSelectionEnabled: false, // ensures only one is selected
+                ),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+              child: FullWidthButton(
+                  text: "Save",
+                  onPressed: onBack,
                 ),
             ),
           ],
