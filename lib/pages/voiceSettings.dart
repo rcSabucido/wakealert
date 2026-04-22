@@ -32,7 +32,8 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
 
   String? voiceAccent;
   String? voiceName;
-  Set<String> voiceSpeedSelection = {"A"};
+  Set<String> voiceSpeedSelection = {"Medium"};
+  Set<String> voicePitchSelection = {"Average"};
 
   _VoiceSettingsPageState(this.onBack);
 
@@ -71,7 +72,9 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
                 DropdownMenuItem(value: "en-GB", child: Text("UK English")),
               ],
               onChanged: (value) {
-                voiceAccent = value;
+                setState(() {
+                  voiceAccent = value;
+                });
               },
             ),
             Padding(
@@ -92,7 +95,9 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
                 DropdownMenuItem(value: "jn", child: Text("John Normal")),
               ],
               onChanged: (value) {
-                voiceName = value;
+                setState(() {
+                  voiceName = value;
+                });
               },
             ),
             Padding(
@@ -110,7 +115,9 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
               height: 60,
               child: SegmentedButton<String>(
                   segments: const [
-                    ButtonSegment(value: "Slow", label: Text('Slow')),
+                    ButtonSegment(value: "Slow", label: Padding(
+                      padding: EdgeInsets.all(20),
+                      child:Text('Slow'))),
                     ButtonSegment(value: "Medium", label: Text('Medium')),
                     ButtonSegment(value: "Fast", label: Text('Fast')),
                   ],
@@ -138,14 +145,16 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
               height: 60,
               child: SegmentedButton<String>(
                   segments: const [
-                    ButtonSegment(value: "Deep", label: Text('Deep')),
+                    ButtonSegment(value: "Deep", label: Padding(
+                      padding: EdgeInsets.all(20),
+                      child:Text('Deep'))),
                     ButtonSegment(value: "Average", label: Text('Average')),
                     ButtonSegment(value: "High", label: Text('High')),
                   ],
-                  selected: voiceSpeedSelection,
+                  selected: voicePitchSelection,
                   onSelectionChanged: (newSelection) {
                     setState(() {
-                      voiceSpeedSelection = newSelection;
+                      voicePitchSelection = newSelection;
                     });
                   },
                   multiSelectionEnabled: false, // ensures only one is selected
