@@ -3,6 +3,8 @@ import 'package:wakealert/components/settingsRedirect.dart';
 import 'package:wakealert/components/subsectionHeader.dart';
 import 'package:wakealert/components/labeledDropdown.dart';
 import 'package:wakealert/components/labeledTextBox.dart';
+import 'package:wakealert/components/fullWidthButton.dart';
+import 'package:wakealert/components/dropdown.dart';
 
 class WellnessCheckSettingsPage extends StatefulWidget {
   final VoidCallback onBack;
@@ -30,6 +32,7 @@ class _WellnessCheckSettingsPageState extends State<WellnessCheckSettingsPage> {
   final TextEditingController editController = new TextEditingController();
 
   String? pregnancyStatusOption;
+  String? wellnessCheckInterval;
 
   _WellnessCheckSettingsPageState(this.onBack);
 
@@ -53,11 +56,44 @@ class _WellnessCheckSettingsPageState extends State<WellnessCheckSettingsPage> {
             Padding(
               padding: EdgeInsets.only(left: 8.0, right: 8.0),
               child: Text(
-                "User Information:",
+                "Wellness check toggle",
                 style: const TextStyle(
-                  fontSize: 16,
+                  fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+              child: FullWidthButton(
+                  text: "Enabled",
+                  onPressed: onBack,
+                ),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
+              child: Text(
+                "Wellness check interval",
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(left: 8.0, right: 8.0),
+              child: Dropdown<String>(
+                value: wellnessCheckInterval,
+                items: [
+                  DropdownMenuItem(value: "30", child: Text("30 minutes")),
+                  DropdownMenuItem(value: "60", child: Text("60 minutes")),
+                  DropdownMenuItem(value: "120", child: Text("12 minutes")),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    wellnessCheckInterval = value;
+                  });
+                },
               ),
             ),
           ],
