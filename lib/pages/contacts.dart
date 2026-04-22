@@ -33,7 +33,6 @@ class _ContactsPageState extends State<ContactsPage> {
 
   void _setPrimaryContact(Map<String, dynamic> newContact) {
     setState(() {
-      // If the new contact is marked as primary, unset the previous primary
       if (newContact['isPrimary'] == true) {
         for (var contact in _contacts) {
           if (contact['isPrimary'] == true && contact != _contacts[0]) {
@@ -41,10 +40,8 @@ class _ContactsPageState extends State<ContactsPage> {
             break;
           }
         }
-        // Add the new contact at index 1 (right after emergency hotline)
         _contacts.insert(1, newContact);
       } else {
-        // If not primary, add to the end
         _contacts.add(newContact);
       }
     });
@@ -58,7 +55,18 @@ class _ContactsPageState extends State<ContactsPage> {
 
   void _updateContact(int index, Map<String, dynamic> updatedContact) {
     setState(() {
-      _contacts[index] = updatedContact;
+      if (updatedContact['isPrimary'] == true) {
+        for (var i = 0; i < _contacts.length; i++) {
+          if (_contacts[i]['isPrimary'] == true && i != 0 && i != index) {
+            _contacts[i]['isPrimary'] = false;
+            break;
+          }
+        }
+        _contacts.removeAt(index);
+        _contacts.insert(1, updatedContact);
+      } else {
+        _contacts[index] = updatedContact;
+      }
     });
   }
 
