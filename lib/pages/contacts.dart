@@ -48,6 +48,7 @@ class _ContactsPageState extends State<ContactsPage> {
   }
 
   void _deleteContact(int index) {
+    if (index == 0) return; // Prevent deletion of emergency contact
     setState(() {
       _contacts.removeAt(index);
     });

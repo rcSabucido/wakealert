@@ -28,7 +28,7 @@ class _AddContactViewState extends State<AddContactView> {
   void _saveContact() {
     if (_formKey.currentState!.validate()) {
       final newContact = {
-        'name': '${_firstNameController.text} ${_lastNameController.text}',
+        'name': '${_firstNameController.text.trim()} ${_lastNameController.text.trim()}'.trim(),
         'phone': _phoneController.text,
         'relationship': _selectedRelationship,
         'isPrimary': _isPrimary,
@@ -94,7 +94,7 @@ class _AddContactViewState extends State<AddContactView> {
                         border: OutlineInputBorder(),
                       ),
                       validator: (value) {
-                        if (value == null || value.isEmpty) {
+                        if (value == null || value.trim().isEmpty) {
                           return 'Please enter a first name';
                         }
                         return null;
@@ -108,7 +108,7 @@ class _AddContactViewState extends State<AddContactView> {
                         border: OutlineInputBorder(),
                       ),
                       validator: (value) {
-                        if (value == null || value.isEmpty) {
+                        if (value == null || value.trim().isEmpty) {
                           return 'Please enter a last name';
                         }
                         return null;
@@ -128,6 +128,12 @@ class _AddContactViewState extends State<AddContactView> {
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please enter a phone number';
+                        }
+                        if (value.length < 7) {
+                          return 'Phone number must be at least 7 digits';
+                        }
+                        if (value.length > 15) {
+                          return 'Phone number must not exceed 15 digits';
                         }
                         return null;
                       },
