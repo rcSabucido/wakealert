@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:wakealert/components/fullWidthHeader.dart';
 import 'package:wakealert/components/fullWidthIconButton.dart';
 import 'package:wakealert/pages/settingsInformation.dart';
+import 'package:wakealert/pages/viewInformation.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -30,6 +31,9 @@ class _SettingsPageState extends State<SettingsPage> {
 
   late final List<Widget> _pages = [
     SettingsInformationPage(onBack: onBack),
+    SettingsInformationPage(onBack: onBack),
+    SettingsInformationPage(onBack: onBack),
+    ViewInformationPage(onBack: onBack),
   ];
 
   @override
@@ -91,6 +95,9 @@ class _SettingsPageState extends State<SettingsPage> {
               icon: Icons.info_outline,
               onPressed: () {
                 print("Button pressed!");
+                setState(() {
+                  _currentIndex = 3;
+                });
               },
             ),
           ],
