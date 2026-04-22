@@ -48,11 +48,8 @@ class _ViewInformationPageState extends State<ViewInformationPage> {
                         Navigator.push(
                           context,
                           PageRouteBuilder(
-                            // Targets the MedicalInfoScreen
                             pageBuilder: (context, animation, secondaryAnimation) => const MedicalInfoScreen(),
-                            // Removes the entrance animation
                             transitionDuration: Duration.zero,
-                            // Removes the exit animation (when pressing back)
                             reverseTransitionDuration: Duration.zero,
                           ),
                         );
