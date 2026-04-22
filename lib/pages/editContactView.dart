@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class EditContactView extends StatefulWidget {
   final Map<String, dynamic> contact;
@@ -132,6 +133,10 @@ class _EditContactViewState extends State<EditContactView> {
                         labelText: 'Phone Number:',
                         border: OutlineInputBorder(),
                       ),
+                      keyboardType: TextInputType.phone,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                      ],
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please enter a phone number';

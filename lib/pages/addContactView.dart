@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class AddContactView extends StatefulWidget {
   const AddContactView({super.key});
@@ -107,6 +108,10 @@ class _AddContactViewState extends State<AddContactView> {
                         labelText: 'Phone Number:',
                         border: OutlineInputBorder(),
                       ),
+                      keyboardType: TextInputType.phone,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                      ],
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please enter a phone number';

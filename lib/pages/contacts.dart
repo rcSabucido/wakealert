@@ -19,13 +19,13 @@ class _ContactsPageState extends State<ContactsPage> {
     },
     {
       'name': 'Jane Smith',
-      'phone': '555-0456',
+      'phone': '5550456',
       'relationship': 'Friend',
       'isPrimary': true,
     },
     {
       'name': 'Emily Brown',
-      'phone': '555-0789',
+      'phone': '5550789',
       'relationship': 'Partner',
       'isPrimary': false,
     },
