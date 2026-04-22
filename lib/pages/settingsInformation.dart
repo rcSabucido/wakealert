@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:wakealert/components/fullWidthHeader.dart';
-import 'package:wakealert/components/fullWidthIconButton.dart';
 import 'package:wakealert/components/settingsRedirect.dart';
 import 'package:wakealert/components/subsectionHeader.dart';
-import 'package:wakealert/pages/labeledDropdown.dart';
-import 'package:wakealert/pages/labeledTextBox.dart';
+import 'package:wakealert/components/labeledDropdown.dart';
+import 'package:wakealert/components/labeledTextBox.dart';
 
 class SettingsInformationPage extends StatefulWidget {
   final VoidCallback onBack;

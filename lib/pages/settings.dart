@@ -86,6 +86,13 @@ class _SettingsPageState extends State<SettingsPage> {
                 print("Button pressed!");
               },
             ),
+            FullWidthIconButton(
+              text: "View Information Placeholder",
+              icon: Icons.info_outline,
+              onPressed: () {
+                print("Button pressed!");
+              },
+            ),
           ],
         ),
       ),
