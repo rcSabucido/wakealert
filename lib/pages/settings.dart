@@ -1,4 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:wakealert/components/fullWidthHeader.dart';
+import 'package:wakealert/components/fullWidthIconButton.dart';
+import 'package:wakealert/pages/settingsInformation.dart';
+import 'package:wakealert/pages/viewInformation.dart';
+import 'package:wakealert/pages/voiceSettings.dart';
+import 'package:wakealert/pages/wellnessCheckSettings.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -17,18 +23,20 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  int _counter = 0;
+  int _currentIndex = -1;
 
-  void _incrementCounter() {
+  void onBack() {
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+      _currentIndex = -1;
     });
   }
+
+  late final List<Widget> _pages = [
+    SettingsInformationPage(onBack: onBack),
+    VoiceSettingsPage(onBack: onBack),
+    WellnessCheckSettingsPage(onBack: onBack),
+    ViewInformationPage(onBack: onBack),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -39,16 +47,8 @@ class _SettingsPageState extends State<SettingsPage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the SettingsPage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text("Settings Page"),
-      ),
-      body: Center(
+      body: _currentIndex >= 0 ? _pages[_currentIndex] : Padding(
+        padding: EdgeInsets.only(top: 32.0),
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
         child: Column(
@@ -65,20 +65,49 @@ class _SettingsPageState extends State<SettingsPage> {
           // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
           // action in the IDE, or press "p" in the console), to see the
           // wireframe for each widget.
-          mainAxisAlignment: .center,
           children: [
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+            FullWidthHeader(
+              text: "SETTINGS",
+            ),
+            FullWidthIconButton(
+              text: "Information",
+              icon: Icons.info_outline,
+              onPressed: () {
+                setState(() {
+                  _currentIndex = 0;
+                });
+              },
+            ),
+            FullWidthIconButton(
+              text: "Voice Settings",
+              icon: Icons.spatial_audio_off_rounded,
+              onPressed: () {
+                setState(() {
+                  _currentIndex = 1;
+                });
+              },
+            ),
+            FullWidthIconButton(
+              text: "Wellness Check",
+              icon: Icons.mood_sharp,
+              onPressed: () {
+                setState(() {
+                  _currentIndex = 2;
+                });
+              },
+            ),
+            FullWidthIconButton(
+              text: "View Information Placeholder",
+              icon: Icons.info_outline,
+              onPressed: () {
+                print("Button pressed!");
+                setState(() {
+                  _currentIndex = 3;
+                });
+              },
             ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
       ),
     );
   }
