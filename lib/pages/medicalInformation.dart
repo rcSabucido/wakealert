@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wakealert/components/labeledListBox.dart';
 import 'package:wakealert/components/settingsRedirect.dart';
 import 'package:wakealert/components/subsectionHeader.dart';
 import 'package:wakealert/components/labeledDropdown.dart';
@@ -28,6 +29,12 @@ class _MedicalInformationPageState extends State<MedicalInformationPage> {
   final TextEditingController firstNameController = new TextEditingController();
   final TextEditingController lastNameController = new TextEditingController();
   final TextEditingController editController = new TextEditingController();
+
+  List<String> allergies = [
+    "Eczema", "Anaphylaxis", "Asthma", "Urticaria",
+    "Allergic Rhinitis", "Shrimp", "Peanuts", "Dust Mites",
+    "Penicillin", "Latex", "Pollen", "Cat Dander", "Dairy"
+  ];
 
   String? pregnancyStatusOption;
 
@@ -60,9 +67,14 @@ class _MedicalInformationPageState extends State<MedicalInformationPage> {
                 ),
               ),
             ),
-            LabeledTextBox(
+            LabeledListBox(
               label: "Allergies:",
-              controller: firstNameController,
+              items: allergies,
+              onChanged: (items) {
+                setState(() {
+                  allergies = items;
+                });
+              }
             ),
             LabeledTextBox(
               label: "Medication:",
