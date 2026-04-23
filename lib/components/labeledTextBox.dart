@@ -4,12 +4,14 @@ class LabeledTextBox extends StatelessWidget {
   final String label;
   final TextEditingController controller;
   final String? hintText;
+  final Color? backgroundColor;
 
   const LabeledTextBox({
     Key? key,
     required this.label,
     required this.controller,
     this.hintText,
+    this.backgroundColor,
   }) : super(key: key);
 
   @override
@@ -19,6 +21,7 @@ class LabeledTextBox extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
         decoration: BoxDecoration(
+          color: backgroundColor,
           border: Border.all(color: Colors.grey, width: 1),
           borderRadius: BorderRadius.circular(12),
         ),

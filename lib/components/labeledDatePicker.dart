@@ -6,6 +6,7 @@ class LabeledDatePicker extends StatelessWidget {
   final String? hintText;
   final DateTime? firstDate;
   final DateTime? lastDate;
+  final Color? backgroundColor;
 
   const LabeledDatePicker({
     Key? key,
@@ -14,6 +15,7 @@ class LabeledDatePicker extends StatelessWidget {
     this.hintText,
     this.firstDate,
     this.lastDate,
+    this.backgroundColor,
   }) : super(key: key);
 
   Future<void> _selectDate(BuildContext context) async {
@@ -39,6 +41,7 @@ class LabeledDatePicker extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
+          color: backgroundColor,
           border: Border.all(color: Colors.grey, width: 1),
           borderRadius: BorderRadius.circular(12),
         ),

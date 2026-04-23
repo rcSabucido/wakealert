@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:wakealert/components/fullWidthButton.dart';
+import 'package:wakealert/components/labeledDatePicker.dart';
 import 'package:wakealert/components/labeledDropdown.dart';
+import 'package:wakealert/components/labeledTextBox.dart';
 
 class AddDiagnosisModal extends StatefulWidget {
   final List<String> items;
@@ -19,7 +22,8 @@ class _AddDiagnosisModalState extends State<AddDiagnosisModal> {
   late List<String> items;
   late String? selected;
   late void Function(String) onChanged;
-  final controller = TextEditingController();
+  final diagnosisDateController = TextEditingController();
+  final hospitalController = TextEditingController();
 
   @override
   void initState() {
@@ -52,11 +56,11 @@ class _AddDiagnosisModalState extends State<AddDiagnosisModal> {
                   const SizedBox(width: 48),
                 ],
               ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  children: [
-                    LabeledDropdown<String>(
+              Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: LabeledDropdown<String>(
                       label: "Last Diagnosis:",
                       value: selected,
                       backgroundColor: Colors.white,
@@ -68,8 +72,42 @@ class _AddDiagnosisModalState extends State<AddDiagnosisModal> {
                         onChanged(value!);
                       },
                     ),
-                  ],
-                ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: LabeledDatePicker(
+                      label: "Diagnosis Date:",
+                      controller: diagnosisDateController,
+                      backgroundColor: Colors.white,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: LabeledTextBox(
+                      label: "Hospital:",
+                      controller: hospitalController,
+                      backgroundColor: Colors.white,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 10.0, horizontal: 8.0),
+                    child: FullWidthButton(
+                      text: "Save",
+                      color: const Color(0xFFCC5959),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 10.0, horizontal: 8.0),
+                    child: FullWidthButton(
+                      text: "Cancel",
+                      color: Colors.grey,
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
