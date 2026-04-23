@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wakealert/components/labeledDiagnosisBox.dart';
 import 'package:wakealert/components/labeledListBox.dart';
 import 'package:wakealert/components/settingsRedirect.dart';
 import 'package:wakealert/components/subsectionHeader.dart';
@@ -89,6 +90,7 @@ class _MedicalInformationPageState extends State<MedicalInformationPage> {
             LabeledListBox(
               label: "Allergies",
               items: allergies,
+              addText: "Add Allergy",
               onChanged: (items) {
                 setState(() {
                   allergies = items;
@@ -98,6 +100,7 @@ class _MedicalInformationPageState extends State<MedicalInformationPage> {
             LabeledListBox(
               label: "Medication",
               items: medication,
+              addText: "Add Medication",
               onChanged: (items) {
                 setState(() {
                   medication = items;
@@ -107,12 +110,14 @@ class _MedicalInformationPageState extends State<MedicalInformationPage> {
             LabeledListBox(
               label: "Medical History",
               items: medicalHistory,
+              addText: "Add Medical Condition",
               onChanged: (items) {
                 setState(() {
                   medicalHistory = items;
                 });
               }
             ),
+            /*
             LabeledDropdown<String>(
               label: "Last Diagnosis:",
               value: lastDiagnosisOption != null &&
@@ -127,6 +132,19 @@ class _MedicalInformationPageState extends State<MedicalInformationPage> {
                   lastDiagnosisOption = value;
                 });
               },
+            ),
+            */
+            LabeledDiagnosisBox(
+              label: "Last Diagnosis",
+              medicalHistory: medicalHistory,
+              selected: lastDiagnosisOption != null &&
+              medicalHistory.contains(lastDiagnosisOption) ?
+              lastDiagnosisOption : medicalHistory[0],
+              onChanged: (item) {
+                setState(() {
+                  lastDiagnosisOption = item;
+                });
+              }
             ),
             LabeledTextBox(
               label: "Medical Notes:",

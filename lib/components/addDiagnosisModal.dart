@@ -1,31 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:wakealert/components/labeledDropdown.dart';
 
-class FullListEditModal extends StatefulWidget {
+class AddDiagnosisModal extends StatefulWidget {
   final List<String> items;
-  final String title;
-  final void Function(List<String>) onChanged;
+  final String? selected;
+  final void Function(String) onChanged;
 
-  const FullListEditModal({super.key,
+  const AddDiagnosisModal({super.key,
     required this.items,
-    required this.title,
+    required this.selected,
     required this.onChanged});
 
   @override
-  State<FullListEditModal> createState() => _FullListEditModalState();
+  State<AddDiagnosisModal> createState() => _AddDiagnosisModalState();
 }
 
-class _FullListEditModalState extends State<FullListEditModal> {
+class _AddDiagnosisModalState extends State<AddDiagnosisModal> {
   late List<String> items;
-  late String title;
-  late void Function(List<String>) onChanged;
+  late String? selected;
+  late void Function(String) onChanged;
   final controller = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     items = List.from(widget.items);
-    title = widget.title;
     onChanged = widget.onChanged;
+    selected = widget.selected;
   }
 
   @override
@@ -33,76 +34,45 @@ class _FullListEditModalState extends State<FullListEditModal> {
     return Scaffold(
       backgroundColor: const Color(0xFFFF6B6B),
       body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              Row(
                 children: [
                   IconButton(
                     icon: const Icon(Icons.close, color: Colors.white, size: 30),
                     onPressed: () => Navigator.pop(context),
                   ),
                   Expanded(
-                    child: Text(title,
+                    child: Text("Add Diagnosis",
                         textAlign: TextAlign.center,
                         style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
                   ),
                   const SizedBox(width: 48),
                 ],
               ),
-            ),
-            Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                itemCount: items.length,
-                itemBuilder: (context, index) {
-                  return Container(
-                    margin: const EdgeInsets.symmetric(vertical: 6),
-                    padding: const EdgeInsets.symmetric(vertical: 18),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE55A5A),
-                      borderRadius: BorderRadius.circular(8),
-                      // Kept a subtle shadow to maintain your previous style
-                      boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))],
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  children: [
+                    LabeledDropdown<String>(
+                      label: "Last Diagnosis:",
+                      value: selected,
+                      backgroundColor: Colors.white,
+                      items: [
+                        for (var str in items)
+                          DropdownMenuItem(value: str, child: Text(str)),
+                      ],
+                      onChanged: (value) {
+                        onChanged(value!);
+                      },
                     ),
-                    child:
-                      Padding(
-                        padding: const EdgeInsets.all(1.0),
-                        child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Center(
-                            child: Text(
-                              items[index],
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            right: 0,
-                            child: IconButton(
-                              icon: const Icon(Icons.close, color: Colors.white, size: 16),
-                              onPressed: () => {
-                                setState(() {
-                                  items.remove(items[index]);
-                                  onChanged(items);
-                                })
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

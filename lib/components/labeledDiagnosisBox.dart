@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:wakealert/components/fullListEditModal.dart';
+import 'package:wakealert/components/addDiagnosisModal.dart';
 
-class LabeledListBox extends StatelessWidget {
-  final String label, addText;
-  final List<String> items;
-  final void Function(List<String>) onChanged;
+class LabeledDiagnosisBox extends StatelessWidget {
+  final String label;
+  final String? selected;
+  final List<String> medicalHistory;
+  final void Function(String) onChanged;
 
-  const LabeledListBox({
+  const LabeledDiagnosisBox({
     Key? key,
     required this.label,
-    required this.items,
-    required this.addText,
+    required this.selected,
+    required this.medicalHistory,
     required this.onChanged,
   }) : super(key: key);
 
@@ -22,7 +23,7 @@ class LabeledListBox extends StatelessWidget {
         onTap: () async {
           final result = await showDialog(
             context: context,
-            builder: (context) => FullListEditModal(title: label, items: items, onChanged: onChanged, addText: addText),
+            builder: (context) => AddDiagnosisModal(items: medicalHistory, selected: selected, onChanged: onChanged),
           );
 
           if (result != null) {
@@ -47,7 +48,7 @@ class LabeledListBox extends StatelessWidget {
               ),
               const SizedBox(height: 1),
               Text(
-                items.join(", "),
+                selected ?? "None",
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis
               ),

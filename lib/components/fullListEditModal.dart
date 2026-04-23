@@ -3,13 +3,16 @@ import 'package:wakealert/components/fullWidthButton.dart';
 
 class FullListEditModal extends StatefulWidget {
   final List<String> items;
-  final String title;
+  final String title, addText;
   final void Function(List<String>) onChanged;
 
-  const FullListEditModal({super.key,
+  const FullListEditModal({
+    super.key,
     required this.items,
     required this.title,
-    required this.onChanged});
+    required this.addText,
+    required this.onChanged,
+  });
 
   @override
   State<FullListEditModal> createState() => _FullListEditModalState();
@@ -17,16 +20,47 @@ class FullListEditModal extends StatefulWidget {
 
 class _FullListEditModalState extends State<FullListEditModal> {
   late List<String> items;
-  late String title;
+  late List<TextEditingController> controllers;
+
+  late String title, addText;
   late void Function(List<String>) onChanged;
-  final controller = TextEditingController();
 
   @override
   void initState() {
     super.initState();
+
     items = List.from(widget.items);
     title = widget.title;
+    addText = widget.addText;
     onChanged = widget.onChanged;
+
+    controllers = items
+        .map((e) => TextEditingController(text: e))
+        .toList();
+  }
+
+  @override
+  void dispose() {
+    for (var c in controllers) {
+      c.dispose();
+    }
+    super.dispose();
+  }
+
+  void _removeItem(int index) {
+    setState(() {
+      items.removeAt(index);
+      controllers.removeAt(index);
+      onChanged(items);
+    });
+  }
+
+  void _addItem() {
+    setState(() {
+      items.insert(0, "");
+      controllers.insert(0, TextEditingController());
+      onChanged(items);
+    });
   }
 
   @override
@@ -41,18 +75,26 @@ class _FullListEditModalState extends State<FullListEditModal> {
               child: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white, size: 30),
+                    icon: const Icon(Icons.close,
+                        color: Colors.white, size: 30),
                     onPressed: () => Navigator.pop(context),
                   ),
                   Expanded(
-                    child: Text(title,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
+                    child: Text(
+                      title,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                   const SizedBox(width: 48),
                 ],
               ),
             ),
+
             Expanded(
               child: ListView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -60,44 +102,52 @@ class _FullListEditModalState extends State<FullListEditModal> {
                 itemBuilder: (context, index) {
                   return Container(
                     margin: const EdgeInsets.symmetric(vertical: 6),
-                    padding: const EdgeInsets.symmetric(vertical: 18),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
                     decoration: BoxDecoration(
                       color: const Color(0xFFE55A5A),
                       borderRadius: BorderRadius.circular(8),
-                      // Kept a subtle shadow to maintain your previous style
-                      boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))],
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 4,
+                          offset: Offset(0, 2),
+                        )
+                      ],
                     ),
-                    child:
-                      Padding(
-                        padding: const EdgeInsets.all(1.0),
-                        child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Center(
-                            child: Text(
-                              items[index],
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.w500,
-                              ),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Padding(
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 40),
+                          child: TextField(
+                            controller: controllers[index],
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
                             ),
-                          ),
-                          Positioned(
-                            right: 0,
-                            child: IconButton(
-                              icon: const Icon(Icons.close, color: Colors.white, size: 16),
-                              onPressed: () => {
-                                setState(() {
-                                  items.remove(items[index]);
-                                  onChanged(items);
-                                })
-                              },
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              isDense: true,
                             ),
+                            onChanged: (value) {
+                              items[index] = value;
+                              onChanged(items);
+                            },
                           ),
-                        ],
-                      ),
+                        ),
+
+                        Positioned(
+                          right: 0,
+                          child: IconButton(
+                            icon: const Icon(Icons.close,
+                                color: Colors.white, size: 16),
+                            onPressed: () => _removeItem(index),
+                          ),
+                        ),
+                      ],
                     ),
                   );
                 },
@@ -105,11 +155,12 @@ class _FullListEditModalState extends State<FullListEditModal> {
             ),
 
             Padding(
-              padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+              padding: const EdgeInsets.symmetric(
+                  vertical: 16.0, horizontal: 8.0),
               child: FullWidthButton(
-                  text: "Save",
-                  color: const Color(0xFFCC5959),
-                  onPressed: () => {Navigator.pop(context)},
+                text: addText,
+                color: const Color(0xFFCC5959),
+                onPressed: _addItem,
               ),
             ),
           ],
