@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wakealert/components/labeledDatePicker.dart';
 import 'package:wakealert/components/settingsRedirect.dart';
 import 'package:wakealert/components/subsectionHeader.dart';
 import 'package:wakealert/components/labeledDropdown.dart';
@@ -30,9 +31,11 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
 
   final TextEditingController firstNameController = new TextEditingController();
   final TextEditingController lastNameController = new TextEditingController();
-  final TextEditingController editController = new TextEditingController();
+  final TextEditingController birthDateController = new TextEditingController();
+  final TextEditingController organDonorController = new TextEditingController();
 
   String? pregnancyStatusOption;
+  String? bloodTypeOption;
 
   _SettingsInformationPageState(this.onBack);
 
@@ -82,9 +85,12 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
               label: "Last Name",
               controller: lastNameController,
             ),
-            LabeledTextBox(
-              label: "Birth Date",
-              controller: editController,
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: LabeledDatePicker(
+                label: "Birth Date:",
+                controller: birthDateController,
+              ),
             ),
             LabeledDropdown<String>(
               label: "Pregnancy Status",
@@ -95,16 +101,33 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
                 DropdownMenuItem(value: "Unknown", child: Text("Unknown")),
               ],
               onChanged: (value) {
-                pregnancyStatusOption = value;
+                setState(() {
+                  pregnancyStatusOption = value;
+                });
               },
             ),
             LabeledTextBox(
               label: "Organ Donor",
-              controller: editController,
+              controller: organDonorController,
             ),
-            LabeledTextBox(
+            LabeledDropdown<String>(
               label: "Blood Type",
-              controller: editController,
+              value: bloodTypeOption,
+              items: [
+                DropdownMenuItem(value: "O+", child: Text("O+")),
+                DropdownMenuItem(value: "O-", child: Text("O-")),
+                DropdownMenuItem(value: "A+", child: Text("A+")),
+                DropdownMenuItem(value: "A-", child: Text("A-")),
+                DropdownMenuItem(value: "B+", child: Text("B+")),
+                DropdownMenuItem(value: "B-", child: Text("B-")),
+                DropdownMenuItem(value: "AB+", child: Text("AB+")),
+                DropdownMenuItem(value: "AB-", child: Text("AB-")),
+              ],
+              onChanged: (value) {
+                setState(() {
+                  bloodTypeOption = value;
+                });
+              },
             ),
             Padding(
               padding: EdgeInsets.only(left: 8.0, right: 8.0),
