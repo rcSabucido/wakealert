@@ -59,7 +59,7 @@ class _WellnessCheckSettingsPageState extends State<WellnessCheckSettingsPage> {
               child: SplitCard(
                 text: "At certain times, the system may ask for a response to confirm the user is present and in good condition. This feature is used to make sure everything is alright and you’re doing well!",
                 icon: Icons.info_outline,
-                height: 140,
+                height: 165,
               ),
             ),
             Padding(
