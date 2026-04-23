@@ -4,6 +4,7 @@ import 'package:wakealert/components/subsectionHeader.dart';
 import 'package:wakealert/components/labeledDropdown.dart';
 import 'package:wakealert/components/labeledTextBox.dart';
 import 'package:wakealert/pages/medicalInformation.dart';
+import 'package:wakealert/pages/userAddressSettings.dart';
 
 class SettingsInformationPage extends StatefulWidget {
   final VoidCallback onBack;
@@ -42,7 +43,7 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
   }
 
   late final List<Widget> _pages = [
-    MedicalInformationPage(onBack: onBackAdditional),
+    UserAddressSettingsPage(onBack: onBackAdditional),
     MedicalInformationPage(onBack: onBackAdditional),
   ];
 
