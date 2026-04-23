@@ -35,8 +35,27 @@ class _MedicalInformationPageState extends State<MedicalInformationPage> {
     "Allergic Rhinitis", "Shrimp", "Peanuts", "Dust Mites",
     "Penicillin", "Latex", "Pollen", "Cat Dander", "Dairy"
   ];
+  List<String> medication = [
+    "Insulin", "Penicillin", "Morphine", "Vicodin", "Percocet", "Metformin",
+    "Amlodipine", "Atorvastatin", "Albuterol", "Omeprazole", "Losartan",
+    "Gabapentin", "Levothyroxine"
+  ];
+  List<String> medicalHistory = const [
+    "Diabetes (Type 2)", 
+    "Asthma", 
+    "Hypertension", 
+    "High Blood Pressure", 
+    "Osteoporosis", 
+    "Arthritis",
+    "Heart Disease",
+    "Thyroid Disorder",
+    "Chronic Kidney Disease",
+    "Anemia",
+    "Epilepsy",
+    "High Cholesterol"
+  ];
 
-  String? pregnancyStatusOption;
+  String? lastDiagnosisOption;
 
   _MedicalInformationPageState(this.onBack);
 
@@ -58,7 +77,7 @@ class _MedicalInformationPageState extends State<MedicalInformationPage> {
               onBack: onBack,
             ),
             Padding(
-              padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 18.0),
+              padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
               child: Text(
                 "Medical Information",
                 style: const TextStyle(
@@ -76,24 +95,35 @@ class _MedicalInformationPageState extends State<MedicalInformationPage> {
                 });
               }
             ),
-            LabeledTextBox(
+            LabeledListBox(
               label: "Medication:",
-              controller: lastNameController,
+              items: medication,
+              onChanged: (items) {
+                setState(() {
+                  medication = items;
+                });
+              }
             ),
-            LabeledTextBox(
+            LabeledListBox(
               label: "Medical History:",
-              controller: editController,
+              items: medicalHistory,
+              onChanged: (items) {
+                setState(() {
+                  medicalHistory = items;
+                });
+              }
             ),
             LabeledDropdown<String>(
               label: "Last Diagnosis:",
-              value: pregnancyStatusOption,
+              value: lastDiagnosisOption,
               items: [
-                DropdownMenuItem(value: "Yes", child: Text("Yes")),
-                DropdownMenuItem(value: "No", child: Text("No")),
-                DropdownMenuItem(value: "Unknown", child: Text("Unknown")),
+                for (var str in medicalHistory)
+                  DropdownMenuItem(value: str, child: Text(str)),
               ],
               onChanged: (value) {
-                pregnancyStatusOption = value;
+                setState(() {
+                  lastDiagnosisOption = value;
+                });
               },
             ),
             LabeledTextBox(

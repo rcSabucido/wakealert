@@ -15,36 +15,43 @@ class LabeledListBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () async {
-        final result = await showDialog(
-          context: context,
-          builder: (context) => FullListEditModal(items: items),
-        );
+    return Padding(
+      padding: EdgeInsets.only(bottom: 8.0, top: 8.0),
+      child: InkWell(
+        onTap: () async {
+          final result = await showDialog(
+            context: context,
+            builder: (context) => FullListEditModal(items: items),
+          );
 
-        if (result != null) {
-          onChanged(result);
-        }
-      },
-      child: Container(
-        padding: EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          border: Border.all(),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
+          if (result != null) {
+            onChanged(result);
+          }
+        },
+        child: Container(
+          padding: EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            const SizedBox(height: 1),
-            Text(items.join(", ")),
-          ]
+              const SizedBox(height: 1),
+              Text(
+                items.join(", "),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis
+              ),
+            ]
+          ),
         ),
       ),
     );
