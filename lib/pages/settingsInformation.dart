@@ -3,6 +3,8 @@ import 'package:wakealert/components/settingsRedirect.dart';
 import 'package:wakealert/components/subsectionHeader.dart';
 import 'package:wakealert/components/labeledDropdown.dart';
 import 'package:wakealert/components/labeledTextBox.dart';
+import 'package:wakealert/pages/medicalInformation.dart';
+import 'package:wakealert/pages/userAddressSettings.dart';
 
 class SettingsInformationPage extends StatefulWidget {
   final VoidCallback onBack;
@@ -24,6 +26,7 @@ class SettingsInformationPage extends StatefulWidget {
 
 class _SettingsInformationPageState extends State<SettingsInformationPage> {
   late final VoidCallback onBack;
+  int _currentIndex = -1;
 
   final TextEditingController firstNameController = new TextEditingController();
   final TextEditingController lastNameController = new TextEditingController();
@@ -32,6 +35,17 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
   String? pregnancyStatusOption;
 
   _SettingsInformationPageState(this.onBack);
+
+  void onBackAdditional() {
+    setState(() {
+      _currentIndex = -1;
+    });
+  }
+
+  late final List<Widget> _pages = [
+    UserAddressSettingsPage(onBack: onBackAdditional),
+    MedicalInformationPage(onBack: onBackAdditional),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +56,7 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return Scaffold(
-      body: Padding(
+      body: _currentIndex >= 0 ? _pages[_currentIndex] : Padding(
         padding: EdgeInsets.only(top: 32.0, left: 8.0, right: 8.0),
         child: ListView(
           children: [
@@ -104,11 +118,19 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
             ),
             SettingsRedirect(
               title: "User Address",
-              onPressed: onBack,
+              onPressed: () {
+                setState(() {
+                  _currentIndex = 0;
+                });
+              },
             ),
             SettingsRedirect(
               title: "User Medical Information",
-              onPressed: onBack,
+              onPressed: () {
+                setState(() {
+                  _currentIndex = 1;
+                });
+              },
             ),
           ],
         ),

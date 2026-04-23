@@ -6,6 +6,7 @@ class LabeledDropdown<T> extends StatelessWidget {
   final List<DropdownMenuItem<T>> items;
   final ValueChanged<T?>? onChanged;
   final String? hintText;
+  final Color? backgroundColor;
 
   const LabeledDropdown({
     Key? key,
@@ -14,6 +15,7 @@ class LabeledDropdown<T> extends StatelessWidget {
     required this.items,
     this.onChanged,
     this.hintText,
+    this.backgroundColor,
   }) : super(key: key);
 
   @override
@@ -21,6 +23,7 @@ class LabeledDropdown<T> extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
       decoration: BoxDecoration(
+        color: backgroundColor,
         border: Border.all(color: Colors.grey, width: 1),
         borderRadius: BorderRadius.circular(12),
       ),
