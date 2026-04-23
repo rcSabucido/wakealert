@@ -21,7 +21,7 @@ class LabeledListBox extends StatelessWidget {
         onTap: () async {
           final result = await showDialog(
             context: context,
-            builder: (context) => FullListEditModal(title: label, items: items),
+            builder: (context) => FullListEditModal(title: label, items: items, onChanged: onChanged),
           );
 
           if (result != null) {

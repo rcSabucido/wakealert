@@ -115,7 +115,9 @@ class _MedicalInformationPageState extends State<MedicalInformationPage> {
             ),
             LabeledDropdown<String>(
               label: "Last Diagnosis:",
-              value: lastDiagnosisOption,
+              value: lastDiagnosisOption != null &&
+                medicalHistory.contains(lastDiagnosisOption) ?
+                lastDiagnosisOption : medicalHistory[0],
               items: [
                 for (var str in medicalHistory)
                   DropdownMenuItem(value: str, child: Text(str)),

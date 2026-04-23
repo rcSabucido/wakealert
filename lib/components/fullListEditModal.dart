@@ -1,12 +1,32 @@
 import 'package:flutter/material.dart';
 
-class FullListEditModal extends StatelessWidget {
+class FullListEditModal extends StatefulWidget {
   final List<String> items;
   final String title;
+  final void Function(List<String>) onChanged;
 
   const FullListEditModal({super.key,
     required this.items,
-    required this.title});
+    required this.title,
+    required this.onChanged});
+
+  @override
+  State<FullListEditModal> createState() => _FullListEditModalState();
+}
+
+class _FullListEditModalState extends State<FullListEditModal> {
+  late List<String> items;
+  late String title;
+  late void Function(List<String>) onChanged;
+  final controller = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    items = List.from(widget.items);
+    title = widget.title;
+    onChanged = widget.onChanged;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +87,12 @@ class FullListEditModal extends StatelessWidget {
                             right: 0,
                             child: IconButton(
                               icon: const Icon(Icons.close, color: Colors.white, size: 16),
-                              onPressed: () => Navigator.pop(context),
+                              onPressed: () => {
+                                setState(() {
+                                  items.remove(items[index]);
+                                  onChanged(items);
+                                })
+                              },
                             ),
                           ),
                         ],
