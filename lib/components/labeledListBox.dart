@@ -21,7 +21,7 @@ class LabeledListBox extends StatelessWidget {
         onTap: () async {
           final result = await showDialog(
             context: context,
-            builder: (context) => FullListEditModal(items: items),
+            builder: (context) => FullListEditModal(title: label, items: items),
           );
 
           if (result != null) {
@@ -38,7 +38,7 @@ class LabeledListBox extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                label,
+                "$label:",
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,

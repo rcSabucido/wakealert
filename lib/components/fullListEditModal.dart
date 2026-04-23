@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 
 class FullListEditModal extends StatelessWidget {
   final List<String> items;
+  final String title;
 
-  const FullListEditModal({super.key, required this.items});
+  const FullListEditModal({super.key,
+    required this.items,
+    required this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -20,8 +23,8 @@ class FullListEditModal extends StatelessWidget {
                     icon: const Icon(Icons.close, color: Colors.white, size: 30),
                     onPressed: () => Navigator.pop(context),
                   ),
-                  const Expanded(
-                    child: Text("Allergies",
+                  Expanded(
+                    child: Text(title,
                         textAlign: TextAlign.center,
                         style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
                   ),
@@ -43,9 +46,33 @@ class FullListEditModal extends StatelessWidget {
                       // Kept a subtle shadow to maintain your previous style
                       boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))],
                     ),
-                    child: Text(items[index],
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w500)),
+                    child:
+                      Padding(
+                        padding: const EdgeInsets.all(1.0),
+                        child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Center(
+                            child: Text(
+                              items[index],
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            right: 0,
+                            child: IconButton(
+                              icon: const Icon(Icons.close, color: Colors.white, size: 16),
+                              onPressed: () => Navigator.pop(context),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   );
                 },
               ),

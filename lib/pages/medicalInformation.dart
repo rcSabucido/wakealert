@@ -87,7 +87,7 @@ class _MedicalInformationPageState extends State<MedicalInformationPage> {
               ),
             ),
             LabeledListBox(
-              label: "Allergies:",
+              label: "Allergies",
               items: allergies,
               onChanged: (items) {
                 setState(() {
@@ -96,7 +96,7 @@ class _MedicalInformationPageState extends State<MedicalInformationPage> {
               }
             ),
             LabeledListBox(
-              label: "Medication:",
+              label: "Medication",
               items: medication,
               onChanged: (items) {
                 setState(() {
@@ -105,7 +105,7 @@ class _MedicalInformationPageState extends State<MedicalInformationPage> {
               }
             ),
             LabeledListBox(
-              label: "Medical History:",
+              label: "Medical History",
               items: medicalHistory,
               onChanged: (items) {
                 setState(() {
