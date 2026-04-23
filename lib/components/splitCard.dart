@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class SplitCard extends StatelessWidget {
   final String text;
   final IconData icon;
-  final int height;
+  final double height;
 
   const SplitCard({
     Key? key,
@@ -15,7 +15,9 @@ class SplitCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      height: height,
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // LEFT (25%)
           Expanded(
@@ -28,10 +30,11 @@ class SplitCard extends StatelessWidget {
               child: Align(
                 alignment: Alignment.topCenter,
                 child: Padding(
-                  padding: const EdgeInsets.only(top: 8),
+                  padding: const EdgeInsets.only(top: 16),
                   child: Icon(
                     icon,
                     color: Colors.white,
+                    size: 48,
                   ),
                 ),
               ),
@@ -42,6 +45,7 @@ class SplitCard extends StatelessWidget {
           Expanded(
             flex: 3,
             child: Container(
+              alignment: Alignment.center,
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.black, width: 1),

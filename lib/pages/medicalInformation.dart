@@ -3,12 +3,11 @@ import 'package:wakealert/components/settingsRedirect.dart';
 import 'package:wakealert/components/subsectionHeader.dart';
 import 'package:wakealert/components/labeledDropdown.dart';
 import 'package:wakealert/components/labeledTextBox.dart';
-import 'package:wakealert/pages/medicalInformation.dart';
 
-class SettingsInformationPage extends StatefulWidget {
+class MedicalInformationPage extends StatefulWidget {
   final VoidCallback onBack;
 
-  const SettingsInformationPage({super.key, required this.onBack});
+  const MedicalInformationPage({super.key, required this.onBack});
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -20,12 +19,11 @@ class SettingsInformationPage extends StatefulWidget {
   // always marked "final".
 
   @override
-  State<SettingsInformationPage> createState() => _SettingsInformationPageState(onBack);
+  State<MedicalInformationPage> createState() => _MedicalInformationPageState(onBack);
 }
 
-class _SettingsInformationPageState extends State<SettingsInformationPage> {
+class _MedicalInformationPageState extends State<MedicalInformationPage> {
   late final VoidCallback onBack;
-  int _currentIndex = -1;
 
   final TextEditingController firstNameController = new TextEditingController();
   final TextEditingController lastNameController = new TextEditingController();
@@ -33,18 +31,7 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
 
   String? pregnancyStatusOption;
 
-  _SettingsInformationPageState(this.onBack);
-
-  void onBackAdditional() {
-    setState(() {
-      _currentIndex = -1;
-    });
-  }
-
-  late final List<Widget> _pages = [
-    MedicalInformationPage(onBack: onBackAdditional),
-    MedicalInformationPage(onBack: onBackAdditional),
-  ];
+  _MedicalInformationPageState(this.onBack);
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +42,7 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return Scaffold(
-      body: _currentIndex >= 0 ? _pages[_currentIndex] : Padding(
+      body: Padding(
         padding: EdgeInsets.only(top: 32.0, left: 8.0, right: 8.0),
         child: ListView(
           children: [
@@ -64,9 +51,9 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
               onBack: onBack,
             ),
             Padding(
-              padding: EdgeInsets.only(left: 8.0, right: 8.0),
+              padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 18.0),
               child: Text(
-                "User Information:",
+                "Medical Information",
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -74,19 +61,19 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
               ),
             ),
             LabeledTextBox(
-              label: "First Name",
+              label: "Allergies:",
               controller: firstNameController,
             ),
             LabeledTextBox(
-              label: "Last Name",
+              label: "Medication:",
               controller: lastNameController,
             ),
             LabeledTextBox(
-              label: "Birth Date",
+              label: "Medical History:",
               controller: editController,
             ),
             LabeledDropdown<String>(
-              label: "Pregnancy Status",
+              label: "Last Diagnosis:",
               value: pregnancyStatusOption,
               items: [
                 DropdownMenuItem(value: "Yes", child: Text("Yes")),
@@ -98,38 +85,8 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
               },
             ),
             LabeledTextBox(
-              label: "Organ Donor",
+              label: "Medical Notes:",
               controller: editController,
-            ),
-            LabeledTextBox(
-              label: "Blood Type",
-              controller: editController,
-            ),
-            Padding(
-              padding: EdgeInsets.only(left: 8.0, right: 8.0),
-              child: Text(
-                "Additional Information",
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            SettingsRedirect(
-              title: "User Address",
-              onPressed: () {
-                setState(() {
-                  _currentIndex = 0;
-                });
-              },
-            ),
-            SettingsRedirect(
-              title: "User Medical Information",
-              onPressed: () {
-                setState(() {
-                  _currentIndex = 1;
-                });
-              },
             ),
           ],
         ),
