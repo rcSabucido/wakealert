@@ -22,7 +22,7 @@ class FullWidthButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: color ?? const Color(0xFFFF6961),
           foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 8),
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
@@ -32,7 +32,7 @@ class FullWidthButton extends StatelessWidget {
           children: [
             Text(
               text,
-              style: const TextStyle(fontSize: 24),
+              style: const TextStyle(fontSize: 16),
             ),
           ],
         ),
