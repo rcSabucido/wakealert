@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:wakealert/components/fullWidthButton.dart';
 
 class FullListEditModal extends StatefulWidget {
   final List<String> items;
@@ -101,15 +100,6 @@ class _FullListEditModalState extends State<FullListEditModal> {
                     ),
                   );
                 },
-              ),
-            ),
-
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
-              child: FullWidthButton(
-                  text: "Save",
-                  color: const Color(0xFFCC5959),
-                  onPressed: () => {Navigator.pop(context)},
               ),
             ),
           ],

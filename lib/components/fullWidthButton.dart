@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 class FullWidthButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
+  final Color? color;
 
   const FullWidthButton({
     Key? key,
     required this.text,
     required this.onPressed,
+    this.color,
   }) : super(key: key);
 
   @override
@@ -18,7 +20,7 @@ class FullWidthButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFFFF6961),
+          backgroundColor: color ?? const Color(0xFFFF6961),
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 8),
           shape: RoundedRectangleBorder(
