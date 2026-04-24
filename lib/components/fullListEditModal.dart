@@ -47,7 +47,7 @@ class _FullListEditModalState extends State<FullListEditModal> {
     super.dispose();
   }
 
-  void _removeItem(int index) {
+  Future<void> _removeItem(int index) async {
     setState(() {
       items.removeAt(index);
       controllers.removeAt(index);
@@ -143,8 +143,14 @@ class _FullListEditModalState extends State<FullListEditModal> {
                           right: 0,
                           child: IconButton(
                             icon: const Icon(Icons.close,
-                                color: Colors.white, size: 16),
-                            onPressed: () => _removeItem(index),
+                            color: Colors.white, size: 16),
+                            splashRadius: 1,
+                            splashColor: Colors.transparent,
+                            highlightColor: Colors.transparent,
+                            hoverColor: Colors.transparent,
+                            onPressed: () => Future.delayed(const Duration(milliseconds: 30)).then((val) {
+                              _removeItem(index);
+                            }),
                           ),
                         ),
                       ],

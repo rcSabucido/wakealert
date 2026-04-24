@@ -26,9 +26,7 @@ class _SettingsPageState extends State<SettingsPage> {
   int _currentIndex = -1;
 
   void onBack() {
-    setState(() {
-      _currentIndex = -1;
-    });
+    Navigator.pop(context);
   }
 
   late final List<Widget> _pages = [
@@ -48,7 +46,7 @@ class _SettingsPageState extends State<SettingsPage> {
     // than having to individually change instances of widgets.
     return Scaffold(
       body: _currentIndex >= 0 ? _pages[_currentIndex] : Padding(
-        padding: EdgeInsets.only(top: 32.0),
+        padding: EdgeInsets.only(top: 14.0),
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
         child: Column(
@@ -73,37 +71,40 @@ class _SettingsPageState extends State<SettingsPage> {
               text: "Information",
               icon: Icons.info_outline,
               onPressed: () {
-                setState(() {
-                  _currentIndex = 0;
-                });
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => _pages[0]),
+                );
               },
             ),
             FullWidthIconButton(
               text: "Voice Settings",
               icon: Icons.spatial_audio_off_rounded,
               onPressed: () {
-                setState(() {
-                  _currentIndex = 1;
-                });
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => _pages[1]),
+                );
               },
             ),
             FullWidthIconButton(
               text: "Wellness Check",
               icon: Icons.mood_sharp,
               onPressed: () {
-                setState(() {
-                  _currentIndex = 2;
-                });
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => _pages[2]),
+                );
               },
             ),
             FullWidthIconButton(
               text: "View Information Placeholder",
               icon: Icons.info_outline,
               onPressed: () {
-                print("Button pressed!");
-                setState(() {
-                  _currentIndex = 3;
-                });
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => _pages[3]),
+                );
               },
             ),
           ],

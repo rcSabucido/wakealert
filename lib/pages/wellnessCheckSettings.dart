@@ -35,6 +35,8 @@ class _WellnessCheckSettingsPageState extends State<WellnessCheckSettingsPage> {
   String? pregnancyStatusOption;
   String? wellnessCheckInterval;
 
+  bool checkEnabled = true;
+
   _WellnessCheckSettingsPageState(this.onBack);
 
   @override
@@ -59,7 +61,7 @@ class _WellnessCheckSettingsPageState extends State<WellnessCheckSettingsPage> {
               child: SplitCard(
                 text: "At certain times, the system may ask for a response to confirm the user is present and in good condition. This feature is used to make sure everything is alright and you’re doing well!",
                 icon: Icons.info_outline,
-                height: 140,
+                height: 165,
               ),
             ),
             Padding(
@@ -75,9 +77,14 @@ class _WellnessCheckSettingsPageState extends State<WellnessCheckSettingsPage> {
             Padding(
               padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
               child: FullWidthButton(
-                  text: "Enabled",
-                  onPressed: onBack,
-                ),
+                text: checkEnabled ? "Enabled" : "Disabled",
+                color: checkEnabled ? const Color(0xFFFF6961) : const Color(0xFF555555),
+                onPressed: () {
+                  setState(() {
+                    checkEnabled = !checkEnabled;
+                  });
+                },
+              ),
             ),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
@@ -91,18 +98,31 @@ class _WellnessCheckSettingsPageState extends State<WellnessCheckSettingsPage> {
             ),
             Padding(
               padding: EdgeInsets.only(left: 8.0, right: 8.0),
-              child: Dropdown<String>(
+              child: IgnorePointer(
+                ignoring: !checkEnabled,
+                child: DropdownButtonFormField<String>(
                 value: wellnessCheckInterval,
-                items: [
+                decoration: const InputDecoration(
+                  hintText: "Select a wellness check interval",
+                  border: OutlineInputBorder(),
+                ),
+                items: const [
                   DropdownMenuItem(value: "30", child: Text("30 minutes")),
                   DropdownMenuItem(value: "60", child: Text("60 minutes")),
                   DropdownMenuItem(value: "120", child: Text("12 minutes")),
                 ],
                 onChanged: (value) {
                   setState(() {
-                    wellnessCheckInterval = value;
+                    wellnessCheckInterval = value;    
                   });
                 },
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Please select a wellness check interval";
+                  }
+                  return null;
+                },
+              ),
               ),
             ),
           ],

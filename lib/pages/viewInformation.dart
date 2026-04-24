@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_auto_size_text/flutter_auto_size_text.dart';
 import 'package:wakealert/medicalInformation/medicalInformation.dart';
 
 class ViewInformationPage extends StatefulWidget {
@@ -80,28 +81,34 @@ class _ViewInformationPageState extends State<ViewInformationPage> {
               child: ListView(
                 padding: const EdgeInsets.all(8),
                 children: [
-                  const Row(
-                    children: [
-                      Expanded(flex: 2, child: InfoTile(label: "Full Name", value: "Juan Dela Cruz")),
-                      SizedBox(width: 12),
-                      Expanded(flex: 1, child: InfoTile(label: "Blood Type", value: "A+")),
-                    ],
+                  const IntrinsicHeight(
+                    child: const Row(
+                      children: [
+                        Expanded(flex: 2, child: InfoTile(label: "Full Name", value: "Juan Dela Cruz")),
+                        SizedBox(width: 12),
+                        Expanded(flex: 1, child: InfoTile(label: "Blood Type", value: "A+")),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 16),
-                  const Row(
-                    children: [
-                      Expanded(flex: 2, child: InfoTile(label: "Date of Birth", value: "YYYY/MM/DD")),
-                      SizedBox(width: 12),
-                      Expanded(flex: 1, child: InfoTile(label: "Age", value: "21")),
-                    ],
+                  const IntrinsicHeight(
+                    child: const Row(
+                      children: [
+                        Expanded(flex: 2, child: InfoTile(label: "Date of Birth", value: "YYYY/MM/DD")),
+                        SizedBox(width: 12),
+                        Expanded(flex: 1, child: InfoTile(label: "Age", value: "21")),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 16),
-                  const Row(
-                    children: [
-                      Expanded(flex: 2, child: InfoTile(label: "Primary Contact", value: "09XXXXXXXXX")),
-                      SizedBox(width: 12),
-                      Expanded(flex: 1, child: InfoTile(label: "Relationship", value: "FAMILY")),
-                    ],
+                  const IntrinsicHeight(
+                    child: const Row(
+                      children: [
+                        Expanded(flex: 2, child: InfoTile(label: "Primary Contact", value: "09XXXXXXXXX", singleLine: true,)),
+                        SizedBox(width: 12),
+                        Expanded(flex: 1, child: InfoTile(label: "Relationship", value: "FAMILY", singleLine: true)),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 16),
                   const InfoTile(label: "Address", value: "Blk X Lot X Subdivision, Barangay, City"),
@@ -122,8 +129,9 @@ class _ViewInformationPageState extends State<ViewInformationPage> {
 class InfoTile extends StatelessWidget {
   final String label;
   final String value;
+  final bool? singleLine;
 
-  const InfoTile({super.key, required this.label, required this.value});
+  const InfoTile({super.key, required this.label, required this.value, this.singleLine});
 
   @override
   Widget build(BuildContext context) {
@@ -134,9 +142,9 @@ class InfoTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize: MainAxisSize.max,
         children: [
-          Text(
+          AutoSizeText(
             label,
             style: const TextStyle(
               color: Colors.white, 
@@ -159,12 +167,20 @@ class InfoTile extends StatelessWidget {
                 ),
               ],
             ),
-            child: Text(
+            child: singleLine != null && singleLine! ? AutoSizeText(
               value,
               textAlign: TextAlign.center,
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 23,
+                fontWeight: FontWeight.bold,
+              ),
+            )
+            : Text(
+              value,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
             ),

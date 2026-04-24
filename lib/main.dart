@@ -140,14 +140,25 @@ class _AppScreenState extends State<AppScreen> {
     OnboardingPage(),
   ];
 
+  final List<GlobalKey<NavigatorState>> _navigatorKeys = [
+    GlobalKey<NavigatorState>(),
+    GlobalKey<NavigatorState>(),
+    GlobalKey<NavigatorState>(),
+    GlobalKey<NavigatorState>(),
+  ];
+
   Widget buildNavigationItem(IconData? iconData, int index) {
     bool isSelected = _currentIndex == index;
 
     return GestureDetector(
       onTap: () {
-        setState(() {
-          _currentIndex = index;
-        });
+          if (index == _currentIndex) {
+          _navigatorKeys[index]
+              .currentState!
+              .popUntil((route) => route.isFirst);
+        } else {
+          setState(() => _currentIndex = index);
+        }
       },
       child: SizedBox(
         width: 72,
@@ -172,7 +183,19 @@ class _AppScreenState extends State<AppScreen> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return Scaffold(
-      body: _pages[_currentIndex],
+      body: IndexedStack(
+        index: _currentIndex,
+        children: List.generate(3, (index) {
+          return Navigator(
+            key: _navigatorKeys[index],
+            onGenerateRoute: (settings) {
+              return MaterialPageRoute(
+                builder: (_) => _pages[index],
+              );
+            },
+          );
+        }),
+      ),
       bottomNavigationBar: BottomAppBar(
         color: Colors.white,
         child: Padding(

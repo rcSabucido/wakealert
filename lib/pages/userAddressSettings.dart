@@ -62,74 +62,128 @@ class _UserAddressSettingsPageState extends State<UserAddressSettingsPage> {
               ),
             ),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8.0),
-              child: LabeledTextBox(
-                label: "Blk and Lot",
+              padding: EdgeInsets.all(8.0),
+              child: TextFormField(
                 controller: blkAndLotController,
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8.0),
-              child: LabeledTextBox(
-                label: "Street (Optional)",
-                controller: streetController,
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8.0),
-              child: LabeledTextBox(
-                label: "Subdivision",
-                controller: subdivisionController,
+                decoration: const InputDecoration(
+                  labelText: 'Blk and Lot:',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please enter a valid block and lot';
+                  }
+                  return null;
+                },
               ),
             ),
             Padding(
               padding: EdgeInsets.all(8.0),
-              child: LabeledDropdown<String>(
-                label: "Barangay",
+              child: TextFormField(
+                controller: streetController,
+                decoration: const InputDecoration(
+                  labelText: 'Street (Optional):',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  return null;
+                },
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(8.0),
+              child: TextFormField(
+                controller: subdivisionController,
+                decoration: const InputDecoration(
+                  labelText: 'Subdivision:',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please enter a valid subdivision';
+                  }
+                  return null;
+                },
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(8.0),
+              child: DropdownButtonFormField<String>(
                 value: barangayOption,
-                items: [
+                decoration: const InputDecoration(
+                  labelText: "Barangay:",
+                  hintText: "Select a barangay",
+                  border: OutlineInputBorder(),
+                ),
+                items: const [
                   DropdownMenuItem(value: "Barangay I", child: Text("Barangay I")),
                   DropdownMenuItem(value: "Barangay II", child: Text("Barangay II")),
                   DropdownMenuItem(value: "Barangay III", child: Text("Barangay III")),
                 ],
                 onChanged: (value) {
                   setState(() {
-                    barangayOption = value;               
+                    barangayOption = value;    
                   });
+                },
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Please select a barangay";
+                  }
+                  return null;
                 },
               ),
             ),
             Padding(
               padding: EdgeInsets.all(8.0),
-              child: LabeledDropdown<String>(
-                label: "Province, Municipality or City",
+              child: DropdownButtonFormField<String>(
                 value: provinceOption,
-                items: [
+                decoration: const InputDecoration(
+                  labelText: "Province, Municipality or City",
+                  hintText: "Select a province, municipality or city",
+                  border: OutlineInputBorder(),
+                ),
+                items: const [
                   DropdownMenuItem(value: "City 1", child: Text("City 1")),
                   DropdownMenuItem(value: "City 2", child: Text("City 2")),
                   DropdownMenuItem(value: "City 3", child: Text("City 3")),
                 ],
                 onChanged: (value) {
                   setState(() {
-                    provinceOption = value;               
+                    provinceOption = value;    
                   });
+                },
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Please select a province, municipality or city";
+                  }
+                  return null;
                 },
               ),
             ),
             Padding(
               padding: EdgeInsets.all(8.0),
-                child: LabeledDropdown<String>(
-                label: "Region",
+              child: DropdownButtonFormField<String>(
                 value: regionOption,
-                items: [
+                decoration: const InputDecoration(
+                  labelText: "Region",
+                  hintText: "Select a region",
+                  border: OutlineInputBorder(),
+                ),
+                items: const [
                   DropdownMenuItem(value: "Region 1", child: Text("Region 1")),
                   DropdownMenuItem(value: "Region 2", child: Text("Region 2")),
                   DropdownMenuItem(value: "Region 3", child: Text("Region 3")),
                 ],
                 onChanged: (value) {
                   setState(() {
-                    regionOption = value;               
+                    regionOption = value;    
                   });
+                },
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Please select a region";
+                  }
+                  return null;
                 },
               ),
             ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wakealert/components/labeledDatePicker.dart';
 import 'package:wakealert/components/settingsRedirect.dart';
 import 'package:wakealert/components/subsectionHeader.dart';
 import 'package:wakealert/components/labeledDropdown.dart';
@@ -30,9 +31,11 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
 
   final TextEditingController firstNameController = new TextEditingController();
   final TextEditingController lastNameController = new TextEditingController();
-  final TextEditingController editController = new TextEditingController();
+  final TextEditingController birthDateController = new TextEditingController();
+  final TextEditingController organDonorController = new TextEditingController();
 
   String? pregnancyStatusOption;
+  String? bloodTypeOption;
 
   _SettingsInformationPageState(this.onBack);
 
@@ -65,7 +68,7 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
               onBack: onBack,
             ),
             Padding(
-              padding: EdgeInsets.only(left: 8.0, right: 8.0),
+              padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 4.0),
               child: Text(
                 "User Information:",
                 style: const TextStyle(
@@ -74,37 +77,114 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
                 ),
               ),
             ),
-            LabeledTextBox(
-              label: "First Name",
-              controller: firstNameController,
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: TextFormField(
+                controller: firstNameController,
+                decoration: const InputDecoration(
+                  labelText: 'First Name:',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please enter a first name';
+                  }
+                  return null;
+                },
+              ),
             ),
-            LabeledTextBox(
-              label: "Last Name",
-              controller: lastNameController,
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: TextFormField(
+                controller: lastNameController,
+                decoration: const InputDecoration(
+                  labelText: 'Last Name:',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please enter a last name';
+                  }
+                  return null;
+                },
+              ),
             ),
-            LabeledTextBox(
-              label: "Birth Date",
-              controller: editController,
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: LabeledDatePicker(
+                label: "Birth Date:",
+                controller: birthDateController,
+              ),
             ),
-            LabeledDropdown<String>(
-              label: "Pregnancy Status",
+            DropdownButtonFormField<String>(
               value: pregnancyStatusOption,
-              items: [
+              decoration: const InputDecoration(
+                labelText: "Pregnancy Status:",
+                hintText: "Select pregnancy status",
+                border: OutlineInputBorder(),
+              ),
+              items: const [
                 DropdownMenuItem(value: "Yes", child: Text("Yes")),
                 DropdownMenuItem(value: "No", child: Text("No")),
                 DropdownMenuItem(value: "Unknown", child: Text("Unknown")),
               ],
               onChanged: (value) {
-                pregnancyStatusOption = value;
+                setState(() {
+                  pregnancyStatusOption = value;
+                });
+              },
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return "Please select a pregnancy status";
+                }
+                return null;
               },
             ),
-            LabeledTextBox(
-              label: "Organ Donor",
-              controller: editController,
+
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: TextFormField(
+                controller: organDonorController,
+                decoration: const InputDecoration(
+                  labelText: 'Organ Donor:',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please enter a valid organ donor status.';
+                  }
+                  return null;
+                },
+              ),
             ),
-            LabeledTextBox(
-              label: "Blood Type",
-              controller: editController,
+            DropdownButtonFormField<String>(
+              value: bloodTypeOption,
+              decoration: const InputDecoration(
+                labelText: "Blood Type:",
+                hintText: "Select a blood type",
+                border: OutlineInputBorder(),
+              ),
+              items: const [
+                DropdownMenuItem(value: "O+", child: Text("O+")),
+                DropdownMenuItem(value: "O-", child: Text("O-")),
+                DropdownMenuItem(value: "A+", child: Text("A+")),
+                DropdownMenuItem(value: "A-", child: Text("A-")),
+                DropdownMenuItem(value: "B+", child: Text("B+")),
+                DropdownMenuItem(value: "B-", child: Text("B-")),
+                DropdownMenuItem(value: "AB+", child: Text("AB+")),
+                DropdownMenuItem(value: "AB-", child: Text("AB-")),
+              ],
+              onChanged: (value) {
+                setState(() {
+                  bloodTypeOption = value;
+                });
+              },
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return "Please select a blood type";
+                }
+                return null;
+              },
             ),
             Padding(
               padding: EdgeInsets.only(left: 8.0, right: 8.0),

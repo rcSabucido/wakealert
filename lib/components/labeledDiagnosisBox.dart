@@ -1,16 +1,22 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 import 'package:wakealert/components/addDiagnosisModal.dart';
 
 class LabeledDiagnosisBox extends StatelessWidget {
   final String label;
   final String? selected;
+  final String? lastDiagnosisDate;
+  final String? hospital;
   final List<String> medicalHistory;
-  final void Function(String) onChanged;
+  final void Function(HashMap) onChanged;
 
   const LabeledDiagnosisBox({
     Key? key,
     required this.label,
     required this.selected,
+    required this.lastDiagnosisDate,
+    required this.hospital,
     required this.medicalHistory,
     required this.onChanged,
   }) : super(key: key);
@@ -23,7 +29,13 @@ class LabeledDiagnosisBox extends StatelessWidget {
         onTap: () async {
           final result = await showDialog(
             context: context,
-            builder: (context) => AddDiagnosisModal(items: medicalHistory, selected: selected, onChanged: onChanged),
+            builder: (context) => AddDiagnosisModal(
+              items: medicalHistory,
+              selected: selected,
+              lastDiagnosisDate: lastDiagnosisDate,
+              hospital: hospital,
+              onChanged: onChanged
+            ),
           );
 
           if (result != null) {

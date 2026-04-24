@@ -65,17 +65,27 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
                 ),
               ),
             ),
-            Dropdown<String>(
+            DropdownButtonFormField<String>(
               value: voiceAccent,
-              items: [
+              decoration: const InputDecoration(
+                hintText: "Select an accent",
+                border: OutlineInputBorder(),
+              ),
+              items: const [
                 DropdownMenuItem(value: "en-PH", child: Text("Filipino")),
                 DropdownMenuItem(value: "en-US", child: Text("US English")),
                 DropdownMenuItem(value: "en-GB", child: Text("UK English")),
               ],
               onChanged: (value) {
                 setState(() {
-                  voiceAccent = value;
+                  voiceAccent = value;    
                 });
+              },
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return "Please select an accent";
+                }
+                return null;
               },
             ),
             Padding(
@@ -88,17 +98,27 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
                 ),
               ),
             ),
-            Dropdown<String>(
+            DropdownButtonFormField<String>(
               value: voiceName,
-              items: [
+              decoration: const InputDecoration(
+                hintText: "Select a voice",
+                border: OutlineInputBorder(),
+              ),
+              items: const [
                 DropdownMenuItem(value: "rn", child: Text("Rosa Normal")),
                 DropdownMenuItem(value: "an", child: Text("Adrian Normal")),
                 DropdownMenuItem(value: "jn", child: Text("John Normal")),
               ],
               onChanged: (value) {
                 setState(() {
-                  voiceName = value;
+                  voiceName = value;    
                 });
+              },
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return "Please select a voice name";
+                }
+                return null;
               },
             ),
             Padding(
@@ -111,44 +131,55 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
                 ),
               ),
             ),
-            SizedBox(
-              width: double.infinity,
-              height: 60,
-              child: SegmentedButton<String>(
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                      (Set<MaterialState> states) {
-                        if (states.contains(MaterialState.selected)){
-                          return const Color(0xFFFF6961);
-                        }
-                        return Colors.white;
-                      },
-                    ),
-                    foregroundColor: MaterialStateProperty.resolveWith<Color>(
-                      (Set<MaterialState> states) {
-                        if (states.contains(MaterialState.selected)){
-                          return Colors.white;
-                        }
-                        return const Color(0xFFFF6961);
-                      },
-                    ),
-                  ),
-                  segments: const [
-                    ButtonSegment(value: "Slow", label: Padding(
-                      padding: EdgeInsets.all(20),
-                      child:Text('Slow'))),
-                    ButtonSegment(value: "Medium", label: Text('Medium')),
-                    ButtonSegment(value: "Fast", label: Text('Fast')),
-                  ],
-                  selected: voiceSpeedSelection,
-                  onSelectionChanged: (newSelection) {
-                    setState(() {
-                      voiceSpeedSelection = newSelection;
-                    });
+            SegmentedButton<String>(
+              showSelectedIcon: false,
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                  (Set<MaterialState> states) {
+                    if (states.contains(MaterialState.selected)){
+                      return const Color(0xFFFF6961);
+                    }
+                    return Colors.white;
                   },
-                  multiSelectionEnabled: false, // ensures only one is selected
                 ),
+                foregroundColor: MaterialStateProperty.resolveWith<Color>(
+                  (Set<MaterialState> states) {
+                    if (states.contains(MaterialState.selected)){
+                      return Colors.white;
+                    }
+                    return const Color(0xFFFF6961);
+                  },
+                ),
+              ),
+              segments: const [
+                ButtonSegment(value: "Slow", label: Text(
+                  'Slow',
+                  style: const TextStyle(
+                    fontSize: 12,
+                  )
+                )),
+                ButtonSegment(value: "Medium", label: Text(
+                  'Medium',
+                  style: const TextStyle(
+                    fontSize: 12,
+                  )
+                )),
+                ButtonSegment(value: "Fast", label: Text(
+                  'Fast',
+                  style: const TextStyle(
+                    fontSize: 12,
+                  )
+                )),
+              ],
+              selected: voiceSpeedSelection,
+              onSelectionChanged: (newSelection) {
+                setState(() {
+                  voiceSpeedSelection = newSelection;
+                });
+              },
+              multiSelectionEnabled: false, // ensures only one is selected
             ),
+
             Padding(
               padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
               child: Text(
@@ -159,43 +190,53 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
                 ),
               ),
             ),
-            SizedBox(
-              width: double.infinity,
-              height: 60,
-              child: SegmentedButton<String>(
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                      (Set<MaterialState> states) {
-                        if (states.contains(MaterialState.selected)){
-                          return const Color(0xFFFF6961);
-                        }
-                        return Colors.white;
-                      },
-                    ),
-                    foregroundColor: MaterialStateProperty.resolveWith<Color>(
-                      (Set<MaterialState> states) {
-                        if (states.contains(MaterialState.selected)){
-                          return Colors.white;
-                        }
-                        return const Color(0xFFFF6961);
-                      },
-                    ),
-                  ),
-                  segments: const [
-                    ButtonSegment(value: "Deep", label: Padding(
-                      padding: EdgeInsets.all(20),
-                      child:Text('Deep'))),
-                    ButtonSegment(value: "Average", label: Text('Average')),
-                    ButtonSegment(value: "High", label: Text('High')),
-                  ],
-                  selected: voicePitchSelection,
-                  onSelectionChanged: (newSelection) {
-                    setState(() {
-                      voicePitchSelection = newSelection;
-                    });
+            SegmentedButton<String>(
+              showSelectedIcon: false,
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                  (Set<MaterialState> states) {
+                    if (states.contains(MaterialState.selected)){
+                      return const Color(0xFFFF6961);
+                    }
+                    return Colors.white;
                   },
-                  multiSelectionEnabled: false, // ensures only one is selected
                 ),
+                foregroundColor: MaterialStateProperty.resolveWith<Color>(
+                  (Set<MaterialState> states) {
+                    if (states.contains(MaterialState.selected)){
+                      return Colors.white;
+                    }
+                    return const Color(0xFFFF6961);
+                  },
+                ),
+              ),
+              segments: const [
+                ButtonSegment(value: "Deep", label: Text(
+                  'Deep',
+                  style: const TextStyle(
+                    fontSize: 12,
+                  )
+                )),
+                ButtonSegment(value: "Average", label: Text(
+                  'Average',
+                  style: const TextStyle(
+                    fontSize: 12,
+                  )
+                )),
+                ButtonSegment(value: "High", label: Text(
+                  'High',
+                  style: const TextStyle(
+                    fontSize: 12,
+                  )
+                )),
+              ],
+              selected: voicePitchSelection,
+              onSelectionChanged: (newSelection) {
+                setState(() {
+                  voicePitchSelection = newSelection;
+                });
+              },
+              multiSelectionEnabled: false, // ensures only one is selected
             ),
             Padding(
               padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
@@ -209,4 +250,6 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
       ),
     );
   }
+
+  childText(String s, {required TextStyle style}) {}
 }

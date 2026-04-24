@@ -7,6 +7,7 @@ class LabeledDatePicker extends StatelessWidget {
   final DateTime? firstDate;
   final DateTime? lastDate;
   final Color? backgroundColor;
+  final void Function(String)? onChanged;
 
   const LabeledDatePicker({
     Key? key,
@@ -16,6 +17,7 @@ class LabeledDatePicker extends StatelessWidget {
     this.firstDate,
     this.lastDate,
     this.backgroundColor,
+    this.onChanged,
   }) : super(key: key);
 
   Future<void> _selectDate(BuildContext context) async {
@@ -31,6 +33,8 @@ class LabeledDatePicker extends StatelessWidget {
     if (picked != null) {
       controller.text =
           "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+
+      onChanged!(controller.text);
     }
   }
 
@@ -42,8 +46,8 @@ class LabeledDatePicker extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: backgroundColor,
-          border: Border.all(color: Colors.grey, width: 1),
-          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFF6F6F6F), width: 1),
+          borderRadius: BorderRadius.circular(6),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -51,8 +55,7 @@ class LabeledDatePicker extends StatelessWidget {
             Text(
               label,
               style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
+                fontSize: 12,
               ),
             ),
             const SizedBox(height: 6),
