@@ -70,6 +70,7 @@ class LabeledDatePicker extends StatelessWidget {
                 suffixIcon: const Icon(Icons.calendar_today, size: 18),
                 contentPadding: const EdgeInsets.symmetric(vertical: 8),
               ),
+              onTap: () => _selectDate(context),
             ),
           ],
         ),
