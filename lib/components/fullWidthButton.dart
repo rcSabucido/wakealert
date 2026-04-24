@@ -4,11 +4,13 @@ class FullWidthButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
   final Color? color;
+  final bool? isBold;
 
   const FullWidthButton({
     Key? key,
     required this.text,
     required this.onPressed,
+    this.isBold,
     this.color,
   }) : super(key: key);
 
@@ -32,7 +34,10 @@ class FullWidthButton extends StatelessWidget {
           children: [
             Text(
               text,
-              style: const TextStyle(fontSize: 16),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: isBold != null && isBold! ? FontWeight.bold : FontWeight.normal
+              ),
             ),
           ],
         ),

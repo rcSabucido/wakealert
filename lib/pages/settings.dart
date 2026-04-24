@@ -33,7 +33,6 @@ class _SettingsPageState extends State<SettingsPage> {
     SettingsInformationPage(onBack: onBack),
     VoiceSettingsPage(onBack: onBack),
     WellnessCheckSettingsPage(onBack: onBack),
-    ViewInformationPage(onBack: onBack),
   ];
 
   @override
@@ -45,6 +44,29 @@ class _SettingsPageState extends State<SettingsPage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return Scaffold(
+      appBar: PreferredSize(preferredSize: const Size(double.infinity, 120), 
+      child: _currentIndex == -1 ? SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.only(top: 14),
+          child: Container(
+            height: 100,
+            decoration: BoxDecoration(
+              color: const Color(0xFFFF6961),
+            ),
+            child: Center(
+              child: Text(
+                "SETTINGS",
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                )
+              )
+            )
+          )
+        )
+      ) : Container(),
+      ),
       body: _currentIndex >= 0 ? _pages[_currentIndex] : Padding(
         padding: EdgeInsets.only(top: 14.0),
         // Center is a layout widget. It takes a single child and positions it
@@ -64,9 +86,6 @@ class _SettingsPageState extends State<SettingsPage> {
           // action in the IDE, or press "p" in the console), to see the
           // wireframe for each widget.
           children: [
-            FullWidthHeader(
-              text: "SETTINGS",
-            ),
             FullWidthIconButton(
               text: "Information",
               icon: Icons.info_outline,
@@ -94,16 +113,6 @@ class _SettingsPageState extends State<SettingsPage> {
                 Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => _pages[2]),
-                );
-              },
-            ),
-            FullWidthIconButton(
-              text: "View Information Placeholder",
-              icon: Icons.info_outline,
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => _pages[3]),
                 );
               },
             ),

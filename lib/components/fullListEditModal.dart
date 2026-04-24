@@ -165,6 +165,7 @@ class _FullListEditModalState extends State<FullListEditModal> {
                   vertical: 16.0, horizontal: 8.0),
               child: FullWidthButton(
                 text: addText,
+                isBold: true,
                 color: const Color(0xFFCC5959),
                 onPressed: _addItem,
               ),

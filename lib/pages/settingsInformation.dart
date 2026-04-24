@@ -32,10 +32,10 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
   final TextEditingController firstNameController = new TextEditingController();
   final TextEditingController lastNameController = new TextEditingController();
   final TextEditingController birthDateController = new TextEditingController();
-  final TextEditingController organDonorController = new TextEditingController();
 
   String? pregnancyStatusOption;
   String? bloodTypeOption;
+  String? organDonorOption;
 
   _SettingsInformationPageState(this.onBack);
 
@@ -116,47 +116,63 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
                 controller: birthDateController,
               ),
             ),
-            DropdownButtonFormField<String>(
-              value: pregnancyStatusOption,
-              decoration: const InputDecoration(
-                labelText: "Pregnancy Status:",
-                hintText: "Select pregnancy status",
-                border: OutlineInputBorder(),
-              ),
-              items: const [
-                DropdownMenuItem(value: "Yes", child: Text("Yes")),
-                DropdownMenuItem(value: "No", child: Text("No")),
-                DropdownMenuItem(value: "Unknown", child: Text("Unknown")),
-              ],
-              onChanged: (value) {
-                setState(() {
-                  pregnancyStatusOption = value;
-                });
-              },
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return "Please select a pregnancy status";
-                }
-                return null;
-              },
-            ),
 
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: TextFormField(
-                controller: organDonorController,
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: DropdownButtonFormField<String>(
+                value: pregnancyStatusOption,
                 decoration: const InputDecoration(
-                  labelText: 'Organ Donor:',
+                  labelText: "Pregnancy Status:",
+                  hintText: "Select pregnancy status",
                   border: OutlineInputBorder(),
                 ),
+                items: const [
+                  DropdownMenuItem(value: "Yes", child: Text("Yes")),
+                  DropdownMenuItem(value: "No", child: Text("No")),
+                  DropdownMenuItem(value: "Unknown", child: Text("Unknown")),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    pregnancyStatusOption = value;
+                  });
+                },
                 validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Please enter a valid organ donor status.';
+                  if (value == null || value.isEmpty) {
+                    return "Please select a pregnancy status";
                   }
                   return null;
                 },
               ),
             ),
+
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: DropdownButtonFormField<String>(
+                value: organDonorOption,
+                decoration: const InputDecoration(
+                  labelText: "Organ Donor:",
+                  hintText: "Select organ donor status",
+                  border: OutlineInputBorder(),
+                ),
+                items: const [
+                  DropdownMenuItem(value: "Yes", child: Text("Yes")),
+                  DropdownMenuItem(value: "No", child: Text("No")),
+                  DropdownMenuItem(value: "Unknown", child: Text("Unknown")),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    organDonorOption = value;
+                  });
+                },
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Please select an organ donor status";
+                  }
+                  return null;
+                },
+              ),
+            ),
+
             DropdownButtonFormField<String>(
               value: bloodTypeOption,
               decoration: const InputDecoration(
@@ -187,11 +203,11 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
               },
             ),
             Padding(
-              padding: EdgeInsets.only(left: 8.0, right: 8.0),
+              padding: EdgeInsets.only(left: 16.0, right: 8.0, top: 16.0, bottom: 6.0),
               child: Text(
                 "Additional Information",
                 style: const TextStyle(
-                  fontSize: 16,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
               ),
