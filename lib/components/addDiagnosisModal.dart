@@ -52,10 +52,6 @@ class _AddDiagnosisModalState extends State<AddDiagnosisModal> {
 
   @override
   Widget build(BuildContext context) {
-    if (selected != null) {
-      print("New selected: " + selected!);
-    }
-
     return Scaffold(
       backgroundColor: const Color(0xFFFF6B6B),
       body: SafeArea(

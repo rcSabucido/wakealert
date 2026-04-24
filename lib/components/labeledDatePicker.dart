@@ -33,6 +33,8 @@ class LabeledDatePicker extends StatelessWidget {
     if (picked != null) {
       controller.text =
           "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+
+      onChanged!(controller.text);
     }
   }
 
@@ -69,9 +71,6 @@ class LabeledDatePicker extends StatelessWidget {
                 suffixIcon: const Icon(Icons.calendar_today, size: 18),
                 contentPadding: const EdgeInsets.symmetric(vertical: 8),
               ),
-              onChanged: (value) {
-                onChanged!(value);
-              },
             ),
           ],
         ),
