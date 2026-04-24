@@ -57,6 +57,8 @@ class _MedicalInformationPageState extends State<MedicalInformationPage> {
   ];
 
   String? lastDiagnosisOption;
+  String? lastDiagnosisDate;
+  String? hospital;
 
   _MedicalInformationPageState(this.onBack);
 
@@ -137,12 +139,22 @@ class _MedicalInformationPageState extends State<MedicalInformationPage> {
             LabeledDiagnosisBox(
               label: "Last Diagnosis",
               medicalHistory: medicalHistory,
+              lastDiagnosisDate: lastDiagnosisDate,
+              hospital: hospital,
               selected: lastDiagnosisOption != null &&
               medicalHistory.contains(lastDiagnosisOption) ?
               lastDiagnosisOption : medicalHistory[0],
-              onChanged: (item) {
+              onChanged: (resultMap) {
                 setState(() {
-                  lastDiagnosisOption = item;
+                  if (resultMap.containsKey("lastDiagnosis")) {
+                    lastDiagnosisOption = resultMap["lastDiagnosis"];
+                  }
+                  if (resultMap.containsKey("hospital")) {
+                    hospital = resultMap["hospital"];
+                  }
+                  if (resultMap.containsKey("lastDiagnosisDate")) {
+                    lastDiagnosisDate = resultMap["lastDiagnosisDate"];
+                  }
                 });
               }
             ),

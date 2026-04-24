@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 import 'package:wakealert/components/fullWidthButton.dart';
 import 'package:wakealert/components/labeledDatePicker.dart';
@@ -7,11 +9,15 @@ import 'package:wakealert/components/labeledTextBox.dart';
 class AddDiagnosisModal extends StatefulWidget {
   final List<String> items;
   final String? selected;
-  final void Function(String) onChanged;
+  final String? lastDiagnosisDate;
+  final String? hospital;
+  final void Function(HashMap) onChanged;
 
   const AddDiagnosisModal({super.key,
     required this.items,
     required this.selected,
+    required this.hospital,
+    required this.lastDiagnosisDate,
     required this.onChanged});
 
   @override
@@ -21,7 +27,9 @@ class AddDiagnosisModal extends StatefulWidget {
 class _AddDiagnosisModalState extends State<AddDiagnosisModal> {
   late List<String> items;
   late String? selected;
-  late void Function(String) onChanged;
+  late String? lastDiagnosisDate;
+  late String? hospital;
+  late void Function(HashMap) onChanged;
   final diagnosisDateController = TextEditingController();
   final hospitalController = TextEditingController();
 
@@ -31,10 +39,23 @@ class _AddDiagnosisModalState extends State<AddDiagnosisModal> {
     items = List.from(widget.items);
     onChanged = widget.onChanged;
     selected = widget.selected;
+    lastDiagnosisDate = widget.lastDiagnosisDate;
+    hospital = widget.hospital;
+
+    if (lastDiagnosisDate != null) {
+      diagnosisDateController.text = lastDiagnosisDate!;
+    }
+    if (hospital != null) {
+      hospitalController.text = hospital!;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (selected != null) {
+      print("New selected: " + selected!);
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFFFF6B6B),
       body: SafeArea(
@@ -69,7 +90,12 @@ class _AddDiagnosisModalState extends State<AddDiagnosisModal> {
                           DropdownMenuItem(value: str, child: Text(str)),
                       ],
                       onChanged: (value) {
-                        onChanged(value!);
+                        setState(() {
+                          final HashMap<String, String> result = HashMap();
+                          result["lastDiagnosis"] = value!;
+                          onChanged(result);
+                          selected = value;
+                        });
                       },
                     ),
                   ),
@@ -79,6 +105,13 @@ class _AddDiagnosisModalState extends State<AddDiagnosisModal> {
                       label: "Diagnosis Date:",
                       controller: diagnosisDateController,
                       backgroundColor: Colors.white,
+                      onChanged: (value) {
+                        setState(() {
+                          final HashMap<String, String> result = HashMap();
+                          result["lastDiagnosisDate"] = value;
+                          onChanged(result);
+                        });
+                      },
                     ),
                   ),
                   Padding(
@@ -87,6 +120,13 @@ class _AddDiagnosisModalState extends State<AddDiagnosisModal> {
                       label: "Hospital:",
                       controller: hospitalController,
                       backgroundColor: Colors.white,
+                      onChanged: (value) {
+                        setState(() {
+                          final HashMap<String, String> result = HashMap();
+                          result["hospital"] = value;
+                          onChanged(result);
+                        });
+                      },
                     ),
                   ),
                   Padding(

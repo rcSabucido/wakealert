@@ -5,6 +5,7 @@ class LabeledTextBox extends StatelessWidget {
   final TextEditingController controller;
   final String? hintText;
   final Color? backgroundColor;
+  final void Function(String)? onChanged;
 
   const LabeledTextBox({
     Key? key,
@@ -12,6 +13,7 @@ class LabeledTextBox extends StatelessWidget {
     required this.controller,
     this.hintText,
     this.backgroundColor,
+    this.onChanged,
   }) : super(key: key);
 
   @override
@@ -45,6 +47,9 @@ class LabeledTextBox extends StatelessWidget {
                 isDense: true,
                 contentPadding: const EdgeInsets.symmetric(vertical: 8),
               ),
+              onChanged: (value) {
+                onChanged!(value);
+              },
             ),
           ],
         ),

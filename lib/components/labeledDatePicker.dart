@@ -7,6 +7,7 @@ class LabeledDatePicker extends StatelessWidget {
   final DateTime? firstDate;
   final DateTime? lastDate;
   final Color? backgroundColor;
+  final void Function(String)? onChanged;
 
   const LabeledDatePicker({
     Key? key,
@@ -16,6 +17,7 @@ class LabeledDatePicker extends StatelessWidget {
     this.firstDate,
     this.lastDate,
     this.backgroundColor,
+    this.onChanged,
   }) : super(key: key);
 
   Future<void> _selectDate(BuildContext context) async {
@@ -67,6 +69,9 @@ class LabeledDatePicker extends StatelessWidget {
                 suffixIcon: const Icon(Icons.calendar_today, size: 18),
                 contentPadding: const EdgeInsets.symmetric(vertical: 8),
               ),
+              onChanged: (value) {
+                onChanged!(value);
+              },
             ),
           ],
         ),
