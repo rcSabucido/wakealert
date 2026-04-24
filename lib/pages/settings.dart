@@ -33,7 +33,6 @@ class _SettingsPageState extends State<SettingsPage> {
     SettingsInformationPage(onBack: onBack),
     VoiceSettingsPage(onBack: onBack),
     WellnessCheckSettingsPage(onBack: onBack),
-    ViewInformationPage(onBack: onBack),
   ];
 
   @override
@@ -94,16 +93,6 @@ class _SettingsPageState extends State<SettingsPage> {
                 Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => _pages[2]),
-                );
-              },
-            ),
-            FullWidthIconButton(
-              text: "View Information Placeholder",
-              icon: Icons.info_outline,
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => _pages[3]),
                 );
               },
             ),
