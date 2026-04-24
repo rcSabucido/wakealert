@@ -48,7 +48,7 @@ class _SettingsPageState extends State<SettingsPage> {
     // than having to individually change instances of widgets.
     return Scaffold(
       body: _currentIndex >= 0 ? _pages[_currentIndex] : Padding(
-        padding: EdgeInsets.only(top: 32.0),
+        padding: EdgeInsets.only(top: 14.0),
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
         child: Column(
