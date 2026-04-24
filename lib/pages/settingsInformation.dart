@@ -116,10 +116,14 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
                 controller: birthDateController,
               ),
             ),
-            LabeledDropdown<String>(
-              label: "Pregnancy Status",
+            DropdownButtonFormField<String>(
               value: pregnancyStatusOption,
-              items: [
+              decoration: const InputDecoration(
+                labelText: "Pregnancy Status:",
+                hintText: "Select pregnancy status",
+                border: OutlineInputBorder(),
+              ),
+              items: const [
                 DropdownMenuItem(value: "Yes", child: Text("Yes")),
                 DropdownMenuItem(value: "No", child: Text("No")),
                 DropdownMenuItem(value: "Unknown", child: Text("Unknown")),
@@ -129,7 +133,14 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
                   pregnancyStatusOption = value;
                 });
               },
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return "Please select a blood type";
+                }
+                return null;
+              },
             ),
+
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: TextFormField(
@@ -146,10 +157,14 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
                 },
               ),
             ),
-            LabeledDropdown<String>(
-              label: "Blood Type",
+            DropdownButtonFormField<String>(
               value: bloodTypeOption,
-              items: [
+              decoration: const InputDecoration(
+                labelText: "Blood Type:",
+                hintText: "Select a blood type",
+                border: OutlineInputBorder(),
+              ),
+              items: const [
                 DropdownMenuItem(value: "O+", child: Text("O+")),
                 DropdownMenuItem(value: "O-", child: Text("O-")),
                 DropdownMenuItem(value: "A+", child: Text("A+")),
@@ -163,6 +178,12 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
                 setState(() {
                   bloodTypeOption = value;
                 });
+              },
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return "Please select a blood type";
+                }
+                return null;
               },
             ),
             Padding(

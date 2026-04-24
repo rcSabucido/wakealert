@@ -24,8 +24,8 @@ class LabeledDropdown<T> extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
       decoration: BoxDecoration(
         color: backgroundColor,
-        border: Border.all(color: Colors.grey, width: 1),
-        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFF6F6F6F), width: 1),
+        borderRadius: BorderRadius.circular(6),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

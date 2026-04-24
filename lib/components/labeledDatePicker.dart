@@ -46,8 +46,8 @@ class LabeledDatePicker extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: backgroundColor,
-          border: Border.all(color: Colors.grey, width: 1),
-          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFF6F6F6F), width: 1),
+          borderRadius: BorderRadius.circular(6),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -55,8 +55,7 @@ class LabeledDatePicker extends StatelessWidget {
             Text(
               label,
               style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
+                fontSize: 12,
               ),
             ),
             const SizedBox(height: 6),
