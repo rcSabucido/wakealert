@@ -203,11 +203,11 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
               },
             ),
             Padding(
-              padding: EdgeInsets.only(left: 8.0, right: 8.0),
+              padding: EdgeInsets.only(left: 16.0, right: 8.0, top: 16.0, bottom: 6.0),
               child: Text(
                 "Additional Information",
                 style: const TextStyle(
-                  fontSize: 16,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
               ),

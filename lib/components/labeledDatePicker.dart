@@ -43,7 +43,7 @@ class LabeledDatePicker extends StatelessWidget {
     return GestureDetector(
       onTap: () => _selectDate(context),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
         decoration: BoxDecoration(
           color: backgroundColor,
           border: Border.all(color: const Color(0xFF6F6F6F), width: 1),
