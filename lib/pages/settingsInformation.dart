@@ -68,7 +68,7 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
               onBack: onBack,
             ),
             Padding(
-              padding: EdgeInsets.only(left: 8.0, right: 8.0),
+              padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 4.0),
               child: Text(
                 "User Information:",
                 style: const TextStyle(
@@ -77,13 +77,37 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
                 ),
               ),
             ),
-            LabeledTextBox(
-              label: "First Name",
-              controller: firstNameController,
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: TextFormField(
+                controller: firstNameController,
+                decoration: const InputDecoration(
+                  labelText: 'First Name:',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please enter a first name';
+                  }
+                  return null;
+                },
+              ),
             ),
-            LabeledTextBox(
-              label: "Last Name",
-              controller: lastNameController,
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: TextFormField(
+                controller: lastNameController,
+                decoration: const InputDecoration(
+                  labelText: 'Last Name:',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please enter a last name';
+                  }
+                  return null;
+                },
+              ),
             ),
             Padding(
               padding: const EdgeInsets.only(bottom: 8.0),
@@ -106,9 +130,21 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
                 });
               },
             ),
-            LabeledTextBox(
-              label: "Organ Donor",
-              controller: organDonorController,
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: TextFormField(
+                controller: organDonorController,
+                decoration: const InputDecoration(
+                  labelText: 'Organ Donor:',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please enter a valid organ donor status.';
+                  }
+                  return null;
+                },
+              ),
             ),
             LabeledDropdown<String>(
               label: "Blood Type",
