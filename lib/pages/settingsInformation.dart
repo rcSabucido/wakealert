@@ -135,7 +135,7 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
               },
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return "Please select a blood type";
+                  return "Please select a pregnancy status";
                 }
                 return null;
               },

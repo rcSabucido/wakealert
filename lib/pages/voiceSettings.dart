@@ -65,17 +65,27 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
                 ),
               ),
             ),
-            Dropdown<String>(
+            DropdownButtonFormField<String>(
               value: voiceAccent,
-              items: [
+              decoration: const InputDecoration(
+                hintText: "Select an accent",
+                border: OutlineInputBorder(),
+              ),
+              items: const [
                 DropdownMenuItem(value: "en-PH", child: Text("Filipino")),
                 DropdownMenuItem(value: "en-US", child: Text("US English")),
                 DropdownMenuItem(value: "en-GB", child: Text("UK English")),
               ],
               onChanged: (value) {
                 setState(() {
-                  voiceAccent = value;
+                  voiceAccent = value;    
                 });
+              },
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return "Please select an accent";
+                }
+                return null;
               },
             ),
             Padding(
@@ -88,17 +98,27 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
                 ),
               ),
             ),
-            Dropdown<String>(
+            DropdownButtonFormField<String>(
               value: voiceName,
-              items: [
+              decoration: const InputDecoration(
+                hintText: "Select a voice",
+                border: OutlineInputBorder(),
+              ),
+              items: const [
                 DropdownMenuItem(value: "rn", child: Text("Rosa Normal")),
                 DropdownMenuItem(value: "an", child: Text("Adrian Normal")),
                 DropdownMenuItem(value: "jn", child: Text("John Normal")),
               ],
               onChanged: (value) {
                 setState(() {
-                  voiceName = value;
+                  voiceName = value;    
                 });
+              },
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return "Please select a voice name";
+                }
+                return null;
               },
             ),
             Padding(
