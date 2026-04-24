@@ -103,7 +103,7 @@ class _SettingsPageState extends State<SettingsPage> {
               onPressed: () {
                 Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => _pages[4]),
+                    MaterialPageRoute(builder: (context) => _pages[3]),
                 );
               },
             ),
