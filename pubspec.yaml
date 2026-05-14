@@ -37,6 +37,10 @@ dependencies:
   simple_ripple_animation: ^0.1.0
   liquid_progress_indicator_v2: ^0.5.0
   flutter_auto_size_text: ^5.0.0
+  flutter_background_service: ^5.1.0
+  flutter_blue_plus: ^2.3.2
+  flutter_local_notifications: ^21.0.0
+  flutter_dotenv: ^6.0.1
 
 dev_dependencies:
   flutter_test:

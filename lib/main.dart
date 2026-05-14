@@ -131,17 +131,14 @@ class _AppScreenState extends State<AppScreen> {
   int _counter = 0;
   int _currentIndex = 0;
 
-
   // List of widgets for each page
   final List<Widget> _pages = [
     HomePage(),
     ContactsPage(),
     SettingsPage(),
-    OnboardingPage(),
   ];
 
   final List<GlobalKey<NavigatorState>> _navigatorKeys = [
-    GlobalKey<NavigatorState>(),
     GlobalKey<NavigatorState>(),
     GlobalKey<NavigatorState>(),
     GlobalKey<NavigatorState>(),
@@ -206,7 +203,6 @@ class _AppScreenState extends State<AppScreen> {
               buildNavigationItem(Icons.home, 0),
               buildNavigationItem(Icons.contacts, 1),
               buildNavigationItem(Icons.settings, 2),
-              buildNavigationItem(Icons.person_pin_circle, 3),
             ],
           ),
         ),
