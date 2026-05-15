@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:wakealert/background_ble_service.dart';
+import 'package:wakealert/globals.dart';
 import 'package:wakealert/pages/contacts.dart';
 import 'package:wakealert/pages/home.dart';
 import 'package:wakealert/pages/onboarding.dart';
 import 'package:wakealert/pages/settings.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
+Future<void> main() async {
+  debugPrint('Loading .env');
+  await dotenv.load();
+  //debugPrint('Starting ble service');
+  //initBackgroundBleService();
   runApp(const MyApp());
 }
 
@@ -179,6 +186,9 @@ class _AppScreenState extends State<AppScreen> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
+    if (!onboardingFinished) {
+      return OnboardingPage();
+    }
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
