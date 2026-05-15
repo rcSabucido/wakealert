@@ -11,7 +11,7 @@ Future<void> main() async {
   debugPrint('Loading .env');
   await dotenv.load();
   final prefs = await SharedPreferences.getInstance();
-  //prefs.setBool("onboardingFinished", false);
+  prefs.setBool("onboardingFinished", false);
   final of = prefs.getBool('onboardingFinished') ?? false;
   debugPrint("onboardingFinished? $of");
   if (of) {
