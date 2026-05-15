@@ -140,6 +140,7 @@ Future<void> _runBleConnection(
   final connSub = device.connectionState.listen((state) async {
     if (state == BluetoothConnectionState.disconnected) {
       debugPrint('[BLE] Disconnected: ${device.disconnectReason?.description}');
+      service.invoke('bleState', {'state': 'disconnected'});
       _updateNotification(notifications, 'Disconnected. Reconnecting…');
       // Re-run the whole flow
       await Future.delayed(const Duration(seconds: 3));
@@ -153,6 +154,7 @@ Future<void> _runBleConnection(
   try {
     _updateNotification(notifications, 'Connecting…');
     await device.connect(license: License.free, timeout: const Duration(seconds: 15));
+    service.invoke('bleState', {'state': 'connected', 'name': device.platformName});
   } catch (e) {
     debugPrint('[BLE] Connect error: $e');
     _updateNotification(notifications, 'Connection failed. Retrying…');
