@@ -140,7 +140,7 @@ class _HomePageState extends State<HomePage> {
           // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text("Pair your WakeAlert device to your Bluetooth",
+            Text(_isPaired ? "Your WakeAlert device has paired successfully" : "Pair your WakeAlert device to your Bluetooth",
             textAlign: TextAlign.center,
             style: const TextStyle(
               fontWeight: FontWeight.bold,
