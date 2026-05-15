@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wakealert/signup/sign_up_password.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -114,7 +115,12 @@ class _SignUpPageState extends State<SignUpPage> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                onPressed: () {
+                onPressed: () async {
+                    final prefs = await SharedPreferences.getInstance();
+                    prefs.setString("firstName", _firstNameController.text);
+                    prefs.setString("lastName", _lastNameController.text);
+                    prefs.setString("email", _emailController.text);
+
                     if (_formKey.currentState!.validate()) {
                       Navigator.push(context,
                       MaterialPageRoute(

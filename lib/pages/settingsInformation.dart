@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wakealert/components/labeledDatePicker.dart';
 import 'package:wakealert/components/settingsRedirect.dart';
 import 'package:wakealert/components/subsectionHeader.dart';
@@ -49,6 +50,18 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
     UserAddressSettingsPage(onBack: onBackAdditional),
     MedicalInformationPage(onBack: onBackAdditional),
   ];
+
+  Future<void> loadInfo() async {
+    final prefs = await SharedPreferences.getInstance();
+    firstNameController.text = prefs.getString("firstName") ?? "";
+    lastNameController.text = prefs.getString("lastName") ?? "";
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loadInfo();
+  }
 
   @override
   Widget build(BuildContext context) {
