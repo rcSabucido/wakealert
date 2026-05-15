@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wakealert/background_ble_service.dart';
 import 'package:wakealert/pages/home.dart';
 import 'package:wakealert/main.dart';
 
@@ -62,7 +64,13 @@ class AllSetPage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                   ),
                 ),
-                onPressed: () {
+                onPressed: () async {
+                  debugPrint('Starting ble service');
+                  initBackgroundBleService();
+
+                  final prefs = await SharedPreferences.getInstance();
+                  prefs.setBool("onboardingFinished", true);
+
                   Navigator.of(context).pushReplacementNamed('/home');
                 },
                 child: const Text(

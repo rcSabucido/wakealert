@@ -12,8 +12,11 @@ Future<void> main() async {
   await dotenv.load();
   final prefs = await SharedPreferences.getInstance();
   final of = prefs.getBool('onboardingFinished') ?? false;
-  //debugPrint('Starting ble service');
-  //initBackgroundBleService();
+  debugPrint("onboardingFinished? $of");
+  if (of) {
+    debugPrint('Starting ble service');
+    initBackgroundBleService();
+  }
   runApp(MyApp(initialRoute: of ? '/home' : '/onboarding')); 
 }
 
