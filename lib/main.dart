@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wakealert/background_ble_service.dart';
-import 'package:wakealert/globals.dart';
 import 'package:wakealert/pages/contacts.dart';
 import 'package:wakealert/pages/home.dart';
 import 'package:wakealert/pages/onboarding.dart';
@@ -10,18 +10,22 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 Future<void> main() async {
   debugPrint('Loading .env');
   await dotenv.load();
+  final prefs = await SharedPreferences.getInstance();
+  final of = prefs.getBool('onboardingFinished') ?? false;
   //debugPrint('Starting ble service');
   //initBackgroundBleService();
-  runApp(const MyApp());
+  runApp(MyApp(initialRoute: of ? '/home' : '/onboarding')); 
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final String initialRoute;
+  const MyApp({super.key, required this.initialRoute});
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      initialRoute: initialRoute,
       title: 'Flutter Demo',
       theme: ThemeData(
         // This is the theme of your application.
@@ -41,7 +45,10 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: .fromSeed(seedColor: const Color(0xFFFF6961)),
       ),
-      home: const AppScreen(title: 'Flutter Demo Home Page'),
+      routes: {
+        '/onboarding': (_) => const OnboardingPage(),
+        '/home':      (_) => const AppScreen(title: 'Flutter Demo Home Page'),
+      },
     );
   }
 }
@@ -186,9 +193,6 @@ class _AppScreenState extends State<AppScreen> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
-    if (!onboardingFinished) {
-      return OnboardingPage();
-    }
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,

@@ -22,7 +22,7 @@ class _OnboardingPermissionsState extends State<OnboardingPermissions> {
   Future<void> _checkPermissions() async {
     final loc = await Permission.locationAlways.status;
     final bt  = await Permission.bluetoothScan.status;
-    
+
     if (mounted) {
       setState(() {
         _locationAllowed  = loc.isGranted;
@@ -89,9 +89,6 @@ class _OnboardingPermissionsState extends State<OnboardingPermissions> {
                       debugPrint("[Permissions] Permission.locationAlways not granted!");
                       return;
                     }
-                    setState(() {
-                      _locationAllowed = true;
-                    });
                   },
                   child: _locationAllowed
                       ? const Icon(Icons.check, color: Colors.white, size: 20)

@@ -20,7 +20,6 @@ class _OnboardingPageState extends State {
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
-
             Container(
               width: 120,
               height: 120,

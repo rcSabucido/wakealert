@@ -117,8 +117,10 @@ class _SignUpPageState extends State<SignUpPage> {
                 onPressed: () {
                     if (_formKey.currentState!.validate()) {
                       Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => const SignUpPassword()),
-                      );}
+                      MaterialPageRoute(
+                        builder: (context) => const SignUpPassword()),
+                      );
+                    }
                   },
                   child: const Text('Next',style: TextStyle(
                     fontSize: 20, 

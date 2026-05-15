@@ -63,11 +63,7 @@ class AllSetPage extends StatelessWidget {
                   ),
                 ),
                 onPressed: () {
-                  // Navigator.pushAndRemoveUntil(
-                  //   context,
-                  //   MaterialPageRoute(builder: (context) => AppBar()),
-                  //   (route) => false, 
-                  // );
+                  Navigator.of(context).pushReplacementNamed('/home');
                 },
                 child: const Text(
                   "Continue",
