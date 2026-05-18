@@ -34,11 +34,24 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
   final TextEditingController lastNameController = new TextEditingController();
   final TextEditingController birthDateController = new TextEditingController();
 
-  String? pregnancyStatusOption;
-  String? bloodTypeOption;
-  String? organDonorOption;
+  String? pregnancyStatusOption = "No";
+  String? bloodTypeOption = "O-";
+  String? organDonorOption = "No";
 
   _SettingsInformationPageState(this.onBack);
+
+  Future<void> onBackSave() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString("firstName", firstNameController.text);
+    prefs.setString("lastName", lastNameController.text);
+    prefs.setString("birthDate", birthDateController.text);
+
+    prefs.setString("pregnancyStatus", pregnancyStatusOption!);
+    prefs.setString("bloodType", bloodTypeOption!);
+    prefs.setString("organDonor", organDonorOption!);
+
+    this.onBack();
+  }
 
   void onBackAdditional() {
     setState(() {
@@ -51,10 +64,21 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
     MedicalInformationPage(onBack: onBackAdditional),
   ];
 
-  Future<void> loadInfo() async {
-    final prefs = await SharedPreferences.getInstance();
-    firstNameController.text = prefs.getString("firstName") ?? "";
-    lastNameController.text = prefs.getString("lastName") ?? "";
+  void loadInfo() {
+    SharedPreferences.getInstance().then((prefs) {
+      setState(() {
+        firstNameController.text = prefs.getString("firstName") ?? "";
+        lastNameController.text = prefs.getString("lastName") ?? "";
+        birthDateController.text = prefs.getString("birthDate") ?? "";
+
+        pregnancyStatusOption = prefs.getString("pregnancyStatus") ?? "No";
+        debugPrint("pregnancyStatusOption $pregnancyStatusOption");
+        organDonorOption = prefs.getString("organDonor") ?? "No";
+        debugPrint("organDonorOption $organDonorOption");
+        bloodTypeOption = prefs.getString("bloodType") ?? "O-";
+        debugPrint("bloodTypeOption $bloodTypeOption");
+      });
+    });
   }
 
   @override
@@ -78,7 +102,7 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
           children: [
             SubsectionHeader(
               title: "Information",
-              onBack: onBack,
+              onBack: onBackSave,
             ),
             Padding(
               padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 4.0),
@@ -174,6 +198,7 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
                 ],
                 onChanged: (value) {
                   setState(() {
+                    debugPrint("New value: $value");
                     organDonorOption = value;
                   });
                 },
@@ -204,7 +229,7 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
                 DropdownMenuItem(value: "AB-", child: Text("AB-")),
               ],
               onChanged: (value) {
-                setState(() {
+                setState(() async {
                   bloodTypeOption = value;
                 });
               },
