@@ -6,6 +6,9 @@ import 'package:wakealert/components/dropdown.dart';
 import 'package:wakealert/components/fullWidthButton.dart';
 import 'package:wakealert/components/labeledTextBox.dart';
 
+import 'package:edge_tts/src/voices.dart';
+import 'package:edge_tts/edge_tts.dart';
+
 class VoiceSettingsPage extends StatefulWidget {
   final VoidCallback onBack;
 
@@ -35,6 +38,39 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
   String? voiceName;
   Set<String> voiceSpeedSelection = {"Medium"};
   Set<String> voicePitchSelection = {"Average"};
+
+  Iterable<Voice> allVoices = <Voice>[];
+  Iterable<Voice> voices = <Voice>[];
+
+  @override
+  void initState() {
+    super.initState();
+    loadVoicesSelection();
+  }
+
+  void loadSpecificVoices() async {
+    if (voiceAccent != null) {
+      final specificVoices = allVoices.where((v) {
+        return v.locale.contains(voiceAccent!);
+      });
+      setState(() {
+        voices = specificVoices;
+      });
+    }
+  }
+
+  void loadVoicesSelection() async {
+    debugPrint('=== Voice listing ===');
+    final manager = await VoicesManager.create();
+    final englishVoices = manager.find(language: 'en');
+    debugPrint('Found ${englishVoices.length} English voices:');
+    for (final voice in englishVoices) {
+      debugPrint('  ${voice.shortName} -> (${voice.gender}, ${voice.locale}, ${voice.language})');
+    }
+    setState(() {
+      allVoices = englishVoices;
+    });
+  }
 
   _VoiceSettingsPageState(this.onBack);
 
@@ -72,14 +108,17 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
                 border: OutlineInputBorder(),
               ),
               items: const [
-                DropdownMenuItem(value: "en-PH", child: Text("Filipino")),
+                DropdownMenuItem(value: "en-PH", child: Text("Filipino English")),
                 DropdownMenuItem(value: "en-US", child: Text("US English")),
                 DropdownMenuItem(value: "en-GB", child: Text("UK English")),
               ],
-              onChanged: (value) {
+              onChanged: (value) async {
                 setState(() {
-                  voiceAccent = value;    
+                  voiceAccent = value;
+                  voiceName = null;
                 });
+
+                loadSpecificVoices();
               },
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -104,11 +143,10 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
                 hintText: "Select a voice",
                 border: OutlineInputBorder(),
               ),
-              items: const [
-                DropdownMenuItem(value: "rn", child: Text("Rosa Normal")),
-                DropdownMenuItem(value: "an", child: Text("Adrian Normal")),
-                DropdownMenuItem(value: "jn", child: Text("John Normal")),
-              ],
+              items: 
+                voices.map((v) =>
+                  DropdownMenuItem(value: v.shortName, child: Text(v.shortName))
+                ).toList(),
               onChanged: (value) {
                 setState(() {
                   voiceName = value;    
@@ -243,6 +281,15 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
               child: FullWidthButton(
                   text: "Save",
                   onPressed: onBack,
+                ),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+              child: FullWidthButton(
+                  text: "Temporary Debug Button",
+                  onPressed: () async {
+                    debugPrint('=== Fetching example speech ===');
+                  },
                 ),
             ),
           ],
