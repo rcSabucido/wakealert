@@ -1,5 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:wakealert/signup/permissions.dart';
+import 'package:wakealert/models/contact.dart';
+
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PrimaryEmergencyContact extends StatefulWidget {
   const PrimaryEmergencyContact({super.key});
@@ -15,8 +20,13 @@ class _PrimaryEmergencyContactState extends State<PrimaryEmergencyContact> {
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _numberController = TextEditingController();
 
-  String? _selectedRelation;
-  final List<String> _relations = ['Family', 'Partner', 'Friend'];
+  RelationshipType? _selectedRelation;
+  final List<RelationshipType> _relations = 
+    [
+      RelationshipType.Parent, RelationshipType.Child,
+      RelationshipType.Partner, RelationshipType.Friend,
+      RelationshipType.Family
+    ];
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +92,7 @@ class _PrimaryEmergencyContactState extends State<PrimaryEmergencyContact> {
               const SizedBox(height: 15),
 
               // Relations Dropdown
-              DropdownButtonFormField<String>(
+              DropdownButtonFormField<RelationshipType>(
                 value: _selectedRelation,
                 decoration: const InputDecoration(
                   labelText: 'Relation',
@@ -91,7 +101,7 @@ class _PrimaryEmergencyContactState extends State<PrimaryEmergencyContact> {
                 items: _relations
                     .map((relation) => DropdownMenuItem(
                           value: relation,
-                          child: Text(relation, textAlign: TextAlign.center),
+                          child: Text(relation.name, textAlign: TextAlign.center),
                         ))
                     .toList(),
                 onChanged: (value) {
@@ -138,8 +148,26 @@ class _PrimaryEmergencyContactState extends State<PrimaryEmergencyContact> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                onPressed: () {
+                onPressed: () async {
                   if (_formKey.currentState!.validate()) {
+                    List<Contact> contacts = [
+                      Contact(
+                        firstName: _firstNameController.text,
+                        lastName: _lastNameController.text,
+                        phoneNumber: _numberController.text,
+                        relationship: _selectedRelation!,
+                        isPrimary: true,
+                      )
+                    ];
+
+                    final List<Map<String, dynamic>> jsonList =
+                        contacts.map((c) => c.toMap()).toList();
+
+                    final String jsonString = json.encode(jsonList);
+
+                    final prefs = await SharedPreferences.getInstance();
+                    prefs.setString("contacts", jsonString);
+
                     Navigator.push(
                       context,
                       MaterialPageRoute(
