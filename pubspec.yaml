@@ -46,6 +46,7 @@ dependencies:
   edge_tts: ^0.1.5
   audioplayers: ^6.6.0
   pro_mpack: ^2.0.2
+  http: ^1.6.0
 
 dev_dependencies:
   flutter_test:
