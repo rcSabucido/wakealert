@@ -9,6 +9,10 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+import 'package:pro_mpack/pro_mpack.dart';
+
+import 'dart:typed_data';
+
 const _notificationChannelId = 'ble_foreground_channel';
 const _notificationId = 1001;
 
@@ -168,11 +172,15 @@ Future<void> _runBleConnection(
   final services = await device.discoverServices();
 
   BluetoothCharacteristic? targetChar;
+  BluetoothCharacteristic? writeChar;
   for (final s in services) {
     if (s.uuid == Guid(dotenv.get('BLE_SERVICE_UUID'))) {
       for (final c in s.characteristics) {
         if (c.uuid == Guid(dotenv.get('BLE_CHAR_READ_UUID'))) {
           targetChar = c;
+        }
+        if (c.uuid == Guid(dotenv.get('BLE_CHAR_WRITE_UUID'))) {
+          writeChar = c;
           break;
         }
       }
@@ -195,15 +203,25 @@ Future<void> _runBleConnection(
 
   await targetChar.setNotifyValue(true);
 
-  // After targetChar is found, register a write listener
   service.on('bleWrite').listen((data) async {
     if (data == null) return;
     final List<int> bytes = List<int>.from(data['bytes']);
     try {
-      await targetChar!.write(bytes, withoutResponse: false);
+      await writeChar!.write(bytes, withoutResponse: false);
       debugPrint('[BLE] Wrote bytes: $bytes');
     } catch (e) {
       debugPrint('[BLE] Write error: $e');
+    }
+  });
+
+  service.on('blobTransfer').listen((data) async {
+    if (data == null) return;
+    final String name = data['name'] as String;
+    final List<int> raw = List<int>.from(data['bytes']);
+    try {
+      await sendBlobTransfer(device!, writeChar!, name, Uint8List.fromList(raw));
+    } catch (e) {
+      debugPrint('[BLE] Blob transfer error: $e');
     }
   });
 
@@ -254,4 +272,155 @@ void _updateNotification(
       ),
     ),
   );
+}
+
+Uint8List intToBytes(int value) {
+  final bytes = ByteData(4); // 4 bytes for a 32-bit integer
+  bytes.setInt32(0, value, Endian.little); // or Endian.big
+
+  return bytes.buffer.asUint8List();
+}
+
+// ---------------------------------------------------------------------------
+// Chunked blob transfer over BLE (MessagePack framed)
+//
+// Start frame → [uint32:2, uint32:totalLen, str:name, uint32:numChunks]
+// Chunk frame → [uint32:3, uint32:chunkIndex, uint32:chunkLen, bin:chunk]
+// ---------------------------------------------------------------------------
+
+Future<void> sendBlobTransfer(
+  BluetoothDevice device,
+  BluetoothCharacteristic characteristic,
+  String blobName,
+  Uint8List data, {
+  int? forcedMaxPayload,
+  Duration interChunkDelay = const Duration(milliseconds: 50),
+}) async {
+  // ── 1. Negotiate MTU ────────────────────────────────────────────────────
+  await device.requestMtu(512);
+  await Future.delayed(const Duration(milliseconds: 500));
+
+  final int actualMtu = await device.mtu.first;
+
+  // ATT payload size
+  final int maxPayload = forcedMaxPayload ?? (actualMtu - 3);
+
+  debugPrint(
+    '[BLE] MTU=$actualMtu | maxPayload=$maxPayload',
+  );
+
+  // MessagePack overhead estimate:
+  //
+  // [
+  //   type,
+  //   chunk_num,
+  //   chunk_len,
+  //   binary
+  // ]
+  //
+  // Array header + integers + bin header
+  const int chunkFrameOverhead = 16;
+
+  final int effectiveChunkSize = maxPayload - chunkFrameOverhead;
+
+  if (effectiveChunkSize <= 0) {
+    throw StateError(
+      '[BLE] maxPayload ($maxPayload) too small for overhead ($chunkFrameOverhead)',
+    );
+  }
+
+  final int totalLength = data.length;
+  final int numChunks = (totalLength / effectiveChunkSize).ceil();
+
+  debugPrint(
+    '[BLE] Blob: "$blobName" | $totalLength bytes | '
+    '$numChunks chunks | chunkSize=$effectiveChunkSize',
+  );
+
+  // ── 2. Start-of-transfer frame ──────────────────────────────────────────
+  //
+  // [
+  //   2,
+  //   totalLength,
+  //   blobName,
+  //   numChunks,
+  //   effectiveChunkSize
+  // ]
+  //
+  final Uint8List startBytes = serialize([
+    2,
+    totalLength,
+    blobName,
+    numChunks,
+    effectiveChunkSize
+  ]);
+
+  debugPrint(
+    '[BLE] Start frame: ${startBytes.length} bytes | limit=$maxPayload',
+  );
+
+  if (startBytes.length > maxPayload) {
+    throw StateError(
+      '[BLE] Start frame (${startBytes.length} bytes) exceeds maxPayload '
+      '($maxPayload). Shorten the blob name.',
+    );
+  }
+
+  try {
+    await characteristic.write(
+      startBytes,
+      withoutResponse: false,
+    );
+
+    debugPrint('[BLE] Sent start-of-transfer frame');
+  } catch (e) {
+    debugPrint('[BLE] Start frame write failed: $e');
+    rethrow;
+  }
+
+  await Future.delayed(const Duration(milliseconds: 50));
+
+  // ── 3. Chunk frames ─────────────────────────────────────────────────────
+  for (int i = 0; i < numChunks; i++) {
+    final int start = i * effectiveChunkSize;
+    final int end = (start + effectiveChunkSize).clamp(0, totalLength);
+
+    final Uint8List chunk = data.sublist(start, end);
+
+    //
+    // [
+    //   3,
+    //   chunkIndex,
+    //   chunkLength,
+    //   binaryChunk
+    // ]
+    //
+    final Uint8List chunkBytes = serialize([
+      3,
+      i,
+      chunk.length,
+      chunk,
+    ]);
+
+    try {
+      await characteristic.write(
+        chunkBytes,
+        withoutResponse: false,
+      );
+    } catch (e) {
+      debugPrint('[BLE] Chunk $i write failed: $e');
+      rethrow;
+    }
+
+    debugPrint(
+      '[BLE] Chunk ${i + 1}/$numChunks | '
+      'payload=${chunk.length} | wire=${chunkBytes.length}',
+    );
+
+    if (interChunkDelay > Duration.zero && i < numChunks - 1) {
+      await Future.delayed(interChunkDelay);
+    }
+  }
+
+  debugPrint('[BLE] Blob transfer complete: "$blobName"');
 }

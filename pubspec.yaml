@@ -45,6 +45,7 @@ dependencies:
   shared_preferences: ^2.5.5
   edge_tts: ^0.1.5
   audioplayers: ^6.6.0
+  pro_mpack: ^2.0.2
 
 dev_dependencies:
   flutter_test:

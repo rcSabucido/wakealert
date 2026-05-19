@@ -608,6 +608,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.8"
+  pro_binary:
+    dependency: transitive
+    description:
+      name: pro_binary
+      sha256: "80b4057b3764f12c44e02a608eea0762b6a569c3a63ae200b1c95d98086c18b6"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.2.0"
+  pro_mpack:
+    dependency: "direct main"
+    description:
+      name: pro_mpack
+      sha256: e735677595e8ef197340dfa1a8167acb39001c63429643e657d0fdace3d88ba4
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.2"
   pub_semver:
     dependency: transitive
     description:

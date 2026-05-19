@@ -10,6 +10,8 @@ import 'package:edge_tts/src/voices.dart';
 import 'package:edge_tts/edge_tts.dart';
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter_background_service/flutter_background_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class VoiceSettingsPage extends StatefulWidget {
   final VoidCallback onBack;
@@ -30,6 +32,56 @@ class VoiceSettingsPage extends StatefulWidget {
 }
 
 class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
+  final List<String> englishVoices = [
+    "en-AU-WilliamMultilingualNeural",
+    "en-AU-NatashaNeural",
+    "en-CA-ClaraNeural",
+    "en-CA-LiamNeural",
+    "en-HK-YanNeural",
+    "en-HK-SamNeural",
+    "en-IN-NeerjaExpressiveNeural",
+    "en-IN-NeerjaNeural",
+    "en-IN-PrabhatNeural",
+    "en-IE-ConnorNeural",
+    "en-IE-EmilyNeural",
+    "en-KE-AsiliaNeural",
+    "en-KE-ChilembaNeural",
+    "en-NZ-MitchellNeural",
+    "en-NZ-MollyNeural",
+    "en-NG-AbeoNeural",
+    "en-NG-EzinneNeural",
+    "en-PH-JamesNeural",
+    "en-PH-RosaNeural",
+    "en-US-AvaNeural",
+    "en-US-AndrewNeural",
+    "en-US-EmmaNeural",
+    "en-US-BrianNeural",
+    "en-SG-LunaNeural",
+    "en-SG-WayneNeural",
+    "en-ZA-LeahNeural",
+    "en-ZA-LukeNeural",
+    "en-TZ-ElimuNeural",
+    "en-TZ-ImaniNeural",
+    "en-GB-LibbyNeural",
+    "en-GB-MaisieNeural",
+    "en-GB-RyanNeural",
+    "en-GB-SoniaNeural",
+    "en-GB-ThomasNeural",
+    "en-US-AnaNeural",
+    "en-US-AndrewMultilingualNeural",
+    "en-US-AriaNeural",
+    "en-US-AvaMultilingualNeural",
+    "en-US-BrianMultilingualNeural",
+    "en-US-ChristopherNeural",
+    "en-US-EmmaMultilingualNeural",
+    "en-US-EricNeural",
+    "en-US-GuyNeural",
+    "en-US-JennyNeural",
+    "en-US-MichelleNeural",
+    "en-US-RogerNeural",
+    "en-US-SteffanNeural",
+  ];
+
   late final VoidCallback onBack;
 
   final TextEditingController firstNameController = new TextEditingController();
@@ -38,8 +90,8 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
 
   String? voiceAccent;
   String? voiceName;
-  Set<String> voiceSpeedSelection = {"Medium"};
-  Set<String> voicePitchSelection = {"Average"};
+  Set<String> voiceSpeedSelection = {"+0%"};
+  Set<String> voicePitchSelection = {"+0Hz"};
 
   Iterable<Voice> allVoices = <Voice>[];
   Iterable<Voice> voices = <Voice>[];
@@ -50,9 +102,31 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
   void initState() {
     super.initState();
     loadVoicesSelection();
+    loadInfo();
 
     player = AudioPlayer();
     player.setReleaseMode(ReleaseMode.stop);
+  }
+
+  Future<void> onBackSave() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString("voiceAccent", voiceAccent!);
+    prefs.setString("voiceName", voiceName!);
+    prefs.setString("voiceSpeed", voiceSpeedSelection.first);
+    prefs.setString("voicePitch", voicePitchSelection.first);
+
+    this.onBack();
+  }
+
+  void loadInfo() {
+    SharedPreferences.getInstance().then((prefs) {
+      setState(() {
+        voiceAccent = prefs.getString("voiceAccent") ?? "en-PH";
+        voiceName = prefs.getString("voiceName") ?? "en-PH-RosaNeural";
+        voiceSpeedSelection = {prefs.getString("voiceSpeed") ?? "+0%"};
+        voicePitchSelection = {prefs.getString("voicePitch") ?? "+0Hz"};
+      });
+    });
   }
 
   void loadSpecificVoices() async {
@@ -96,7 +170,7 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
           children: [
             SubsectionHeader(
               title: "Voice Settings",
-              onBack: onBack,
+              onBack: onBackSave,
             ),
             Padding(
               padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
@@ -118,6 +192,17 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
                 DropdownMenuItem(value: "en-PH", child: Text("Filipino English")),
                 DropdownMenuItem(value: "en-US", child: Text("US English")),
                 DropdownMenuItem(value: "en-GB", child: Text("UK English")),
+                DropdownMenuItem(value: "en-AU", child: Text("Australian English")),
+                DropdownMenuItem(value: "en-CA", child: Text("Canadian English")),
+                DropdownMenuItem(value: "en-HK", child: Text("Hong Kong English")),
+                DropdownMenuItem(value: "en-IN", child: Text("Indian English")),
+                DropdownMenuItem(value: "en-IE", child: Text("Irish English")),
+                DropdownMenuItem(value: "en-KE", child: Text("Kenyan English")),
+                DropdownMenuItem(value: "en-NZ", child: Text("New Zealand English")),
+                DropdownMenuItem(value: "en-NG", child: Text("Nigerian English")),
+                DropdownMenuItem(value: "en-SG", child: Text("Singaporean English")),
+                DropdownMenuItem(value: "en-ZA", child: Text("South African English")),
+                DropdownMenuItem(value: "en-TZ", child: Text("Tanzanian English")),
               ],
               onChanged: (value) async {
                 setState(() {
@@ -151,9 +236,15 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
                 border: OutlineInputBorder(),
               ),
               items: 
-                voices.map((v) =>
-                  DropdownMenuItem(value: v.shortName, child: Text(v.shortName))
-                ).toList(),
+                voices.length > 0 ?
+                  voices.map((v) =>
+                    DropdownMenuItem(value: v.shortName, child: Text(v.shortName))
+                  ).toList()
+                  :
+                  englishVoices.map((v) =>
+                    DropdownMenuItem(value: v, child: Text(v))
+                  ).toList()
+                ,
               onChanged: (value) {
                 setState(() {
                   voiceName = value;    
@@ -197,19 +288,19 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
                 ),
               ),
               segments: const [
-                ButtonSegment(value: "Slow", label: Text(
+                ButtonSegment(value: "-15%", label: Text(
                   'Slow',
                   style: const TextStyle(
                     fontSize: 12,
                   )
                 )),
-                ButtonSegment(value: "Medium", label: Text(
+                ButtonSegment(value: "+0%", label: Text(
                   'Medium',
                   style: const TextStyle(
                     fontSize: 12,
                   )
                 )),
-                ButtonSegment(value: "Fast", label: Text(
+                ButtonSegment(value: "+15%", label: Text(
                   'Fast',
                   style: const TextStyle(
                     fontSize: 12,
@@ -256,19 +347,19 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
                 ),
               ),
               segments: const [
-                ButtonSegment(value: "Deep", label: Text(
+                ButtonSegment(value: "-20Hz", label: Text(
                   'Deep',
                   style: const TextStyle(
                     fontSize: 12,
                   )
                 )),
-                ButtonSegment(value: "Average", label: Text(
+                ButtonSegment(value: "+0Hz", label: Text(
                   'Average',
                   style: const TextStyle(
                     fontSize: 12,
                   )
                 )),
-                ButtonSegment(value: "High", label: Text(
+                ButtonSegment(value: "+20Hz", label: Text(
                   'High',
                   style: const TextStyle(
                     fontSize: 12,
@@ -287,7 +378,7 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
               padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
               child: FullWidthButton(
                   text: "Save",
-                  onPressed: onBack,
+                  onPressed: onBackSave,
                 ),
             ),
             Padding(
@@ -299,21 +390,31 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
 
                     final tts = Communicate(
                       text: 'Wake word detected. Do you want me to continue contacting your emergency contacts and emergency services?',
-                      voice: 'en-PH-JamesNeural',
-                      rate: '+0%',
-                      pitch: '+0Hz',
-                      volume: '+0%',
+                      voice: voiceName ?? 'en-PH-JamesNeural',
+                      rate: voiceSpeedSelection.first,
+                      pitch: voicePitchSelection.first,
+                      volume: '+20%',
                     );
 
-                    debugPrint("TTS Player - Fetching sample");
+                    debugPrint("TTS - Fetching sample");
 
                     final bytes = await tts.toBytes();
-                    final source = BytesSource(bytes, mimeType: "audio/mpeg");
 
+                    //final source = BytesSource(bytes, mimeType: "audio/mpeg");
+
+                    /*
                     debugPrint("TTS Player - Setting source");
                     await player.setSource(source);
                     debugPrint("TTS Player - Resuming player");
                     await player.resume();
+                    */
+
+                    debugPrint("Sending speech samples via Bluetooth LE...");
+
+                    FlutterBackgroundService().invoke('blobTransfer', {
+                      'name': 'wake_word_detected.mp3',
+                      'bytes': bytes,
+                    });
                   },
                 ),
             ),
