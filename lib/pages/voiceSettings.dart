@@ -9,6 +9,8 @@ import 'package:wakealert/components/labeledTextBox.dart';
 import 'package:edge_tts/src/voices.dart';
 import 'package:edge_tts/edge_tts.dart';
 
+import 'package:audioplayers/audioplayers.dart';
+
 class VoiceSettingsPage extends StatefulWidget {
   final VoidCallback onBack;
 
@@ -42,10 +44,15 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
   Iterable<Voice> allVoices = <Voice>[];
   Iterable<Voice> voices = <Voice>[];
 
+  late AudioPlayer player = AudioPlayer();
+
   @override
   void initState() {
     super.initState();
     loadVoicesSelection();
+
+    player = AudioPlayer();
+    player.setReleaseMode(ReleaseMode.stop);
   }
 
   void loadSpecificVoices() async {
@@ -289,6 +296,24 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
                   text: "Temporary Debug Button",
                   onPressed: () async {
                     debugPrint('=== Fetching example speech ===');
+
+                    final tts = Communicate(
+                      text: 'Wake word detected. Do you want me to continue contacting your emergency contacts and emergency services?',
+                      voice: 'en-PH-JamesNeural',
+                      rate: '+0%',
+                      pitch: '+0Hz',
+                      volume: '+0%',
+                    );
+
+                    debugPrint("TTS Player - Fetching sample");
+
+                    final bytes = await tts.toBytes();
+                    final source = BytesSource(bytes, mimeType: "audio/mpeg");
+
+                    debugPrint("TTS Player - Setting source");
+                    await player.setSource(source);
+                    debugPrint("TTS Player - Resuming player");
+                    await player.resume();
                   },
                 ),
             ),
