@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:wakealert/signup/sign_up.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/http.dart' as http;
+
+import 'package:wakealert/services/user_service.dart';
+
+import 'dart:convert';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -77,8 +83,8 @@ class _LoginPageState extends State<LoginPage> {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your password';
                   }
-                  if (value.length < 6) {
-                    return 'Password must be at least 6 characters';
+                  if (value.length < 4) {
+                    return 'Password must be at least 4 characters';
                   }
                   return null;
                 },
@@ -94,12 +100,33 @@ class _LoginPageState extends State<LoginPage> {
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 15),
                   ),
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      // TODO: Implement login logic
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Logging in...')),
+                  onPressed: () async {
+                    if (!_formKey.currentState!.validate()) return;
+
+                    try {
+                      final authResp = await AuthService.login(
+                        email: _emailController.text,
+                        password: _passwordController.text,
                       );
+
+                      if (!mounted) return;
+
+                      if (authResp.status == 200 && authResp.body != null) {
+                        final token = authResp.body!['token'];
+                        final user_id = authResp.body!['user']['mobile_user_id'];
+                        final email = authResp.body!['user']['email'];
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Logged in.')),
+                        );
+                        debugPrint("token: ${token}");
+                        debugPrint("user_id: ${user_id}");
+                        debugPrint("email: ${email}");
+                      } else {
+                        final msg = authResp.body?['message'] ?? 'Invalid email or password';
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+                      }
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error accessing server: ${e}")));
                     }
                   },
                   child: const Text(

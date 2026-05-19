@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wakealert/signup/sign_up_password.dart';
+import 'package:wakealert/services/user_service.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -116,16 +117,30 @@ class _SignUpPageState extends State<SignUpPage> {
                   ),
                 ),
                 onPressed: () async {
-                    final prefs = await SharedPreferences.getInstance();
-                    prefs.setString("firstName", _firstNameController.text);
-                    prefs.setString("lastName", _lastNameController.text);
-                    prefs.setString("email", _emailController.text);
-
                     if (_formKey.currentState!.validate()) {
-                      Navigator.push(context,
-                      MaterialPageRoute(
-                        builder: (context) => const SignUpPassword()),
-                      );
+                      final prefs = await SharedPreferences.getInstance();
+                      prefs.setString("firstName", _firstNameController.text);
+                      prefs.setString("lastName", _lastNameController.text);
+                      prefs.setString("email", _emailController.text);
+
+                      try {
+                        final user = await AuthService.getMobileUserByEmail(
+                          _emailController.text
+                        );
+
+                        if (!mounted) return;
+
+                        if (user == null) {
+                          Navigator.push(context,
+                          MaterialPageRoute(
+                            builder: (context) => const SignUpPassword()),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Account with that e-mail already exists!")));
+                        }
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error accessing server: ${e}")));
+                      }
                     }
                   },
                   child: const Text('Next',style: TextStyle(
