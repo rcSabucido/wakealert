@@ -67,8 +67,8 @@ class _EditContactViewState extends State<EditContactView> {
     debugPrint("updated: ${updated}");
 
     try {
-      ContactService.clearAllPrimaryContacts(clientUserId: prefs.getInt(PrefsNames.MOBILE_USER_ID)!);
-      ContactService.updateContact(contact: updated, clientUserId: prefs.getInt(PrefsNames.MOBILE_USER_ID)!);
+      await ContactService.clearAllPrimaryContacts(clientUserId: prefs.getInt(PrefsNames.MOBILE_USER_ID)!);
+      await ContactService.updateContact(contact: updated, clientUserId: prefs.getInt(PrefsNames.MOBILE_USER_ID)!);
 
       Navigator.push(
         context,

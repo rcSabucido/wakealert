@@ -7,6 +7,7 @@ import 'package:wakealert/pages/editContactView.dart';
 import 'package:wakealert/models/contact.dart';
 
 import 'package:wakealert/prefs_names.dart' as PrefsNames;
+import 'package:wakealert/services/contact_service.dart';
 
 class ContactsPage extends StatefulWidget {
   const ContactsPage({super.key});
@@ -122,8 +123,20 @@ class _ContactsPageState extends State<ContactsPage> {
     _saveContacts();
   }
 
-  void _deleteContact(int index) {
+  Future<void> _deleteContact(int index) async {
     if (index == 0) return;
+
+    final prefs = await SharedPreferences.getInstance();
+
+    try {
+      await ContactService.deleteContact(clientUserId: prefs.getInt(PrefsNames.MOBILE_USER_ID)!, contactId: _contacts[index].id!);
+    } catch (e) {
+      debugPrint('Failed to delete contact: ${e}');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to delete contact: ${e}')),
+      );
+    }
+
     setState(() => _contacts.removeAt(index));
     _saveContacts();
   }
