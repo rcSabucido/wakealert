@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:wakealert/background_ble_service.dart';
+import 'package:wakealert/models/contact.dart';
+import 'package:wakealert/prefs_names.dart' as PrefsNames;
+import 'package:wakealert/services/contact_service.dart';
 import 'package:wakealert/signup/sign_up.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:wakealert/services/user_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'dart:convert';
 
@@ -121,11 +126,34 @@ class _LoginPageState extends State<LoginPage> {
                         debugPrint("token: ${token}");
                         debugPrint("user_id: ${user_id}");
                         debugPrint("email: ${email}");
+
+                        // Get list of contacts from API.
+                        List<Contact> contactsList = await ContactService.getContactsByClient(user_id);
+                        final mapList = contactsList
+                          .map((c) => c.toMap())
+                          .toList();
+                        debugPrint("list of contacts: ${mapList}");
+
+                        final prefs = await SharedPreferences.getInstance();
+
+                        // Save user info to prefs
+                        prefs.setString(PrefsNames.EMAIL, email);
+                        prefs.setInt(PrefsNames.MOBILE_USER_ID, user_id);
+
+                        await prefs.setString(PrefsNames.CONTACTS, json.encode(mapList));
+
+                        debugPrint('Starting ble service');
+                        initBackgroundBleService();
+
+                        prefs.setBool(PrefsNames.ONBOARDING_FINISHED, true);
+
+                        Navigator.of(context).pushReplacementNamed('/home');
                       } else {
                         final msg = authResp.body?['message'] ?? 'Invalid email or password';
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
                       }
                     } catch (e) {
+                      debugPrint("Error: ${e}");
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error accessing server: ${e}")));
                     }
                   },

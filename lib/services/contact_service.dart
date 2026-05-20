@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'package:wakealert/models/contact.dart';
 
 class ContactService {
   static final String? _baseUrl = "${dotenv.env['API_URL']}/contacts/add";
@@ -32,5 +34,26 @@ class ContactService {
         'is_primary': isPrimary,
       }),
     );
+  }
+
+  /// GET all contacts for a given mobile-user id.
+  /// Returns List<Contact> parsed from the JSON array.
+  static Future<List<Contact>> getContactsByClient(int clientUserId) async {
+    final apiUrl = dotenv.env['API_URL'];
+    if (apiUrl == null || apiUrl.isEmpty) {
+      throw AssertionError('API_URL not found in .env');
+    }
+
+    final uri = Uri.parse('$apiUrl/contacts/client/$clientUserId');
+    final resp = await http.get(uri);
+
+    if (resp.statusCode != 200) {
+      throw Exception('Failed to load contacts: ${resp.statusCode}');
+    }
+
+    debugPrint("body out: ${resp.body}");
+
+    final List<dynamic> list = jsonDecode(resp.body);
+    return list.map((json) => Contact.fromJson(json)).toList();
   }
 }

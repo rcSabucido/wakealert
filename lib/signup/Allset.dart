@@ -126,6 +126,8 @@ class AllSetPage extends StatelessWidget {
                     );
                     debugPrint('Victim created with id=${newVictim.victimId}');
 
+                    prefs.setInt(PrefsNames.MOBILE_USER_ID, newUser.id);
+
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('User data created.')),
                     );

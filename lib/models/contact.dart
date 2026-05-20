@@ -3,6 +3,7 @@ import 'dart:convert';
 enum RelationshipType { Parent, Child, Partner, Friend, Family, Emergency }
 
 class Contact {
+  final int? id;
   final String firstName;
   final String lastName;
   final String phoneNumber;
@@ -15,6 +16,7 @@ class Contact {
     required this.phoneNumber,
     required this.relationship,
     required this.isPrimary,
+    this.id,
   });
 
   // -------------------------------------------------
@@ -29,11 +31,12 @@ class Contact {
   // From JSON
   // -------------------------------------------------
   factory Contact.fromJson(Map<String, dynamic> json) => Contact(
-        firstName: json['firstName'] as String,
-        lastName: json['lastName'] as String,
-        phoneNumber: json['phoneNumber'] as String,
+        firstName: (json['firstName'] ?? json['first_name']) as String,
+        lastName: (json['lastName'] ?? json['last_name']) as String,
+        phoneNumber: (json['phoneNumber'] ?? json['phone_number']) as String,
         relationship: _relationshipFromJson(json['relationship'] as String),
-        isPrimary: json['isPrimary'] as bool,
+        isPrimary: (json['isPrimary'] ?? json['is_primary']) as bool,
+        id: (json['id'] ?? json['contact_id']) as int?,
       );
 
   factory Contact.fromJsonString(String source) =>
@@ -48,6 +51,7 @@ class Contact {
         'phoneNumber': phoneNumber,
         'relationship': _relationshipName(relationship),
         'isPrimary': isPrimary,
+        'id': id,
       };
 
   String toJsonString() => json.encode(toMap());
