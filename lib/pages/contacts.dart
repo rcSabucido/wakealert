@@ -78,7 +78,7 @@ class _ContactsPageState extends State<ContactsPage> {
         .where((c) => c.relationship != RelationshipType.Emergency)
         .map((c) => c.toMap())
         .toList();
-    await prefs.setString(PrefsNames.CONTACTS, json.encode(payload));
+    //await prefs.setString(PrefsNames.CONTACTS, json.encode(payload));
   }
 
   /* ----------  CRUD helpers  ---------- */

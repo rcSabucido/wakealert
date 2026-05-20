@@ -4,6 +4,8 @@ import 'package:wakealert/models/contact.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:wakealert/outbox/outbox_provider.dart';
+import 'package:wakealert/outbox/outbox_repository.dart';
 import 'package:wakealert/pages/contactConfirmedView.dart';
 import 'package:wakealert/prefs_names.dart' as PrefsNames;
 import 'package:wakealert/services/contact_service.dart';
@@ -36,44 +38,51 @@ class _AddContactViewState extends State<AddContactView> {
   void _saveContact() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final prefs = await SharedPreferences.getInstance();
+    final newContact = Contact(
+      firstName:   _firstNameController.text.trim(),
+      lastName:    _lastNameController.text.trim(),
+      phoneNumber: _phoneController.text.trim(),
+      relationship:_selectedRelationship!,
+      isPrimary:   _isPrimary,
+    );
 
-    try {
-      /*
-        final newContact = Contact(
-          firstName:   _firstNameController.text.trim(),
-          lastName:    _lastNameController.text.trim(),
-          phoneNumber: _phoneController.text.trim(),
-          relationship:_selectedRelationship!,
-          isPrimary:   _isPrimary,
-        );
-      */
-      final newContact = await ContactService.addContact(
-        clientUserId:     prefs.getInt(PrefsNames.MOBILE_USER_ID)!,
-        firstName:        _firstNameController.text.trim(),
-        lastName:         _lastNameController.text.trim(),
-        phoneNumber:      _phoneController.text.trim(),
-        relationshipName: _selectedRelationship!.name,
-        isPrimary:        _isPrimary,
-      );
+    /*
+    final newContact = await ContactService.addContact(
+      clientUserId:     prefs.getInt(PrefsNames.MOBILE_USER_ID)!,
+      firstName:        _firstNameController.text.trim(),
+      lastName:         _lastNameController.text.trim(),
+      phoneNumber:      _phoneController.text.trim(),
+      relationshipName: _selectedRelationship!.name,
+      isPrimary:        _isPrimary,
+    );
+    */
 
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => ContactConfirmedView(
-            contactName: newContact.fullName(),
-            isEdit: false,
-          ),
+    /*
+    await appOutbox.enqueue(
+      channel: 'add_contact',
+      payload: {"hello": "world"},
+    );
+    */
+
+    final repo = OutboxProvider.of(context);
+
+    repo.enqueue(
+      endpoint: '/orders',
+      method: 'POST',
+      payload: {'item': 'Widget A', 'qty': 1},
+    );
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ContactConfirmedView(
+          contactName: newContact.fullName(),
+          isEdit: false,
         ),
-      ).then((confirmed) {
-        if (confirmed == true) Navigator.pop(context, newContact);
-      });
-    } catch (e) {
-      debugPrint('Failed to add contact: ${e}');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to add contact: ${e}')),
-      );
-    }
+      ),
+    ).then((confirmed) {
+      if (confirmed == true) Navigator.pop(context, newContact);
+    });
   }
   /* --------------------------------------------------------------- */
 
