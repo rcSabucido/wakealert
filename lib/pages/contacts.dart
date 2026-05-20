@@ -128,6 +128,7 @@ class _ContactsPageState extends State<ContactsPage> {
 
     final prefs = await SharedPreferences.getInstance();
 
+    /*
     try {
       await ContactService.deleteContact(clientUserId: prefs.getInt(PrefsNames.MOBILE_USER_ID)!, contactId: _contacts[index].id!);
     } catch (e) {
@@ -136,6 +137,13 @@ class _ContactsPageState extends State<ContactsPage> {
         SnackBar(content: Text('Failed to delete contact: ${e}')),
       );
     }
+    */
+
+    ContactService.enqueueDeleteContact(
+      context: context,
+      clientUserId: prefs.getInt(PrefsNames.MOBILE_USER_ID)!,
+      contact: _contacts[index]
+    );
 
     setState(() => _contacts.removeAt(index));
     _saveContacts();

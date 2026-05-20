@@ -25,6 +25,23 @@ class ContactService {
     );
   }
 
+  static void enqueueDeleteContact({
+    required BuildContext context,
+    required int clientUserId,
+    required Contact contact
+  }) {
+    final repo = OutboxProvider.of(context);
+
+    var map = contact.toMap();
+    map["client_user_id"] = clientUserId;
+
+    repo.enqueue(
+      endpoint: '/contacts/by_details',
+      method: 'DELETE',
+      payload: map,
+    );
+  }
+
   /// POST a new emergency contact.
   /// Returns the contact put in the database
   static Future<Contact> addContact({

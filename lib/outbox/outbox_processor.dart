@@ -60,7 +60,7 @@ class OutboxProcessor {
         'POST' => _dio.post(entry.endpoint, data: data),
         'PUT' => _dio.put(entry.endpoint, data: data),
         'PATCH' => _dio.patch(entry.endpoint, data: data),
-        'DELETE' => _dio.delete(entry.endpoint),
+        'DELETE' => _dio.delete(entry.endpoint, data: data),
         _ => throw UnsupportedError('Method ${entry.method} not supported'),
       };
 
