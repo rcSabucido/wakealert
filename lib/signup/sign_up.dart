@@ -3,6 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wakealert/signup/sign_up_password.dart';
 import 'package:wakealert/services/user_service.dart';
 
+import 'package:wakealert/prefs_names.dart' as PrefsNames;
+
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
 
@@ -119,9 +121,9 @@ class _SignUpPageState extends State<SignUpPage> {
                 onPressed: () async {
                     if (_formKey.currentState!.validate()) {
                       final prefs = await SharedPreferences.getInstance();
-                      prefs.setString("firstName", _firstNameController.text);
-                      prefs.setString("lastName", _lastNameController.text);
-                      prefs.setString("email", _emailController.text);
+                      prefs.setString(PrefsNames.FIRST_NAME, _firstNameController.text);
+                      prefs.setString(PrefsNames.LAST_NAME, _lastNameController.text);
+                      prefs.setString(PrefsNames.EMAIL, _emailController.text);
 
                       try {
                         final user = await AuthService.getMobileUserByEmail(

@@ -13,6 +13,8 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:wakealert/prefs_names.dart' as PrefsNames;
+
 class VoiceSettingsPage extends StatefulWidget {
   final VoidCallback onBack;
 
@@ -110,10 +112,10 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
 
   Future<void> onBackSave() async {
     final prefs = await SharedPreferences.getInstance();
-    prefs.setString("voiceAccent", voiceAccent!);
-    prefs.setString("voiceName", voiceName!);
-    prefs.setString("voiceSpeed", voiceSpeedSelection.first);
-    prefs.setString("voicePitch", voicePitchSelection.first);
+    prefs.setString(PrefsNames.VOICE_ACCENT, voiceAccent!);
+    prefs.setString(PrefsNames.VOICE_NAME, voiceName!);
+    prefs.setString(PrefsNames.VOICE_SPEED, voiceSpeedSelection.first);
+    prefs.setString(PrefsNames.VOICE_PITCH, voicePitchSelection.first);
 
     this.onBack();
   }
@@ -121,10 +123,10 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
   void loadInfo() {
     SharedPreferences.getInstance().then((prefs) {
       setState(() {
-        voiceAccent = prefs.getString("voiceAccent") ?? "en-PH";
-        voiceName = prefs.getString("voiceName") ?? "en-PH-RosaNeural";
-        voiceSpeedSelection = {prefs.getString("voiceSpeed") ?? "+0%"};
-        voicePitchSelection = {prefs.getString("voicePitch") ?? "+0Hz"};
+        voiceAccent = prefs.getString(PrefsNames.VOICE_ACCENT) ?? "en-PH";
+        voiceName = prefs.getString(PrefsNames.VOICE_NAME) ?? "en-PH-RosaNeural";
+        voiceSpeedSelection = {prefs.getString(PrefsNames.VOICE_SPEED) ?? "+0%"};
+        voicePitchSelection = {prefs.getString(PrefsNames.VOICE_PITCH) ?? "+0Hz"};
       });
     });
   }

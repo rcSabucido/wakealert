@@ -28,7 +28,7 @@ class ContactService {
         'first_name': firstName.trim(),
         'last_name': lastName.trim(),
         'phone_number': phoneNumber.trim(),
-        'relationship_name': relationshipName.trim(),
+        'relationship': relationshipName.trim(),
         'is_primary': isPrimary,
       }),
     );

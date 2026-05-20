@@ -7,12 +7,14 @@ import 'package:wakealert/pages/onboarding.dart';
 import 'package:wakealert/pages/settings.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+import 'package:wakealert/prefs_names.dart' as PrefsNames;
+
 Future<void> main() async {
   debugPrint('Loading .env');
   await dotenv.load();
   final prefs = await SharedPreferences.getInstance();
-  prefs.setBool("onboardingFinished", false);
-  final of = prefs.getBool('onboardingFinished') ?? false;
+  prefs.setBool(PrefsNames.ONBOARDING_FINISHED, false);
+  final of = prefs.getBool(PrefsNames.ONBOARDING_FINISHED) ?? false;
   debugPrint("onboardingFinished? $of");
   if (of) {
     debugPrint('Starting ble service');

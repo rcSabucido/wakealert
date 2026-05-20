@@ -6,6 +6,8 @@ import 'package:wakealert/models/contact.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:wakealert/prefs_names.dart' as PrefsNames;
+
 class PrimaryEmergencyContact extends StatefulWidget {
   const PrimaryEmergencyContact({super.key});
 
@@ -166,7 +168,7 @@ class _PrimaryEmergencyContactState extends State<PrimaryEmergencyContact> {
                     final String jsonString = json.encode(jsonList);
 
                     final prefs = await SharedPreferences.getInstance();
-                    prefs.setString("contacts", jsonString);
+                    prefs.setString(PrefsNames.CONTACTS, jsonString);
 
                     Navigator.push(
                       context,

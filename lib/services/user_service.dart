@@ -19,7 +19,7 @@ class MobileUser {
   });
 
   factory MobileUser.fromJson(Map<String, dynamic> json) => MobileUser._(
-    id: json['id'] as int,
+    id: (json['mobile_user_id'] ?? json['id']) as int,
     email: json['email'] as String,
     firstName: json['first_name'] as String?,
     lastName: json['last_name'] as String?,
@@ -95,4 +95,39 @@ class AuthService {
       throw Exception('Network error: $e');
     }
   }
+
+  /// Creates a new mobile-user account.
+  /// Throws on network errors or unexpected status codes.
+  /// Returns the created [MobileUser] when server replies 201.
+  static Future<MobileUser> createMobileUser({
+    required String email,
+    required String password,
+  }) async {
+    final api = _apiUrl;
+    if (api == null || api.isEmpty) {
+      throw AssertionError('API_URL not found in .env');
+    }
+
+    final uri = Uri.parse('$api/mobile_users');
+    try {
+      final resp = await http.post(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email.trim(), 'password': password}),
+      );
+
+      if (resp.statusCode == 201 || resp.statusCode == 200) {
+        // Expecting server to return the created user JSON
+        final json = jsonDecode(resp.body) as Map<String, dynamic>;
+        return MobileUser.fromJson(json);
+      }
+
+      // Handle known error shapes if your backend returns them
+      final bodyString = resp.body.isNotEmpty ? resp.body : 'No details';
+      throw Exception('Create user failed (${resp.statusCode}): $bodyString');
+    } catch (e) {
+      // Re-throw network/JSON errors unchanged
+      throw Exception('Network error while creating user: $e');
+    }
+}
 }

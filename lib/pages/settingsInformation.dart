@@ -8,6 +8,8 @@ import 'package:wakealert/components/labeledTextBox.dart';
 import 'package:wakealert/pages/medicalInformation.dart';
 import 'package:wakealert/pages/userAddressSettings.dart';
 
+import 'package:wakealert/prefs_names.dart' as PrefsNames;
+
 class SettingsInformationPage extends StatefulWidget {
   final VoidCallback onBack;
 
@@ -42,13 +44,13 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
 
   Future<void> onBackSave() async {
     final prefs = await SharedPreferences.getInstance();
-    prefs.setString("firstName", firstNameController.text);
-    prefs.setString("lastName", lastNameController.text);
-    prefs.setString("birthDate", birthDateController.text);
+    prefs.setString(PrefsNames.FIRST_NAME, firstNameController.text);
+    prefs.setString(PrefsNames.LAST_NAME, lastNameController.text);
+    prefs.setString(PrefsNames.BIRTH_DATE, birthDateController.text);
 
-    prefs.setString("pregnancyStatus", pregnancyStatusOption!);
-    prefs.setString("bloodType", bloodTypeOption!);
-    prefs.setString("organDonor", organDonorOption!);
+    prefs.setString(PrefsNames.PREGNANCY_STATUS, pregnancyStatusOption!);
+    prefs.setString(PrefsNames.BLOOD_TYPE, bloodTypeOption!);
+    prefs.setString(PrefsNames.ORGAN_DONOR, organDonorOption!);
 
     this.onBack();
   }
@@ -67,15 +69,15 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
   void loadInfo() {
     SharedPreferences.getInstance().then((prefs) {
       setState(() {
-        firstNameController.text = prefs.getString("firstName") ?? "";
-        lastNameController.text = prefs.getString("lastName") ?? "";
-        birthDateController.text = prefs.getString("birthDate") ?? "";
+        firstNameController.text = prefs.getString(PrefsNames.FIRST_NAME) ?? "";
+        lastNameController.text = prefs.getString(PrefsNames.LAST_NAME) ?? "";
+        birthDateController.text = prefs.getString(PrefsNames.BIRTH_DATE) ?? "";
 
-        pregnancyStatusOption = prefs.getString("pregnancyStatus") ?? "No";
+        pregnancyStatusOption = prefs.getString(PrefsNames.PREGNANCY_STATUS) ?? "No";
         debugPrint("pregnancyStatusOption $pregnancyStatusOption");
-        organDonorOption = prefs.getString("organDonor") ?? "No";
+        organDonorOption = prefs.getString(PrefsNames.ORGAN_DONOR) ?? "No";
         debugPrint("organDonorOption $organDonorOption");
-        bloodTypeOption = prefs.getString("bloodType") ?? "O-";
+        bloodTypeOption = prefs.getString(PrefsNames.BLOOD_TYPE) ?? "O-";
         debugPrint("bloodTypeOption $bloodTypeOption");
       });
     });
@@ -227,6 +229,7 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
                 DropdownMenuItem(value: "B-", child: Text("B-")),
                 DropdownMenuItem(value: "AB+", child: Text("AB+")),
                 DropdownMenuItem(value: "AB-", child: Text("AB-")),
+                DropdownMenuItem(value: "Unknown", child: Text("Unknown")),
               ],
               onChanged: (value) {
                 setState(() async {

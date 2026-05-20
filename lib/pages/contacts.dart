@@ -6,6 +6,8 @@ import 'package:wakealert/pages/editContactView.dart';
 
 import 'package:wakealert/models/contact.dart';
 
+import 'package:wakealert/prefs_names.dart' as PrefsNames;
+
 class ContactsPage extends StatefulWidget {
   const ContactsPage({super.key});
 
@@ -33,8 +35,6 @@ class _ContactsPageState extends State<ContactsPage> {
   }
 
   /* ----------  persistence  ---------- */
-  static const String _spKey = 'contacts';
-
   void _loadContacts() {
     SharedPreferences.getInstance().then((prefs) {
       _loadContactsState(prefs);
@@ -44,7 +44,7 @@ class _ContactsPageState extends State<ContactsPage> {
   void _loadContactsState(SharedPreferences prefs) async {
     debugPrint("Contacts sharedprefs loaded");
 
-    final raw = prefs.getString(_spKey);
+    final raw = prefs.getString(PrefsNames.CONTACTS);
     if (raw == null) return;
 
     final List<dynamic> list = json.decode(raw);
@@ -69,7 +69,7 @@ class _ContactsPageState extends State<ContactsPage> {
         .where((c) => c.relationship != RelationshipType.Emergency)
         .map((c) => c.toMap())
         .toList();
-    await prefs.setString(_spKey, json.encode(payload));
+    await prefs.setString(PrefsNames.CONTACTS, json.encode(payload));
   }
 
   /* ----------  CRUD helpers  ---------- */

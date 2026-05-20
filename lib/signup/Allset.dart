@@ -4,6 +4,15 @@ import 'package:wakealert/background_ble_service.dart';
 import 'package:wakealert/pages/home.dart';
 import 'package:wakealert/main.dart';
 
+import 'dart:convert';
+import 'package:wakealert/models/contact.dart';
+
+import 'package:wakealert/prefs_names.dart' as PrefsNames;
+import 'package:wakealert/services/contact_service.dart';
+import 'package:wakealert/services/medical_info_service.dart';
+import 'package:wakealert/services/user_service.dart';
+import 'package:wakealert/services/victim_service.dart';
+
 class AllSetPage extends StatelessWidget {
   const AllSetPage({super.key});
 
@@ -65,11 +74,70 @@ class AllSetPage extends StatelessWidget {
                   ),
                 ),
                 onPressed: () async {
+                  final prefs = await SharedPreferences.getInstance();
+                  final raw = prefs.getString(PrefsNames.CONTACTS);
+                  if (raw == null) return;
+
+                  final List<dynamic> list = json.decode(raw);
+                  final loaded = list.map((e) => Contact.fromJson(e)).toList();
+                  final primaryContact = loaded.first;
+
+                  debugPrint("First ever contact: ${primaryContact}");
+                  debugPrint("Email: ${prefs.getString(PrefsNames.EMAIL)}");
+
+                  try {
+                    // Create mobile user first
+                    final newUser = await AuthService.createMobileUser(
+                      email: prefs.getString(PrefsNames.EMAIL)!,
+                      password: prefs.getString(PrefsNames.PASSWORD)!,
+                    );
+                    debugPrint('User created with id=${newUser.id}, email=${newUser.email}');
+
+                    // Add primary contact
+                    final resp = await ContactService.addContact(
+                      clientUserId: newUser.id,
+                      firstName: primaryContact.firstName,
+                      lastName: primaryContact.lastName,
+                      phoneNumber: primaryContact.phoneNumber,
+                      relationshipName: primaryContact.relationship.name,
+                      isPrimary: true,
+                    );
+
+                    if (resp.statusCode != 201 && resp.statusCode != 200) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Error: ${resp.body}')),
+                      );
+                      return;
+                    }
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Contact added')),
+                    );
+
+                    final newRecord = await MedicalInfoService.createBlank();
+                    final mi_id = newRecord['medical_info_id'];
+                    debugPrint('New medical_info id = $mi_id');
+
+                    final newVictim = await VictimService.addVictim(
+                      mobileUserId: newUser.id,
+                      firstName: prefs.getString(PrefsNames.FIRST_NAME)!,
+                      lastName: prefs.getString(PrefsNames.LAST_NAME)!,
+                      medicalInfoId: mi_id,
+                    );
+                    debugPrint('Victim created with id=${newVictim.victimId}');
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('User data created.')),
+                    );
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Error in registration: ${e.toString()}")),
+                    );
+                  } 
                   debugPrint('Starting ble service');
                   initBackgroundBleService();
 
-                  final prefs = await SharedPreferences.getInstance();
-                  prefs.setBool("onboardingFinished", true);
+                  prefs.setBool(PrefsNames.ONBOARDING_FINISHED, true);
 
                   Navigator.of(context).pushReplacementNamed('/home');
                 },
