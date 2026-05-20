@@ -1,8 +1,11 @@
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wakealert/models/contact.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:wakealert/pages/contactConfirmedView.dart';
+import 'package:wakealert/prefs_names.dart' as PrefsNames;
+import 'package:wakealert/services/contact_service.dart';
 
 class EditContactView extends StatefulWidget {
   final Contact contact;
@@ -48,8 +51,10 @@ class _EditContactViewState extends State<EditContactView> {
   }
 
   /* --------------------------------------------------------------- */
-  void _saveContact() {
+  void _saveContact() async {
     if (!_formKey.currentState!.validate()) return;
+
+    final prefs = await SharedPreferences.getInstance();
 
     final updated = widget.contact.copyWith(
       firstName: _firstNameController.text.trim(),
@@ -59,17 +64,29 @@ class _EditContactViewState extends State<EditContactView> {
       isPrimary:  _isPrimary,
     );
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => ContactConfirmedView(
-          contactName: updated.fullName(),
-          isEdit: true,
+    debugPrint("updated: ${updated}");
+
+    try {
+      ContactService.clearAllPrimaryContacts(clientUserId: prefs.getInt(PrefsNames.MOBILE_USER_ID)!);
+      ContactService.updateContact(contact: updated, clientUserId: prefs.getInt(PrefsNames.MOBILE_USER_ID)!);
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ContactConfirmedView(
+            contactName: updated.fullName(),
+            isEdit: true,
+          ),
         ),
-      ),
-    ).then((confirmed) {
-      if (confirmed == true) Navigator.pop(context, updated);
-    });
+      ).then((confirmed) {
+        if (confirmed == true) Navigator.pop(context, updated);
+      });
+    } catch (e) {
+      debugPrint('Failed to edit contact: ${e}');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to edit contact: ${e}')),
+      );
+    }
   }
   /* --------------------------------------------------------------- */
 

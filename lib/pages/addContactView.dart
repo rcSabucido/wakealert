@@ -1,9 +1,12 @@
 // Placeholder – replace with the real file that exports Contact & RelationshipType
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wakealert/models/contact.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:wakealert/pages/contactConfirmedView.dart';
+import 'package:wakealert/prefs_names.dart' as PrefsNames;
+import 'package:wakealert/services/contact_service.dart';
 
 class AddContactView extends StatefulWidget {
   const AddContactView({super.key});
@@ -30,28 +33,47 @@ class _AddContactViewState extends State<AddContactView> {
   }
 
   /* --------------------------------------------------------------- */
-  void _saveContact() {
+  void _saveContact() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final newContact = Contact(
-      firstName:   _firstNameController.text.trim(),
-      lastName:    _lastNameController.text.trim(),
-      phoneNumber: _phoneController.text.trim(),
-      relationship:_selectedRelationship!,
-      isPrimary:   _isPrimary,
-    );
+    final prefs = await SharedPreferences.getInstance();
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => ContactConfirmedView(
-          contactName: newContact.fullName(),
-          isEdit: false,
+    try {
+      /*
+        final newContact = Contact(
+          firstName:   _firstNameController.text.trim(),
+          lastName:    _lastNameController.text.trim(),
+          phoneNumber: _phoneController.text.trim(),
+          relationship:_selectedRelationship!,
+          isPrimary:   _isPrimary,
+        );
+      */
+      final newContact = await ContactService.addContact(
+        clientUserId:     prefs.getInt(PrefsNames.MOBILE_USER_ID)!,
+        firstName:        _firstNameController.text.trim(),
+        lastName:         _lastNameController.text.trim(),
+        phoneNumber:      _phoneController.text.trim(),
+        relationshipName: _selectedRelationship!.name,
+        isPrimary:        _isPrimary,
+      );
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ContactConfirmedView(
+            contactName: newContact.fullName(),
+            isEdit: false,
+          ),
         ),
-      ),
-    ).then((confirmed) {
-      if (confirmed == true) Navigator.pop(context, newContact);
-    });
+      ).then((confirmed) {
+        if (confirmed == true) Navigator.pop(context, newContact);
+      });
+    } catch (e) {
+      debugPrint('Failed to add contact: ${e}');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to add contact: ${e}')),
+      );
+    }
   }
   /* --------------------------------------------------------------- */
 

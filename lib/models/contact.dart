@@ -64,6 +64,7 @@ class Contact {
     String? phoneNumber,
     RelationshipType? relationship,
     bool? isPrimary,
+    int? id,
   }) => 
     Contact(
       firstName: firstName ?? this.firstName,
@@ -71,6 +72,7 @@ class Contact {
       phoneNumber: phoneNumber ?? this.phoneNumber,
       relationship: relationship ?? this.relationship,
       isPrimary: isPrimary ?? this.isPrimary,
+      id: id ?? this.id,
     );
 
   // -------------------------------------------------
@@ -78,5 +80,5 @@ class Contact {
   // -------------------------------------------------
   @override
   String toString() =>
-      '$firstName $lastName ($relationship) - $phoneNumber${isPrimary ? ' [PRIMARY]' : ''}';
+      '$firstName $lastName ($relationship) - $phoneNumber${isPrimary ? ' [PRIMARY]' : ''} - Id: ${id}';
 }

@@ -103,13 +103,6 @@ class AllSetPage extends StatelessWidget {
                       isPrimary: true,
                     );
 
-                    if (resp.statusCode != 201 && resp.statusCode != 200) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Error: ${resp.body}')),
-                      );
-                      return;
-                    }
-
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Contact added')),
                     );

@@ -50,7 +50,15 @@ class _ContactsPageState extends State<ContactsPage> {
     final List<dynamic> list = json.decode(raw);
     final loaded = list.map((e) => Contact.fromJson(e)).toList();
 
-    debugPrint("loaded: ${loaded}");
+    loaded.sort((a, b) {
+      // true (1) comes before false (0)
+      int primaryCmp = b.isPrimary ? 1 : 0 - (a.isPrimary ? 1 : 0);
+      if (primaryCmp != 0) return primaryCmp;
+
+      // secondary ordering: alphabetically by last name, then first
+      int lastCmp = a.lastName.compareTo(b.lastName);
+      return lastCmp != 0 ? lastCmp : a.firstName.compareTo(b.firstName);
+    });
 
     final emergency = _contacts.first.copyWith();
 
@@ -145,6 +153,9 @@ class _ContactsPageState extends State<ContactsPage> {
               child: ElevatedButton(
                 onPressed: () async {
                   Navigator.pop(context);
+
+                  debugPrint("Contact to edit: ${contact}");
+
                   final result = await Navigator.push<Contact>(
                     context,
                     MaterialPageRoute(
