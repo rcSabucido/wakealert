@@ -1,4 +1,3 @@
-// lib/outbox/outbox_processor.dart
 import 'dart:async';
 import 'dart:convert';
 import 'package:dio/dio.dart';
@@ -9,7 +8,7 @@ class OutboxProcessor {
   OutboxProcessor({
     required OutboxRepository repository,
     required Dio dio,
-    this.pollInterval = const Duration(seconds: 5),
+    this.pollInterval = const Duration(seconds: 10),
   })  : _repository = repository,
         _dio = dio;
 
@@ -57,7 +56,6 @@ class OutboxProcessor {
 
       debugPrint("outbox_processor: New Data! ${data}");
 
-      /*
       await switch (entry.method.toUpperCase()) {
         'POST' => _dio.post(entry.endpoint, data: data),
         'PUT' => _dio.put(entry.endpoint, data: data),
@@ -65,7 +63,6 @@ class OutboxProcessor {
         'DELETE' => _dio.delete(entry.endpoint),
         _ => throw UnsupportedError('Method ${entry.method} not supported'),
       };
-      */
 
       await _repository.markSuccess(entry.id);
     } on DioException catch (e) {

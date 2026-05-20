@@ -57,19 +57,12 @@ class _AddContactViewState extends State<AddContactView> {
     );
     */
 
-    /*
-    await appOutbox.enqueue(
-      channel: 'add_contact',
-      payload: {"hello": "world"},
-    );
-    */
+    final prefs = await SharedPreferences.getInstance();
 
-    final repo = OutboxProvider.of(context);
-
-    repo.enqueue(
-      endpoint: '/orders',
-      method: 'POST',
-      payload: {'item': 'Widget A', 'qty': 1},
+    ContactService.enqueueAddContact(
+      context:      context, 
+      clientUserId: prefs.getInt(PrefsNames.MOBILE_USER_ID)!,
+      contact:      newContact
     );
 
     Navigator.push(

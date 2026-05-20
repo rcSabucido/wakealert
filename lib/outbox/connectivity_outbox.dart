@@ -1,4 +1,3 @@
-// lib/outbox/connectivity_outbox.dart
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'outbox_processor.dart';
@@ -7,7 +6,7 @@ import 'outbox_processor.dart';
 class ConnectivityOutbox {
   ConnectivityOutbox({
     required OutboxProcessor processor,
-    Connectivity? connectivity,          // injectable for tests
+    Connectivity? connectivity,
   })  : _processor = processor,
         _connectivity = connectivity ?? Connectivity() {
     _listen();
@@ -18,10 +17,7 @@ class ConnectivityOutbox {
   StreamSubscription<List<ConnectivityResult>>? _sub;
 
   void _listen() {
-    // initial state
     _connectivity.checkConnectivity().then(_handle);
-
-    // changes
     _sub = _connectivity.onConnectivityChanged.listen(_handle);
   }
 

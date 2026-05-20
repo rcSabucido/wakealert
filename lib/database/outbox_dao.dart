@@ -32,7 +32,7 @@ class OutboxDao extends DatabaseAccessor<AppDatabase> with _$OutboxDaoMixin {
       (update(outboxEntries)..where((e) => e.id.equals(id))).write(
         OutboxEntriesCompanion(
           status: Value(
-            retryCount >= 3 ? OutboxStatus.failed : OutboxStatus.pending,
+            retryCount >= 100 ? OutboxStatus.failed : OutboxStatus.pending,
           ),
           retryCount: Value(retryCount + 1),
           updatedAt: Value(DateTime.now()),

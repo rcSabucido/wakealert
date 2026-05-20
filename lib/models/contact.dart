@@ -46,12 +46,12 @@ class Contact {
   // To JSON
   // -------------------------------------------------
   Map<String, dynamic> toMap() => {
-        'firstName': firstName,
-        'lastName': lastName,
-        'phoneNumber': phoneNumber,
+        'first_name': firstName,
+        'last_name': lastName,
+        'phone_number': phoneNumber,
         'relationship': _relationshipName(relationship),
-        'isPrimary': isPrimary,
-        'id': id,
+        'is_primary': isPrimary,
+        'contact_id': id,
       };
 
   String toJsonString() => json.encode(toMap());

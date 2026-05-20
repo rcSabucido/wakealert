@@ -3,9 +3,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:wakealert/models/contact.dart';
+import 'package:wakealert/outbox/outbox_provider.dart';
 
 class ContactService {
   static final String? _baseUrl = "${dotenv.env['API_URL']}/contacts/add";
+
+  static void enqueueAddContact({
+    required BuildContext context,
+    required int clientUserId,
+    required Contact contact
+  }) {
+    final repo = OutboxProvider.of(context);
+
+    var map = contact.toMap();
+    map["client_user_id"] = clientUserId;
+
+    repo.enqueue(
+      endpoint: '/contacts/add',
+      method: 'POST',
+      payload: map,
+    );
+  }
 
   /// POST a new emergency contact.
   /// Returns the contact put in the database
