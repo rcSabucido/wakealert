@@ -80,6 +80,10 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
       final lastDiagnosis = prefs.getString(PrefsNames.LAST_DIAGNOSIS);
       final index = lastDiagnosis != null ? diagnoses.indexOf(lastDiagnosis!) : -1;
 
+      MedicalHistoryService.enqueueDeleteHistoryByInfo(
+        context: context,
+        medicalInfoId: prefs.getInt(PrefsNames.MEDICAL_INFO_ID)!,
+      );
       MedicalHistoryService.enqueueUpsertDiagnosisList(
         context: context,
         medicalInfoId: prefs.getInt(PrefsNames.MEDICAL_INFO_ID)!,

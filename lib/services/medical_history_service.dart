@@ -57,6 +57,18 @@ class MedicalHistoryService {
     );
   }
 
+  static void enqueueDeleteHistoryByInfo({
+    required BuildContext context,
+    required int medicalInfoId,
+  }) {
+    final repo = OutboxProvider.of(context);
+
+    repo.enqueue(
+      endpoint: '/medical_history/${medicalInfoId}',
+      method: 'DELETE',
+    );
+  }
+
   static Future<List<MedicalHistoryEntry>> fetchByMedicalInfoId(
       int medicalInfoId) async {
     final apiUrl = dotenv.env['API_URL'];
