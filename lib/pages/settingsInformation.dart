@@ -9,6 +9,7 @@ import 'package:wakealert/pages/medicalInformation.dart';
 import 'package:wakealert/pages/userAddressSettings.dart';
 
 import 'package:wakealert/prefs_names.dart' as PrefsNames;
+import 'package:wakealert/services/medical_history_service.dart';
 import 'package:wakealert/services/medical_info_service.dart';
 import 'package:wakealert/services/victim_service.dart';
 
@@ -73,6 +74,17 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
         pregnancyStatusName: prefs.getString(PrefsNames.PREGNANCY_STATUS),
         donorStatusName: prefs.getString(PrefsNames.ORGAN_DONOR),
         bloodTypeName: prefs.getString(PrefsNames.BLOOD_TYPE),
+      );
+
+      final diagnoses = prefs.getStringList(PrefsNames.MEDICAL_HISTORY)!;
+      final lastDiagnosis = prefs.getString(PrefsNames.LAST_DIAGNOSIS);
+      final index = lastDiagnosis != null ? diagnoses.indexOf(lastDiagnosis!) : -1;
+
+      MedicalHistoryService.enqueueUpsertDiagnosisList(
+        context: context,
+        medicalInfoId: prefs.getInt(PrefsNames.MEDICAL_INFO_ID)!,
+        diagnoses: diagnoses,
+        mostRecentIndex: index,
       );
 
       onBack();
