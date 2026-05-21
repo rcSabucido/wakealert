@@ -23,7 +23,7 @@ class OutboxRepository {
     ));
   }
 
-  Future<List<OutboxEntry>> getPending({int limit = 10}) =>
+  Future<List<OutboxEntry>> getPending({int limit = 100}) =>
       _dao.getPendingEntries(limit: limit);
 
   Future<void> markProcessing(int id) => _dao.markAsProcessing(id);

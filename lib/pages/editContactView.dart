@@ -56,6 +56,7 @@ class _EditContactViewState extends State<EditContactView> {
 
     final prefs = await SharedPreferences.getInstance();
 
+    final originalContact = widget.contact;
     final updated = widget.contact.copyWith(
       firstName: _firstNameController.text.trim(),
       lastName:  _lastNameController.text.trim(),
@@ -67,8 +68,18 @@ class _EditContactViewState extends State<EditContactView> {
     debugPrint("updated: ${updated}");
 
     try {
-      await ContactService.clearAllPrimaryContacts(clientUserId: prefs.getInt(PrefsNames.MOBILE_USER_ID)!);
-      await ContactService.updateContact(contact: updated, clientUserId: prefs.getInt(PrefsNames.MOBILE_USER_ID)!);
+      if (_isPrimary) {
+        ContactService.enqueueClearAllPrimaryContacts(
+          context: context,
+          clientUserId: prefs.getInt(PrefsNames.MOBILE_USER_ID)!
+        );
+      }
+      ContactService.enqueueEditContactByDetails(
+        context: context,
+        clientUserId: prefs.getInt(PrefsNames.MOBILE_USER_ID)!,
+        originalContact: originalContact,
+        updatedContact: updated,
+      );
 
       Navigator.push(
         context,

@@ -8,7 +8,7 @@ class OutboxProcessor {
   OutboxProcessor({
     required OutboxRepository repository,
     required Dio dio,
-    this.pollInterval = const Duration(seconds: 10),
+    this.pollInterval = const Duration(seconds: 5),
   })  : _repository = repository,
         _dio = dio;
 
@@ -66,6 +66,8 @@ class OutboxProcessor {
 
       await _repository.markSuccess(entry.id);
     } on DioException catch (e) {
+      debugPrint("DioException on ${entry.method.toUpperCase()} ${entry.endpoint}: ${e}");
+
       // Retry on network/server errors, skip on 4xx client errors
       final shouldRetry = e.response == null ||
           (e.response!.statusCode ?? 0) >= 500;
