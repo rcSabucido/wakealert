@@ -4,6 +4,7 @@ import 'package:wakealert/models/contact.dart';
 import 'package:wakealert/outbox/outbox_provider.dart';
 import 'package:wakealert/prefs_names.dart' as PrefsNames;
 import 'package:wakealert/services/contact_service.dart';
+import 'package:wakealert/services/victim_service.dart';
 import 'package:wakealert/signup/sign_up.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
@@ -141,7 +142,36 @@ class _LoginPageState extends State<LoginPage> {
                         prefs.setString(PrefsNames.EMAIL, email);
                         prefs.setInt(PrefsNames.MOBILE_USER_ID, user_id);
 
-                        await prefs.setString(PrefsNames.CONTACTS, json.encode(mapList));
+                        prefs.setString(PrefsNames.CONTACTS, json.encode(mapList));
+
+                        final victim = await VictimService.getVictimByMobileUser(user_id);
+                        final victimDetails = await VictimService.getVictimDetails(victim.victimId);
+
+                        // Save relevant IDs for later.
+                        prefs.setInt(PrefsNames.MEDICAL_INFO_ID, victim.medicalInfoId);
+                        prefs.setInt(PrefsNames.VICTIM_ID, victim.victimId);
+
+                        // Set preferences to blank/defaults.
+                        prefs.setString(PrefsNames.FIRST_NAME, victimDetails["firstName"]);
+                        prefs.setString(PrefsNames.LAST_NAME, victimDetails["lastName"]);
+                        prefs.setString(PrefsNames.BIRTH_DATE, victimDetails["birthDate"]);
+
+                        prefs.setString(PrefsNames.PREGNANCY_STATUS, victimDetails["pregnancyStatus"]);
+                        prefs.setString(PrefsNames.BLOOD_TYPE, victimDetails["bloodType"]);
+                        prefs.setString(PrefsNames.ORGAN_DONOR, victimDetails["organDonor"]);
+
+                        prefs.setStringList(PrefsNames.ALLERGIES, victimDetails["allergies"].split(", "));
+                        prefs.setStringList(PrefsNames.MEDICATION, victimDetails["medication"].split(", "));
+                        prefs.setStringList(PrefsNames.MEDICAL_HISTORY, victimDetails["medicalHistory"].split(", "));
+                        prefs.setString(PrefsNames.LAST_DIAGNOSIS, victimDetails["lastDiagnosis"]);
+                        prefs.setString(PrefsNames.LAST_DIAGNOSIS_DATE, victimDetails["diagnosisDate"]);
+                        prefs.setString(PrefsNames.PLACE_OF_DIAGNOSIS, victimDetails["placeOfDiagnosis"]);
+                        prefs.setString(PrefsNames.MEDICAL_NOTES, victimDetails["medicalNote"]);
+
+                        prefs.setString(PrefsNames.VOICE_ACCENT, "en-PH");
+                        prefs.setString(PrefsNames.VOICE_NAME, "en-PH-RosaNeural");
+                        prefs.setString(PrefsNames.VOICE_SPEED, "+0%");
+                        prefs.setString(PrefsNames.VOICE_PITCH, "+0Hz");
 
                         debugPrint('Starting ble service');
                         initBackgroundBleService();

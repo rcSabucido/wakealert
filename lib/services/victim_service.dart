@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'package:wakealert/outbox/outbox_provider.dart';
 
 class Victim {
   final int victimId;
@@ -29,9 +31,33 @@ class Victim {
 class VictimService {
   static final String? _apiUrl = dotenv.env['API_URL'];
 
-  /// Creates a new victim record.
-  /// Throws on network errors or unexpected status codes.
-  /// Returns the created [Victim] when server replies 201.
+  static void enqueueUpdateVictim({
+    required BuildContext context,
+    required int victimId,
+    String? firstName,
+    String? lastName,
+    String? birthDate,
+  }) {
+    final repo = OutboxProvider.of(context);
+
+    Map<String, dynamic> map = {};
+    if (firstName != null && firstName.isNotEmpty) {
+      map["first_name"] = firstName;
+    }
+    if (lastName != null && lastName.isNotEmpty) {
+      map["last_name"] = lastName;
+    }
+    if (birthDate != null && birthDate.isNotEmpty) {
+      map["birth_date"] = birthDate;
+    }
+
+    repo.enqueue(
+      endpoint: '/victims/update/${victimId}',
+      method: 'POST',
+      payload: map,
+    );
+  }
+
   static Future<Victim> addVictim({
     required int mobileUserId,
     required String firstName,
@@ -65,6 +91,50 @@ class VictimService {
       throw Exception('Add victim failed (${resp.statusCode}): $bodyString');
     } catch (e) {
       throw Exception('Network error while adding victim: $e');
+    }
+  }
+
+  static Future<Victim> getVictimByMobileUser(int mobileUserId) async {
+    final api = _apiUrl;
+    if (api == null || api.isEmpty) {
+      throw AssertionError('API_URL not found in .env');
+    }
+
+    final uri = Uri.parse('${api}/victims/mobile_user/${mobileUserId}');
+    try {
+      final resp = await http.get(uri);
+
+      if (resp.statusCode >= 200 && resp.statusCode < 300) {
+        final map = jsonDecode(resp.body) as Map<String, dynamic>;
+        return Victim.fromJson(map);
+      }
+
+      final bodyString = resp.body.isNotEmpty ? resp.body : 'No details';
+      throw Exception('Get victim by mobile user failed (${resp.statusCode}): $bodyString');
+    } catch (e) {
+      throw Exception('Network error while getting victim details: $e');
+    }
+  }
+
+  static Future<Map<String, dynamic>> getVictimDetails(int victimId) async {
+    final api = _apiUrl;
+    if (api == null || api.isEmpty) {
+      throw AssertionError('API_URL not found in .env');
+    }
+
+    final uri = Uri.parse('${api}/victims/${victimId}');
+    try {
+      final resp = await http.get(uri);
+
+      if (resp.statusCode >= 200 && resp.statusCode < 300) {
+        final map = jsonDecode(resp.body) as Map<String, dynamic>;
+        return map;
+      }
+
+      final bodyString = resp.body.isNotEmpty ? resp.body : 'No details';
+      throw Exception('Get victim details failed (${resp.statusCode}): $bodyString');
+    } catch (e) {
+      throw Exception('Network error while getting victim details: $e');
     }
   }
 }

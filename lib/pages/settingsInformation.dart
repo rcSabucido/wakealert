@@ -9,6 +9,8 @@ import 'package:wakealert/pages/medicalInformation.dart';
 import 'package:wakealert/pages/userAddressSettings.dart';
 
 import 'package:wakealert/prefs_names.dart' as PrefsNames;
+import 'package:wakealert/services/medical_info_service.dart';
+import 'package:wakealert/services/victim_service.dart';
 
 class SettingsInformationPage extends StatefulWidget {
   final VoidCallback onBack;
@@ -42,17 +44,39 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
 
   _SettingsInformationPageState(this.onBack);
 
-  Future<void> onBackSave() async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setString(PrefsNames.FIRST_NAME, firstNameController.text);
-    prefs.setString(PrefsNames.LAST_NAME, lastNameController.text);
-    prefs.setString(PrefsNames.BIRTH_DATE, birthDateController.text);
+  void onBackSave() {
+    SharedPreferences.getInstance().then((prefs) {
+      prefs.setString(PrefsNames.FIRST_NAME, firstNameController.text);
+      prefs.setString(PrefsNames.LAST_NAME, lastNameController.text);
+      prefs.setString(PrefsNames.BIRTH_DATE, birthDateController.text);
 
-    prefs.setString(PrefsNames.PREGNANCY_STATUS, pregnancyStatusOption!);
-    prefs.setString(PrefsNames.BLOOD_TYPE, bloodTypeOption!);
-    prefs.setString(PrefsNames.ORGAN_DONOR, organDonorOption!);
+      VictimService.enqueueUpdateVictim(
+        context: context,
+        victimId: prefs.getInt(PrefsNames.VICTIM_ID)!,
+        firstName: firstNameController.text,
+        lastName: lastNameController.text,
+        birthDate: birthDateController.text
+      );
 
-    this.onBack();
+      prefs.setString(PrefsNames.PREGNANCY_STATUS, pregnancyStatusOption!);
+      prefs.setString(PrefsNames.BLOOD_TYPE, bloodTypeOption!);
+      prefs.setString(PrefsNames.ORGAN_DONOR, organDonorOption!);
+
+      MedicalInfoService.enqueueUpdateMedicalInfo(
+        context: context,
+        medicalInfoId: prefs.getInt(PrefsNames.MEDICAL_INFO_ID)!,
+        allergies: prefs.getStringList(PrefsNames.ALLERGIES)!.join(", "),
+        medication: prefs.getStringList(PrefsNames.MEDICATION)!.join(", "),
+        medicalNotes: prefs.getString(PrefsNames.MEDICAL_NOTES),
+        lastDiagnosisDate: prefs.getString(PrefsNames.LAST_DIAGNOSIS_DATE),
+        lastDiagnosisHospitalName: prefs.getString(PrefsNames.PLACE_OF_DIAGNOSIS),
+        pregnancyStatusName: prefs.getString(PrefsNames.PREGNANCY_STATUS),
+        donorStatusName: prefs.getString(PrefsNames.ORGAN_DONOR),
+        bloodTypeName: prefs.getString(PrefsNames.BLOOD_TYPE),
+      );
+
+      onBack();
+    });
   }
 
   void onBackAdditional() {

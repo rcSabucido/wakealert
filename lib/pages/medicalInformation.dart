@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wakealert/components/labeledDiagnosisBox.dart';
 import 'package:wakealert/components/labeledListBox.dart';
 import 'package:wakealert/components/settingsRedirect.dart';
 import 'package:wakealert/components/subsectionHeader.dart';
 import 'package:wakealert/components/labeledDropdown.dart';
 import 'package:wakealert/components/labeledTextBox.dart';
+import 'package:wakealert/prefs_names.dart' as PrefsNames;
 
 class MedicalInformationPage extends StatefulWidget {
   final VoidCallback onBack;
@@ -27,40 +29,57 @@ class MedicalInformationPage extends StatefulWidget {
 class _MedicalInformationPageState extends State<MedicalInformationPage> {
   late final VoidCallback onBack;
 
-  final TextEditingController firstNameController = new TextEditingController();
-  final TextEditingController lastNameController = new TextEditingController();
-  final TextEditingController editController = new TextEditingController();
+  final TextEditingController medicalNotesController = new TextEditingController();
 
-  List<String> allergies = [
-    "Eczema", "Anaphylaxis", "Asthma", "Urticaria",
-    "Allergic Rhinitis", "Shrimp", "Peanuts", "Dust Mites",
-    "Penicillin", "Latex", "Pollen", "Cat Dander", "Dairy"
-  ];
-  List<String> medication = [
-    "Insulin", "Penicillin", "Morphine", "Vicodin", "Percocet", "Metformin",
-    "Amlodipine", "Atorvastatin", "Albuterol", "Omeprazole", "Losartan",
-    "Gabapentin", "Levothyroxine"
-  ];
-  List<String> medicalHistory = const [
-    "Diabetes (Type 2)", 
-    "Asthma", 
-    "Hypertension", 
-    "High Blood Pressure", 
-    "Osteoporosis", 
-    "Arthritis",
-    "Heart Disease",
-    "Thyroid Disorder",
-    "Chronic Kidney Disease",
-    "Anemia",
-    "Epilepsy",
-    "High Cholesterol"
-  ];
+  List<String> allergies = [""];
+  List<String> medication = [""];
+  List<String> medicalHistory = [""];
 
   String? lastDiagnosisOption;
   String? lastDiagnosisDate;
   String? hospital;
 
   _MedicalInformationPageState(this.onBack);
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMedicalInfo();
+  }
+
+  void _loadMedicalInfo() {
+    SharedPreferences.getInstance().then((prefs) {
+      _loadContactsState(prefs);
+    });
+  }
+
+  void _loadContactsState(SharedPreferences prefs) {
+    debugPrint("Medical info sharedprefs loaded");
+
+    setState(() {
+      allergies = prefs.getStringList(PrefsNames.ALLERGIES)!;
+      medication = prefs.getStringList(PrefsNames.MEDICATION)!;
+      medicalHistory = prefs.getStringList(PrefsNames.MEDICAL_HISTORY)!;
+      lastDiagnosisOption = prefs.getString(PrefsNames.LAST_DIAGNOSIS);
+      lastDiagnosisDate = prefs.getString(PrefsNames.LAST_DIAGNOSIS_DATE);
+      hospital = prefs.getString(PrefsNames.PLACE_OF_DIAGNOSIS);
+      medicalNotesController.text = prefs.getString(PrefsNames.MEDICAL_NOTES) ?? "";
+    });
+  }
+
+  void onBackSave() {
+    SharedPreferences.getInstance().then((prefs) {
+      prefs.setStringList(PrefsNames.ALLERGIES, allergies);
+      prefs.setStringList(PrefsNames.MEDICATION, medication);
+      prefs.setStringList(PrefsNames.MEDICAL_HISTORY, medicalHistory);
+      prefs.setString(PrefsNames.LAST_DIAGNOSIS, lastDiagnosisOption ?? "");
+      prefs.setString(PrefsNames.LAST_DIAGNOSIS_DATE, lastDiagnosisDate ?? "");
+      prefs.setString(PrefsNames.PLACE_OF_DIAGNOSIS, hospital ?? "");
+      prefs.setString(PrefsNames.MEDICAL_NOTES, medicalNotesController.text);
+
+      onBack();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +96,7 @@ class _MedicalInformationPageState extends State<MedicalInformationPage> {
           children: [
             SubsectionHeader(
               title: "Information",
-              onBack: onBack,
+              onBack: onBackSave,
             ),
             Padding(
               padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
@@ -105,6 +124,7 @@ class _MedicalInformationPageState extends State<MedicalInformationPage> {
               addText: "Add Medication",
               onChanged: (items) {
                 setState(() {
+                  debugPrint("New medication list: ${medication}");
                   medication = items;
                 });
               }
@@ -160,7 +180,7 @@ class _MedicalInformationPageState extends State<MedicalInformationPage> {
             ),
             LabeledTextBox(
               label: "Medical Notes:",
-              controller: editController,
+              controller: medicalNotesController,
             ),
           ],
         ),

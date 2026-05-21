@@ -62,7 +62,6 @@ class ContactService {
     );
   }
 
-
   static void enqueueClearAllPrimaryContacts({
     required BuildContext context,
     required int clientUserId

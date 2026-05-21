@@ -125,6 +125,25 @@ class AllSetPage extends StatelessWidget {
                     prefs.setInt(PrefsNames.VICTIM_ID, newVictim.victimId);
                     prefs.setInt(PrefsNames.MOBILE_USER_ID, newUser.id);
 
+                    // Set preferences to blank/defaults.
+                    prefs.setString(PrefsNames.BIRTH_DATE, "");
+                    prefs.setString(PrefsNames.PREGNANCY_STATUS, "Unknown");
+                    prefs.setString(PrefsNames.BLOOD_TYPE, "Unknown");
+                    prefs.setString(PrefsNames.ORGAN_DONOR, "Unknown");
+
+                    prefs.setString(PrefsNames.VOICE_ACCENT, "en-PH");
+                    prefs.setString(PrefsNames.VOICE_NAME, "en-PH-RosaNeural");
+                    prefs.setString(PrefsNames.VOICE_SPEED, "+0%");
+                    prefs.setString(PrefsNames.VOICE_PITCH, "+0Hz");
+
+                    prefs.setStringList(PrefsNames.ALLERGIES, []);
+                    prefs.setStringList(PrefsNames.MEDICATION, []);
+                    prefs.setStringList(PrefsNames.MEDICAL_HISTORY, []);
+                    prefs.setString(PrefsNames.LAST_DIAGNOSIS, "");
+                    prefs.setString(PrefsNames.LAST_DIAGNOSIS_DATE, "");
+                    prefs.setString(PrefsNames.PLACE_OF_DIAGNOSIS, "");
+                    prefs.setString(PrefsNames.MEDICAL_NOTES, "");
+
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('User data created.')),
                     );

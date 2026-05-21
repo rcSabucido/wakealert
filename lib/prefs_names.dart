@@ -10,9 +10,18 @@ const CONTACTS = "contacts"; // json string
 const FIRST_NAME = "firstName";
 const LAST_NAME = "lastName";
 const BIRTH_DATE = "birthDate";
+
 const PREGNANCY_STATUS = "pregnancyStatus";
 const BLOOD_TYPE = "bloodType";
 const ORGAN_DONOR = "organDonor";
+
+const ALLERGIES = "allergies"; // string list
+const MEDICATION = "medication";  // string list
+const MEDICAL_HISTORY = "medicalHistory";  // string list
+const LAST_DIAGNOSIS = "lastDiagnosis";
+const LAST_DIAGNOSIS_DATE = "lastDiagnosisDate";
+const PLACE_OF_DIAGNOSIS = "placeOfDiagnosis";
+const MEDICAL_NOTES = "medicalNotes";
 
 const VOICE_ACCENT = "voiceAccent";
 const VOICE_NAME = "voiceName";
