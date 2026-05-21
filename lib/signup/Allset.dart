@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wakealert/background_ble_service.dart';
+import 'package:wakealert/outbox/outbox_provider.dart';
 import 'package:wakealert/pages/home.dart';
 import 'package:wakealert/main.dart';
 
@@ -119,6 +120,9 @@ class AllSetPage extends StatelessWidget {
                     );
                     debugPrint('Victim created with id=${newVictim.victimId}');
 
+                    // Save relevant IDs for later.
+                    prefs.setInt(PrefsNames.MEDICAL_INFO_ID, mi_id);
+                    prefs.setInt(PrefsNames.VICTIM_ID, newVictim.victimId);
                     prefs.setInt(PrefsNames.MOBILE_USER_ID, newUser.id);
 
                     ScaffoldMessenger.of(context).showSnackBar(

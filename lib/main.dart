@@ -34,15 +34,18 @@ Future<void> main() async {
 
   processor.start();
 
-  final of = prefs.getBool(PrefsNames.ONBOARDING_FINISHED) ?? false;
-  debugPrint("onboardingFinished? $of");
-  if (of) {
+  final onboardingFinished = prefs.getBool(PrefsNames.ONBOARDING_FINISHED) ?? false;
+  debugPrint("onboardingFinished? $onboardingFinished");
+  if (onboardingFinished) {
     debugPrint('Starting ble service');
     initBackgroundBleService();
+  } else {
+    // Onboarding not finished, flush the queue first since fresh data is received after login/signup.
+    await outboxRepo.flushQueue();
   }
 
   ConnectivityOutbox(processor: processor);
-  runApp(MyApp(initialRoute: of ? '/home' : '/onboarding')); 
+  runApp(MyApp(initialRoute: onboardingFinished ? '/home' : '/onboarding')); 
 }
 
 class MyApp extends StatelessWidget {

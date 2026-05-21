@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wakealert/background_ble_service.dart';
 import 'package:wakealert/models/contact.dart';
+import 'package:wakealert/outbox/outbox_provider.dart';
 import 'package:wakealert/prefs_names.dart' as PrefsNames;
 import 'package:wakealert/services/contact_service.dart';
 import 'package:wakealert/signup/sign_up.dart';

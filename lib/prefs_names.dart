@@ -2,6 +2,8 @@ const ONBOARDING_FINISHED = "onboardingFinished"; // bool
 const EMAIL = "email";
 const PASSWORD = "password";
 
+const MEDICAL_INFO_ID = "medicalInfoId"; // int
+const VICTIM_ID = "victimId"; // int
 const MOBILE_USER_ID = "mobileUserId"; // int
 
 const CONTACTS = "contacts"; // json string

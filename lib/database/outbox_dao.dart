@@ -18,6 +18,8 @@ class OutboxDao extends DatabaseAccessor<AppDatabase> with _$OutboxDaoMixin {
             ..limit(limit))
           .get();
 
+  Future<int> clearAll() => delete(outboxEntries).go();
+
   Future<void> markAsProcessing(int id) => (update(outboxEntries)
         ..where((e) => e.id.equals(id)))
       .write(OutboxEntriesCompanion(

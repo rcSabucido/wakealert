@@ -26,6 +26,8 @@ class OutboxRepository {
   Future<List<OutboxEntry>> getPending({int limit = 100}) =>
       _dao.getPendingEntries(limit: limit);
 
+  Future<int> flushQueue() => _dao.clearAll();
+
   Future<void> markProcessing(int id) => _dao.markAsProcessing(id);
 
   Future<void> markSuccess(int id) => _dao.markAsSuccess(id);
