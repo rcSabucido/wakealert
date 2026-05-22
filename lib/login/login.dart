@@ -4,6 +4,7 @@ import 'package:wakealert/models/contact.dart';
 import 'package:wakealert/outbox/outbox_provider.dart';
 import 'package:wakealert/prefs_names.dart' as PrefsNames;
 import 'package:wakealert/services/contact_service.dart';
+import 'package:wakealert/services/psgc_parser.dart';
 import 'package:wakealert/services/victim_service.dart';
 import 'package:wakealert/signup/sign_up.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -146,6 +147,37 @@ class _LoginPageState extends State<LoginPage> {
 
                         final victim = await VictimService.getVictimByMobileUser(user_id);
                         final victimDetails = await VictimService.getVictimDetails(victim.victimId);
+
+                        final res = await VictimService.getVictimAddressID(victim.victimId);
+
+                        if (res["address_id"] != null && res["address_id"] > 0) {
+                          debugPrint("after login - address_id exists: ${res["address_id"]}");
+                          prefs.setInt(PrefsNames.ADDRESS_LINE_ID, res["address_id"]);
+
+                          final addressEntry = await VictimService.getAddressLine(res["address_id"]);
+                          prefs.setString(PrefsNames.ADDRESS_LINE, addressEntry["address_line"]);
+                          final barangayCode = addressEntry["barangay_id"];
+                          prefs.setString(PrefsNames.BARANGAY, barangayCode);
+
+                          prefs.setString(PrefsNames.CITY_MUN, PsgcParser.cityOrMun(barangayCode));
+                          prefs.setString(PrefsNames.PROVINCE_OR_HUC, PsgcParser.provinceOrHuc(barangayCode));
+                          prefs.setString(PrefsNames.REGION, PsgcParser.region(barangayCode));
+                        } else {
+                          debugPrint("after login - address_id does not exist!");
+                          final res = await VictimService.createAddressLine(victim.victimId);
+                          prefs.setInt(PrefsNames.ADDRESS_LINE_ID, res["address_id"]);
+                          debugPrint("after login - new address_id: ${res["address_id"]}");
+                          prefs.setString(PrefsNames.ADDRESS_LINE, "");
+                          prefs.setString(PrefsNames.REGION, "");
+                          prefs.setString(PrefsNames.PROVINCE_OR_HUC, "");
+                          prefs.setString(PrefsNames.CITY_MUN, "");
+                          prefs.setString(PrefsNames.BARANGAY, "");
+
+                          await VictimService.setVictimAddressID(
+                            victimId: victim.victimId,
+                            addressId: res["address_id"]
+                          );
+                        }
 
                         // Save relevant IDs for later.
                         prefs.setInt(PrefsNames.MEDICAL_INFO_ID, victim.medicalInfoId);

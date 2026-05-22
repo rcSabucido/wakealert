@@ -10,6 +10,7 @@ class Victim {
   final String firstName;
   final String lastName;
   final int medicalInfoId;
+  int? addressID;
 
   Victim._({
     required this.victimId,
@@ -17,6 +18,7 @@ class Victim {
     required this.firstName,
     required this.lastName,
     required this.medicalInfoId,
+    this.addressID,
   });
 
   factory Victim.fromJson(Map<String, dynamic> json) => Victim._(
@@ -25,6 +27,7 @@ class Victim {
         firstName: json['first_name'] as String,
         lastName: json['last_name'] as String,
         medicalInfoId: json['medical_info_id'] as int,
+        addressID: json['address_id'] as int?,
       );
 }
 
@@ -136,5 +139,119 @@ class VictimService {
     } catch (e) {
       throw Exception('Network error while getting victim details: $e');
     }
+  }
+
+  static Future<Map<String, dynamic>> getVictimAddressID(int victimId) async {
+    final api = _apiUrl;
+    if (api == null || api.isEmpty) {
+      throw AssertionError('API_URL not found in .env');
+    }
+
+    final uri = Uri.parse('${api}/victims/address_id/${victimId}');
+    try {
+      final resp = await http.get(uri);
+
+      if (resp.statusCode >= 200 && resp.statusCode < 300) {
+        final map = jsonDecode(resp.body) as Map<String, dynamic>;
+        return map;
+      }
+
+      final bodyString = resp.body.isNotEmpty ? resp.body : 'No details';
+      throw Exception('Get victim address id failed (${resp.statusCode}): $bodyString');
+    } catch (e) {
+      throw Exception('Network error while getting victim address id: $e');
+    }
+  }
+
+  static Future<void> setVictimAddressID({
+    required int victimId,
+    required int addressId
+  }) async {
+    final api = _apiUrl;
+    if (api == null || api.isEmpty) {
+      throw AssertionError('API_URL not found in .env');
+    }
+
+    final uri = Uri.parse('${api}/victims/address_id/${victimId}');
+    try {
+      final resp = await http.put(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'address_id': addressId,
+        })
+      );
+
+      if (resp.statusCode >= 200 && resp.statusCode < 300) {
+        return;
+      }
+
+      final bodyString = resp.body.isNotEmpty ? resp.body : 'No details';
+      throw Exception('Setting victim address id failed (${resp.statusCode}): $bodyString');
+    } catch (e) {
+      throw Exception('Network error while setting victim address id: $e');
+    }
+  }
+
+  static Future<Map<String, dynamic>> createAddressLine(int victimId) async {
+    final api = _apiUrl;
+    if (api == null || api.isEmpty) {
+      throw AssertionError('API_URL not found in .env');
+    }
+
+    final uri = Uri.parse('${api}/addresses/lines');
+    try {
+      final resp = await http.post(uri);
+
+      if (resp.statusCode >= 200 && resp.statusCode < 300) {
+        final map = jsonDecode(resp.body) as Map<String, dynamic>;
+        return map;
+      }
+
+      final bodyString = resp.body.isNotEmpty ? resp.body : 'No details';
+      throw Exception('Creating address line failed (${resp.statusCode}): $bodyString');
+    } catch (e) {
+      throw Exception('Network error while creating address line: $e');
+    }
+  }
+
+  static Future<Map<String, dynamic>> getAddressLine(int addressId) async {
+    final api = _apiUrl;
+    if (api == null || api.isEmpty) {
+      throw AssertionError('API_URL not found in .env');
+    }
+
+    final uri = Uri.parse('${api}/addresses/lines/${addressId}');
+    try {
+      final resp = await http.get(uri);
+
+      if (resp.statusCode >= 200 && resp.statusCode < 300) {
+        final map = jsonDecode(resp.body) as Map<String, dynamic>;
+        return map;
+      }
+
+      final bodyString = resp.body.isNotEmpty ? resp.body : 'No details';
+      throw Exception('Get address line failed (${resp.statusCode}): $bodyString');
+    } catch (e) {
+      throw Exception('Network error while getting address line: $e');
+    }
+  }
+
+  static void enqueueUpdateAddressLine({
+    required BuildContext context,
+    required int addressId,
+    required String barangayPsgc,
+    required String addressLine,
+  }) {
+    final repo = OutboxProvider.of(context);
+
+    repo.enqueue(
+      endpoint: '/addresses/lines/${addressId}',
+      method: 'PUT',
+      payload: {
+        "address_line": addressLine,
+        "barangay_psgc": barangayPsgc,
+      },
+    );
   }
 }

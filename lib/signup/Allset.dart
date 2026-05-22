@@ -120,6 +120,17 @@ class AllSetPage extends StatelessWidget {
                     );
                     debugPrint('Victim created with id=${newVictim.victimId}');
 
+                    // Create address line entry.
+                    debugPrint("Creating address line entry.");
+                    final res = await VictimService.createAddressLine(newVictim.victimId);
+                    prefs.setInt(PrefsNames.ADDRESS_LINE_ID, res["address_id"]);
+                    debugPrint("New address line entry: ${res["address_id"]}");
+
+                    await VictimService.setVictimAddressID(
+                      victimId: newVictim.victimId,
+                      addressId: res["address_id"]
+                    );
+
                     // Save relevant IDs for later.
                     prefs.setInt(PrefsNames.MEDICAL_INFO_ID, mi_id);
                     prefs.setInt(PrefsNames.VICTIM_ID, newVictim.victimId);
@@ -135,6 +146,12 @@ class AllSetPage extends StatelessWidget {
                     prefs.setString(PrefsNames.VOICE_NAME, "en-PH-RosaNeural");
                     prefs.setString(PrefsNames.VOICE_SPEED, "+0%");
                     prefs.setString(PrefsNames.VOICE_PITCH, "+0Hz");
+                    
+                    prefs.setString(PrefsNames.ADDRESS_LINE, "");
+                    prefs.setString(PrefsNames.REGION, "");
+                    prefs.setString(PrefsNames.PROVINCE_OR_HUC, "");
+                    prefs.setString(PrefsNames.CITY_MUN, "");
+                    prefs.setString(PrefsNames.BARANGAY, "");
 
                     prefs.setStringList(PrefsNames.ALLERGIES, []);
                     prefs.setStringList(PrefsNames.MEDICATION, []);

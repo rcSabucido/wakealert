@@ -23,6 +23,13 @@ const LAST_DIAGNOSIS_DATE = "lastDiagnosisDate";
 const PLACE_OF_DIAGNOSIS = "placeOfDiagnosis";
 const MEDICAL_NOTES = "medicalNotes";
 
+const ADDRESS_LINE = "addressLine";
+const ADDRESS_LINE_ID = "addressLineId"; // int
+const REGION = "region";
+const PROVINCE_OR_HUC = "provinceOrHuc";
+const CITY_MUN = "cityOrMun";
+const BARANGAY = "barangay";
+
 const VOICE_ACCENT = "voiceAccent";
 const VOICE_NAME = "voiceName";
 const VOICE_SPEED = "voiceSpeed";
