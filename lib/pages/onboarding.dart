@@ -20,16 +20,10 @@ class _OnboardingPageState extends State {
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
-
             Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                color: Colors.redAccent,
-                shape: BoxShape.rectangle,
-                borderRadius: BorderRadius.circular(20), // rounded corners
-              ),
-              child: const Icon(Icons.sos, color: Colors.white, size: 60),
+              width: 180,
+              height: 180,
+              child: const Image(image: AssetImage('images/logo.png')),
             ),
             const SizedBox(height: 20), 
 

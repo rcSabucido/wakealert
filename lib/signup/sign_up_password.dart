@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:wakealert/signup/primary_emergency_contact.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:wakealert/prefs_names.dart' as PrefsNames;
 
 class SignUpPassword extends StatefulWidget {
   const SignUpPassword({super.key});
@@ -118,8 +121,11 @@ class _SignUpPasswordState extends State<SignUpPassword> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                onPressed: () {
+                onPressed: () async {
                   if (_formKey.currentState!.validate()) {
+                    final prefs = await SharedPreferences.getInstance();
+                    prefs.setString(PrefsNames.PASSWORD, _confirmPasswordController.text);
+
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => const PrimaryEmergencyContact()),

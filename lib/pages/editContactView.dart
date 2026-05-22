@@ -1,9 +1,14 @@
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wakealert/models/contact.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:wakealert/pages/contactConfirmedView.dart';
+import 'package:wakealert/prefs_names.dart' as PrefsNames;
+import 'package:wakealert/services/contact_service.dart';
 
 class EditContactView extends StatefulWidget {
-  final Map<String, dynamic> contact;
+  final Contact contact;
   final int contactIndex;
 
   const EditContactView({
@@ -21,25 +26,20 @@ class _EditContactViewState extends State<EditContactView> {
   late final TextEditingController _firstNameController;
   late final TextEditingController _lastNameController;
   late final TextEditingController _phoneController;
-  late String? _selectedRelationship;
+  late RelationshipType _selectedRelationship;
   late bool _isPrimary;
 
   @override
   void initState() {
     super.initState();
     _formKey = GlobalKey<FormState>();
-    
-    final nameParts = widget.contact['name'].toString().split(' ');
-    final firstName = nameParts.isNotEmpty ? nameParts[0] : '';
-    final lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
-    
-    _firstNameController = TextEditingController(text: firstName);
-    _lastNameController = TextEditingController(text: lastName);
-    _phoneController = TextEditingController(
-      text: widget.contact['phone']?.toString() ?? '',
-    );
-    _selectedRelationship = widget.contact['relationship'];
-    _isPrimary = widget.contact['isPrimary'] ?? false;
+
+    // pre-fill fields from the Contact object
+    _firstNameController = TextEditingController(text: widget.contact.firstName);
+    _lastNameController  = TextEditingController(text: widget.contact.lastName);
+    _phoneController     = TextEditingController(text: widget.contact.phoneNumber);
+    _selectedRelationship = widget.contact.relationship;
+    _isPrimary           = widget.contact.isPrimary;
   }
 
   @override
@@ -50,29 +50,56 @@ class _EditContactViewState extends State<EditContactView> {
     super.dispose();
   }
 
-  void _saveContact() {
-    if (_formKey.currentState!.validate()) {
-      final updatedContact = {
-        'name': '${_firstNameController.text.trim()} ${_lastNameController.text.trim()}'.trim(),
-        'phone': _phoneController.text,
-        'relationship': _selectedRelationship,
-        'isPrimary': _isPrimary,
-      };
+  /* --------------------------------------------------------------- */
+  void _saveContact() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final prefs = await SharedPreferences.getInstance();
+
+    final originalContact = widget.contact;
+    final updated = widget.contact.copyWith(
+      firstName: _firstNameController.text.trim(),
+      lastName:  _lastNameController.text.trim(),
+      phoneNumber:_phoneController.text.trim(),
+      relationship:_selectedRelationship,
+      isPrimary:  _isPrimary,
+    );
+
+    debugPrint("updated: ${updated}");
+
+    try {
+      if (_isPrimary) {
+        ContactService.enqueueClearAllPrimaryContacts(
+          context: context,
+          clientUserId: prefs.getInt(PrefsNames.MOBILE_USER_ID)!
+        );
+      }
+      ContactService.enqueueEditContactByDetails(
+        context: context,
+        clientUserId: prefs.getInt(PrefsNames.MOBILE_USER_ID)!,
+        originalContact: originalContact,
+        updatedContact: updated,
+      );
+
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => ContactConfirmedView(
-            contactName: updatedContact['name'] as String,
+          builder: (_) => ContactConfirmedView(
+            contactName: updated.fullName(),
             isEdit: true,
           ),
         ),
-      ).then((result) {
-        if (result == true) {
-          Navigator.pop(context, updatedContact);
-        }
+      ).then((confirmed) {
+        if (confirmed == true) Navigator.pop(context, updated);
       });
+    } catch (e) {
+      debugPrint('Failed to edit contact: ${e}');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to edit contact: ${e}')),
+      );
     }
   }
+  /* --------------------------------------------------------------- */
 
   @override
   Widget build(BuildContext context) {
@@ -86,10 +113,7 @@ class _EditContactViewState extends State<EditContactView> {
         ),
         title: const Text(
           'EDIT CONTACT',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 24,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
         ),
         centerTitle: true,
       ),
@@ -101,10 +125,9 @@ class _EditContactViewState extends State<EditContactView> {
             const Text(
               'Update your\ncontact:',
               style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-              ),
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20),
             ),
             const SizedBox(height: 20),
             Expanded(
@@ -112,101 +135,79 @@ class _EditContactViewState extends State<EditContactView> {
                 key: _formKey,
                 child: ListView(
                   children: [
+                    /* ----------  First Name  ---------- */
                     TextFormField(
                       controller: _firstNameController,
                       decoration: const InputDecoration(
                         labelText: 'First Name:',
                         border: OutlineInputBorder(),
                       ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Please enter a first name';
-                        }
-                        return null;
-                      },
+                      validator: (v) =>
+                          v == null || v.trim().isEmpty ? 'Required' : null,
                     ),
                     const SizedBox(height: 16),
+
+                    /* ----------  Last Name  ---------- */
                     TextFormField(
                       controller: _lastNameController,
                       decoration: const InputDecoration(
                         labelText: 'Last Name:',
                         border: OutlineInputBorder(),
                       ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Please enter a last name';
-                        }
-                        return null;
-                      },
+                      validator: (v) =>
+                          v == null || v.trim().isEmpty ? 'Required' : null,
                     ),
                     const SizedBox(height: 16),
+
+                    /* ----------  Phone  ---------- */
                     TextFormField(
                       controller: _phoneController,
+                      keyboardType: TextInputType.phone,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       decoration: const InputDecoration(
                         labelText: 'Phone Number:',
                         border: OutlineInputBorder(),
                       ),
-                      keyboardType: TextInputType.phone,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                      ],
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter a phone number';
-                        }
-                        if (value.length < 7) {
-                          return 'Phone number must be at least 7 digits';
-                        }
-                        if (value.length > 15) {
-                          return 'Phone number must not exceed 15 digits';
+                      validator: (v) {
+                        if (v == null || v.isEmpty) return 'Required';
+                        if (v.length < 7 || v.length > 15) {
+                          return '7-15 digits';
                         }
                         return null;
                       },
                     ),
                     const SizedBox(height: 16),
-                    DropdownButtonFormField<String>(
+
+                    /* ----------  Relationship  ---------- */
+                    DropdownButtonFormField<RelationshipType>(
                       value: _selectedRelationship,
                       decoration: const InputDecoration(
                         labelText: 'Relations:',
                         border: OutlineInputBorder(),
                       ),
-                      items: const [
-                        DropdownMenuItem(
-                          value: 'Family',
-                          child: Text('Family'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'Friend',
-                          child: Text('Friend'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'Partner',
-                          child: Text('Partner'),
-                        ),
-                      ],
-                      onChanged: (String? value) {
-                        setState(() {
-                          _selectedRelationship = value;
-                        });
-                      },
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please select a relationship';
-                        }
-                        return null;
-                      },
+                      items: RelationshipType.values
+                          .where((t) => t != RelationshipType.Emergency)
+                          .map((t) => DropdownMenuItem(
+                                value: t,
+                                child: Text(t.name),
+                              ))
+                          .toList(),
+                      onChanged: (v) => setState(() {
+                        _selectedRelationship = v!;
+                      }),
+                      validator: (v) => v == null ? 'Required' : null,
                     ),
                     const SizedBox(height: 16),
+
+                    /* ----------  Primary switch  ---------- */
                     SwitchListTile(
                       title: const Text('Set as Primary Contact'),
                       value: _isPrimary,
-                      onChanged: (bool value) {
-                        setState(() {
-                          _isPrimary = value;
-                        });
-                      },
+                      onChanged: (v) => setState(() => _isPrimary = v),
                     ),
                     const SizedBox(height: 24),
+
+                    /* ----------  Save button  ---------- */
                     ElevatedButton(
                       onPressed: _saveContact,
                       style: ElevatedButton.styleFrom(
@@ -214,8 +215,7 @@ class _EditContactViewState extends State<EditContactView> {
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
+                            borderRadius: BorderRadius.circular(8)),
                       ),
                       child: const Text('Save Changes'),
                     ),

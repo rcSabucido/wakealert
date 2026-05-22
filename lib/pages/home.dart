@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:liquid_progress_indicator_v2/liquid_progress_indicator.dart';
 import 'package:simple_ripple_animation/simple_ripple_animation.dart';
 
@@ -21,7 +23,38 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   bool _isPaired = false;
+  StreamSubscription? _bleSub;
   int batteryPercentage = 75;
+
+  @override
+  void initState() {
+    super.initState();
+    _listenToState();
+  }
+
+  void _listenToState() {
+    _bleSub = FlutterBackgroundService()
+        .on('bleState')
+        .listen((data) {
+      if (data == null) return;
+      setState(() {
+        switch (data['state'] as String) {
+          case 'connected':
+            setState(() {
+              _isPaired = true;
+            });
+          case 'disconnected':
+            setState(() {
+              _isPaired = false;
+            });
+          /*
+          case 'scanning':
+          */
+        }
+      });
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -107,7 +140,7 @@ class _HomePageState extends State<HomePage> {
           // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text("Pair your WakeAlert device to your Bluetooth",
+            Text(_isPaired ? "Your WakeAlert device has paired successfully" : "Pair your WakeAlert device to your Bluetooth",
             textAlign: TextAlign.center,
             style: const TextStyle(
               fontWeight: FontWeight.bold,
@@ -163,35 +196,28 @@ class _HomePageState extends State<HomePage> {
                 )
               )
             ),
-            GestureDetector(
-              onTap: () {
-                setState(() {
-                  _isPaired = !_isPaired;
-                });
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  color: _isPaired ? const Color(0xFFFF6961) : const Color(0xFFF4EEEE),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.1),
-                      blurRadius: 3,
-                      spreadRadius: 1,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Padding(
-                  padding: EdgeInsets.only(left: 35, right: 35, top: 11, bottom: 11),
-                  child: Text(
-                    _isPaired ? "Paired" : "Pairing", 
-                    style: TextStyle(
-                    color: _isPaired ? Colors.white : const Color(0xFFFF6961) ,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  )
-                  )
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                color: _isPaired ? const Color(0xFFFF6961) : const Color(0xFFF4EEEE),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.1),
+                    blurRadius: 3,
+                    spreadRadius: 1,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Padding(
+                padding: EdgeInsets.only(left: 35, right: 35, top: 11, bottom: 11),
+                child: Text(
+                  _isPaired ? "Paired" : "Pairing", 
+                  style: TextStyle(
+                  color: _isPaired ? Colors.white : const Color(0xFFFF6961) ,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                )
                 )
               )
             )

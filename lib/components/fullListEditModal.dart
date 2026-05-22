@@ -133,7 +133,7 @@ class _FullListEditModalState extends State<FullListEditModal> {
                               isDense: true,
                             ),
                             onChanged: (value) {
-                              items[index] = value;
+                              items[index] = value.replaceAll(",", "");
                               onChanged(items);
                             },
                           ),

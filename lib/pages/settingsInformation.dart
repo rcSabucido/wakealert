@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wakealert/components/labeledDatePicker.dart';
 import 'package:wakealert/components/settingsRedirect.dart';
 import 'package:wakealert/components/subsectionHeader.dart';
@@ -6,6 +7,11 @@ import 'package:wakealert/components/labeledDropdown.dart';
 import 'package:wakealert/components/labeledTextBox.dart';
 import 'package:wakealert/pages/medicalInformation.dart';
 import 'package:wakealert/pages/userAddressSettings.dart';
+
+import 'package:wakealert/prefs_names.dart' as PrefsNames;
+import 'package:wakealert/services/medical_history_service.dart';
+import 'package:wakealert/services/medical_info_service.dart';
+import 'package:wakealert/services/victim_service.dart';
 
 class SettingsInformationPage extends StatefulWidget {
   final VoidCallback onBack;
@@ -33,11 +39,61 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
   final TextEditingController lastNameController = new TextEditingController();
   final TextEditingController birthDateController = new TextEditingController();
 
-  String? pregnancyStatusOption;
-  String? bloodTypeOption;
-  String? organDonorOption;
+  String? pregnancyStatusOption = "No";
+  String? bloodTypeOption = "O-";
+  String? organDonorOption = "No";
 
   _SettingsInformationPageState(this.onBack);
+
+  void onBackSave() {
+    SharedPreferences.getInstance().then((prefs) {
+      prefs.setString(PrefsNames.FIRST_NAME, firstNameController.text);
+      prefs.setString(PrefsNames.LAST_NAME, lastNameController.text);
+      prefs.setString(PrefsNames.BIRTH_DATE, birthDateController.text);
+
+      VictimService.enqueueUpdateVictim(
+        context: context,
+        victimId: prefs.getInt(PrefsNames.VICTIM_ID)!,
+        firstName: firstNameController.text,
+        lastName: lastNameController.text,
+        birthDate: birthDateController.text
+      );
+
+      prefs.setString(PrefsNames.PREGNANCY_STATUS, pregnancyStatusOption!);
+      prefs.setString(PrefsNames.BLOOD_TYPE, bloodTypeOption!);
+      prefs.setString(PrefsNames.ORGAN_DONOR, organDonorOption!);
+
+      MedicalInfoService.enqueueUpdateMedicalInfo(
+        context: context,
+        medicalInfoId: prefs.getInt(PrefsNames.MEDICAL_INFO_ID)!,
+        allergies: prefs.getStringList(PrefsNames.ALLERGIES)!.join(", "),
+        medication: prefs.getStringList(PrefsNames.MEDICATION)!.join(", "),
+        medicalNotes: prefs.getString(PrefsNames.MEDICAL_NOTES),
+        lastDiagnosisDate: prefs.getString(PrefsNames.LAST_DIAGNOSIS_DATE),
+        lastDiagnosisHospitalName: prefs.getString(PrefsNames.PLACE_OF_DIAGNOSIS),
+        pregnancyStatusName: prefs.getString(PrefsNames.PREGNANCY_STATUS),
+        donorStatusName: prefs.getString(PrefsNames.ORGAN_DONOR),
+        bloodTypeName: prefs.getString(PrefsNames.BLOOD_TYPE),
+      );
+
+      final diagnoses = prefs.getStringList(PrefsNames.MEDICAL_HISTORY)!;
+      final lastDiagnosis = prefs.getString(PrefsNames.LAST_DIAGNOSIS);
+      final index = lastDiagnosis != null ? diagnoses.indexOf(lastDiagnosis!) : -1;
+
+      MedicalHistoryService.enqueueDeleteHistoryByInfo(
+        context: context,
+        medicalInfoId: prefs.getInt(PrefsNames.MEDICAL_INFO_ID)!,
+      );
+      MedicalHistoryService.enqueueUpsertDiagnosisList(
+        context: context,
+        medicalInfoId: prefs.getInt(PrefsNames.MEDICAL_INFO_ID)!,
+        diagnoses: diagnoses,
+        mostRecentIndex: index,
+      );
+
+      onBack();
+    });
+  }
 
   void onBackAdditional() {
     setState(() {
@@ -49,6 +105,29 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
     UserAddressSettingsPage(onBack: onBackAdditional),
     MedicalInformationPage(onBack: onBackAdditional),
   ];
+
+  void loadInfo() {
+    SharedPreferences.getInstance().then((prefs) {
+      setState(() {
+        firstNameController.text = prefs.getString(PrefsNames.FIRST_NAME) ?? "";
+        lastNameController.text = prefs.getString(PrefsNames.LAST_NAME) ?? "";
+        birthDateController.text = prefs.getString(PrefsNames.BIRTH_DATE) ?? "";
+
+        pregnancyStatusOption = prefs.getString(PrefsNames.PREGNANCY_STATUS) ?? "No";
+        debugPrint("pregnancyStatusOption $pregnancyStatusOption");
+        organDonorOption = prefs.getString(PrefsNames.ORGAN_DONOR) ?? "No";
+        debugPrint("organDonorOption $organDonorOption");
+        bloodTypeOption = prefs.getString(PrefsNames.BLOOD_TYPE) ?? "O-";
+        debugPrint("bloodTypeOption $bloodTypeOption");
+      });
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loadInfo();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +144,7 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
           children: [
             SubsectionHeader(
               title: "Information",
-              onBack: onBack,
+              onBack: onBackSave,
             ),
             Padding(
               padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 4.0),
@@ -161,6 +240,7 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
                 ],
                 onChanged: (value) {
                   setState(() {
+                    debugPrint("New value: $value");
                     organDonorOption = value;
                   });
                 },
@@ -189,9 +269,10 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
                 DropdownMenuItem(value: "B-", child: Text("B-")),
                 DropdownMenuItem(value: "AB+", child: Text("AB+")),
                 DropdownMenuItem(value: "AB-", child: Text("AB-")),
+                DropdownMenuItem(value: "Unknown", child: Text("Unknown")),
               ],
               onChanged: (value) {
-                setState(() {
+                setState(() async {
                   bloodTypeOption = value;
                 });
               },

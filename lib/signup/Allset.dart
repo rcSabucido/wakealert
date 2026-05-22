@@ -1,6 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wakealert/background_ble_service.dart';
+import 'package:wakealert/outbox/outbox_provider.dart';
 import 'package:wakealert/pages/home.dart';
 import 'package:wakealert/main.dart';
+
+import 'dart:convert';
+import 'package:wakealert/models/contact.dart';
+
+import 'package:wakealert/prefs_names.dart' as PrefsNames;
+import 'package:wakealert/services/contact_service.dart';
+import 'package:wakealert/services/medical_info_service.dart';
+import 'package:wakealert/services/user_service.dart';
+import 'package:wakealert/services/victim_service.dart';
 
 class AllSetPage extends StatelessWidget {
   const AllSetPage({super.key});
@@ -62,12 +74,107 @@ class AllSetPage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                   ),
                 ),
-                onPressed: () {
-                  // Navigator.pushAndRemoveUntil(
-                  //   context,
-                  //   MaterialPageRoute(builder: (context) => AppBar()),
-                  //   (route) => false, 
-                  // );
+                onPressed: () async {
+                  final prefs = await SharedPreferences.getInstance();
+                  final raw = prefs.getString(PrefsNames.CONTACTS);
+                  if (raw == null) return;
+
+                  final List<dynamic> list = json.decode(raw);
+                  final loaded = list.map((e) => Contact.fromJson(e)).toList();
+                  final primaryContact = loaded.first;
+
+                  debugPrint("First ever contact: ${primaryContact}");
+                  debugPrint("Email: ${prefs.getString(PrefsNames.EMAIL)}");
+
+                  try {
+                    // Create mobile user first
+                    final newUser = await AuthService.createMobileUser(
+                      email: prefs.getString(PrefsNames.EMAIL)!,
+                      password: prefs.getString(PrefsNames.PASSWORD)!,
+                    );
+                    debugPrint('User created with id=${newUser.id}, email=${newUser.email}');
+
+                    // Add primary contact
+                    final resp = await ContactService.addContact(
+                      clientUserId: newUser.id,
+                      firstName: primaryContact.firstName,
+                      lastName: primaryContact.lastName,
+                      phoneNumber: primaryContact.phoneNumber,
+                      relationshipName: primaryContact.relationship.name,
+                      isPrimary: true,
+                    );
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Contact added')),
+                    );
+
+                    final newRecord = await MedicalInfoService.createBlank();
+                    final mi_id = newRecord['medical_info_id'];
+                    debugPrint('New medical_info id = $mi_id');
+
+                    final newVictim = await VictimService.addVictim(
+                      mobileUserId: newUser.id,
+                      firstName: prefs.getString(PrefsNames.FIRST_NAME)!,
+                      lastName: prefs.getString(PrefsNames.LAST_NAME)!,
+                      medicalInfoId: mi_id,
+                    );
+                    debugPrint('Victim created with id=${newVictim.victimId}');
+
+                    // Create address line entry.
+                    debugPrint("Creating address line entry.");
+                    final res = await VictimService.createAddressLine(newVictim.victimId);
+                    prefs.setInt(PrefsNames.ADDRESS_LINE_ID, res["address_id"]);
+                    debugPrint("New address line entry: ${res["address_id"]}");
+
+                    await VictimService.setVictimAddressID(
+                      victimId: newVictim.victimId,
+                      addressId: res["address_id"]
+                    );
+
+                    // Save relevant IDs for later.
+                    prefs.setInt(PrefsNames.MEDICAL_INFO_ID, mi_id);
+                    prefs.setInt(PrefsNames.VICTIM_ID, newVictim.victimId);
+                    prefs.setInt(PrefsNames.MOBILE_USER_ID, newUser.id);
+
+                    // Set preferences to blank/defaults.
+                    prefs.setString(PrefsNames.BIRTH_DATE, "");
+                    prefs.setString(PrefsNames.PREGNANCY_STATUS, "Unknown");
+                    prefs.setString(PrefsNames.BLOOD_TYPE, "Unknown");
+                    prefs.setString(PrefsNames.ORGAN_DONOR, "Unknown");
+
+                    prefs.setString(PrefsNames.VOICE_ACCENT, "en-PH");
+                    prefs.setString(PrefsNames.VOICE_NAME, "en-PH-RosaNeural");
+                    prefs.setString(PrefsNames.VOICE_SPEED, "+0%");
+                    prefs.setString(PrefsNames.VOICE_PITCH, "+0Hz");
+                    
+                    prefs.setString(PrefsNames.ADDRESS_LINE, "");
+                    prefs.setString(PrefsNames.REGION, "");
+                    prefs.setString(PrefsNames.PROVINCE_OR_HUC, "");
+                    prefs.setString(PrefsNames.CITY_MUN, "");
+                    prefs.setString(PrefsNames.BARANGAY, "");
+
+                    prefs.setStringList(PrefsNames.ALLERGIES, []);
+                    prefs.setStringList(PrefsNames.MEDICATION, []);
+                    prefs.setStringList(PrefsNames.MEDICAL_HISTORY, []);
+                    prefs.setString(PrefsNames.LAST_DIAGNOSIS, "");
+                    prefs.setString(PrefsNames.LAST_DIAGNOSIS_DATE, "");
+                    prefs.setString(PrefsNames.PLACE_OF_DIAGNOSIS, "");
+                    prefs.setString(PrefsNames.MEDICAL_NOTES, "");
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('User data created.')),
+                    );
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Error in registration: ${e.toString()}")),
+                    );
+                  } 
+                  debugPrint('Starting ble service');
+                  initBackgroundBleService();
+
+                  prefs.setBool(PrefsNames.ONBOARDING_FINISHED, true);
+
+                  Navigator.of(context).pushReplacementNamed('/home');
                 },
                 child: const Text(
                   "Continue",

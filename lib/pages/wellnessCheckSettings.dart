@@ -7,6 +7,8 @@ import 'package:wakealert/components/fullWidthButton.dart';
 import 'package:wakealert/components/dropdown.dart';
 import 'package:wakealert/components/splitCard.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
 class WellnessCheckSettingsPage extends StatefulWidget {
   final VoidCallback onBack;
 
@@ -32,12 +34,23 @@ class _WellnessCheckSettingsPageState extends State<WellnessCheckSettingsPage> {
   final TextEditingController lastNameController = new TextEditingController();
   final TextEditingController editController = new TextEditingController();
 
-  String? pregnancyStatusOption;
   String? wellnessCheckInterval;
-
   bool checkEnabled = true;
 
   _WellnessCheckSettingsPageState(this.onBack);
+
+  @override
+  void initState() {
+    super.initState();
+    loadInfo();
+  }
+
+  void loadInfo() {
+    SharedPreferences.getInstance().then((prefs) {
+      setState(() {
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

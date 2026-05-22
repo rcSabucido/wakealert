@@ -1,6 +1,14 @@
+// Placeholder – replace with the real file that exports Contact & RelationshipType
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wakealert/models/contact.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:wakealert/outbox/outbox_provider.dart';
+import 'package:wakealert/outbox/outbox_repository.dart';
 import 'package:wakealert/pages/contactConfirmedView.dart';
+import 'package:wakealert/prefs_names.dart' as PrefsNames;
+import 'package:wakealert/services/contact_service.dart';
 
 class AddContactView extends StatefulWidget {
   const AddContactView({super.key});
@@ -8,13 +16,14 @@ class AddContactView extends StatefulWidget {
   @override
   State<AddContactView> createState() => _AddContactViewState();
 }
-  
+
 class _AddContactViewState extends State<AddContactView> {
   final _formKey = GlobalKey<FormState>();
   final _firstNameController = TextEditingController();
-  final _lastNameController = TextEditingController();
-  final _phoneController = TextEditingController();
-  String? _selectedRelationship;
+  final _lastNameController  = TextEditingController();
+  final _phoneController     = TextEditingController();
+
+  RelationshipType? _selectedRelationship;
   bool _isPrimary = false;
 
   @override
@@ -25,29 +34,50 @@ class _AddContactViewState extends State<AddContactView> {
     super.dispose();
   }
 
-  void _saveContact() {
-    if (_formKey.currentState!.validate()) {
-      final newContact = {
-        'name': '${_firstNameController.text.trim()} ${_lastNameController.text.trim()}'.trim(),
-        'phone': _phoneController.text,
-        'relationship': _selectedRelationship,
-        'isPrimary': _isPrimary,
-      };
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ContactConfirmedView(
-            contactName: newContact['name'] as String,
-            isEdit: false,
-          ),
+  /* --------------------------------------------------------------- */
+  void _saveContact() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final newContact = Contact(
+      firstName:   _firstNameController.text.trim(),
+      lastName:    _lastNameController.text.trim(),
+      phoneNumber: _phoneController.text.trim(),
+      relationship:_selectedRelationship!,
+      isPrimary:   _isPrimary,
+    );
+
+    /*
+    final newContact = await ContactService.addContact(
+      clientUserId:     prefs.getInt(PrefsNames.MOBILE_USER_ID)!,
+      firstName:        _firstNameController.text.trim(),
+      lastName:         _lastNameController.text.trim(),
+      phoneNumber:      _phoneController.text.trim(),
+      relationshipName: _selectedRelationship!.name,
+      isPrimary:        _isPrimary,
+    );
+    */
+
+    final prefs = await SharedPreferences.getInstance();
+
+    ContactService.enqueueAddContact(
+      context:      context, 
+      clientUserId: prefs.getInt(PrefsNames.MOBILE_USER_ID)!,
+      contact:      newContact
+    );
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ContactConfirmedView(
+          contactName: newContact.fullName(),
+          isEdit: false,
         ),
-      ).then((result) {
-        if (result == true) {
-          Navigator.pop(context, newContact);
-        }
-      });
-    }
+      ),
+    ).then((confirmed) {
+      if (confirmed == true) Navigator.pop(context, newContact);
+    });
   }
+  /* --------------------------------------------------------------- */
 
   @override
   Widget build(BuildContext context) {
@@ -61,10 +91,7 @@ class _AddContactViewState extends State<AddContactView> {
         ),
         title: const Text(
           'CONTACTS',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 24,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
         ),
         centerTitle: true,
       ),
@@ -76,10 +103,9 @@ class _AddContactViewState extends State<AddContactView> {
             const Text(
               'Please enter your\ncontact:',
               style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-              ),
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20),
             ),
             const SizedBox(height: 20),
             Expanded(
@@ -87,101 +113,77 @@ class _AddContactViewState extends State<AddContactView> {
                 key: _formKey,
                 child: ListView(
                   children: [
+                    /* ----------  First Name  ---------- */
                     TextFormField(
                       controller: _firstNameController,
                       decoration: const InputDecoration(
                         labelText: 'First Name:',
                         border: OutlineInputBorder(),
                       ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Please enter a first name';
-                        }
-                        return null;
-                      },
+                      validator: (v) =>
+                          v == null || v.trim().isEmpty ? 'Required' : null,
                     ),
                     const SizedBox(height: 16),
+
+                    /* ----------  Last Name  ---------- */
                     TextFormField(
                       controller: _lastNameController,
                       decoration: const InputDecoration(
                         labelText: 'Last Name:',
                         border: OutlineInputBorder(),
                       ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Please enter a last name';
-                        }
-                        return null;
-                      },
+                      validator: (v) =>
+                          v == null || v.trim().isEmpty ? 'Required' : null,
                     ),
                     const SizedBox(height: 16),
+
+                    /* ----------  Phone  ---------- */
                     TextFormField(
                       controller: _phoneController,
+                      keyboardType: TextInputType.phone,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       decoration: const InputDecoration(
                         labelText: 'Phone Number:',
                         border: OutlineInputBorder(),
                       ),
-                      keyboardType: TextInputType.phone,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                      ],
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter a phone number';
-                        }
-                        if (value.length < 7) {
-                          return 'Phone number must be at least 7 digits';
-                        }
-                        if (value.length > 15) {
-                          return 'Phone number must not exceed 15 digits';
-                        }
+                      validator: (v) {
+                        if (v == null || v.isEmpty) return 'Required';
+                        if (v.length < 7 || v.length > 15) return '7-15 digits';
                         return null;
                       },
                     ),
                     const SizedBox(height: 16),
-                    DropdownButtonFormField<String>(
-                      initialValue: _selectedRelationship,
+
+                    /* ----------  Relationship  ---------- */
+                    DropdownButtonFormField<RelationshipType>(
+                      value: _selectedRelationship,
                       decoration: const InputDecoration(
                         labelText: 'Relations:',
                         border: OutlineInputBorder(),
                       ),
-                      items: const [
-                        DropdownMenuItem(
-                          value: 'Family',
-                          child: Text('Family'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'Friend',
-                          child: Text('Friend'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'Partner',
-                          child: Text('Partner'),
-                        ),
-                      ],
-                      onChanged: (String? value) {
-                        setState(() {
-                          _selectedRelationship = value;
-                        });
-                      },
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please select a relationship';
-                        }
-                        return null;
-                      },
+                      items: RelationshipType.values
+                          .where((t) => t != RelationshipType.Emergency)
+                          .map((t) => DropdownMenuItem(
+                                value: t,
+                                child: Text(t.name),
+                              ))
+                          .toList(),
+                      onChanged: (v) => setState(() {
+                        _selectedRelationship = v;
+                      }),
+                      validator: (v) => v == null ? 'Required' : null,
                     ),
                     const SizedBox(height: 16),
+
+                    /* ----------  Primary switch  ---------- */
                     SwitchListTile(
                       title: const Text('Set as Primary Contact'),
                       value: _isPrimary,
-                      onChanged: (bool value) {
-                        setState(() {
-                          _isPrimary = value;
-                        });
-                      },
+                      onChanged: (v) => setState(() => _isPrimary = v),
                     ),
                     const SizedBox(height: 24),
+
+                    /* ----------  Save button  ---------- */
                     ElevatedButton(
                       onPressed: _saveContact,
                       style: ElevatedButton.styleFrom(
@@ -189,8 +191,7 @@ class _AddContactViewState extends State<AddContactView> {
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
+                            borderRadius: BorderRadius.circular(8)),
                       ),
                       child: const Text('Add Contact'),
                     ),

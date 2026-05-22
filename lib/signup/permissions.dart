@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:wakealert/signup/Allset.dart';
 
 class OnboardingPermissions extends StatefulWidget {
@@ -11,6 +12,24 @@ class OnboardingPermissions extends StatefulWidget {
 class _OnboardingPermissionsState extends State<OnboardingPermissions> {
   bool _locationAllowed = false;
   bool _bluetoothAllowed = false;
+  
+  @override
+  void initState() {
+    super.initState();
+    _checkPermissions();
+  }
+
+  Future<void> _checkPermissions() async {
+    final loc = await Permission.locationAlways.status;
+    final bt  = await Permission.bluetoothScan.status;
+
+    if (mounted) {
+      setState(() {
+        _locationAllowed  = loc.isGranted;
+        _bluetoothAllowed = bt.isGranted;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,10 +76,19 @@ class _OnboardingPermissionsState extends State<OnboardingPermissions> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  onPressed: () {
-                    setState(() {
-                      _locationAllowed = true;
-                    });
+                  onPressed: () async {
+                    var status = await Permission.location.request();
+                    print('location status = $status');
+                    if (!status.isGranted) {
+                      debugPrint("[Permissions] Permission.location not granted!");
+                      return;
+                    }
+                    status = await Permission.locationAlways.request();
+                    print('locationAlways status = $status');
+                    if (!status.isGranted) {
+                      debugPrint("[Permissions] Permission.locationAlways not granted!");
+                      return;
+                    }
                   },
                   child: _locationAllowed
                       ? const Icon(Icons.check, color: Colors.white, size: 20)
@@ -92,8 +120,26 @@ class _OnboardingPermissionsState extends State<OnboardingPermissions> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  onPressed: () {
-                    setState(() {
+                  onPressed: () async {
+                    var status = await Permission.bluetoothScan.request();
+                    print('bluetoothScan status = $status');
+                    if (!status.isGranted) {
+                      debugPrint("[Permissions] Permission.bluetoothScan not granted!");
+                      return;
+                    }
+                    status = await Permission.bluetoothConnect.request();
+                    print('bluetoothConnect status = $status');
+                    if (!status.isGranted) {
+                      debugPrint("[Permissions] Permission.bluetoothConnect not granted!");
+                      return;
+                    }
+                    status = await Permission.bluetooth.request();
+                    print('bluetooth status = $status');
+                    if (!status.isGranted) {
+                      debugPrint("[Permissions] Permission.bluetooth not granted!");
+                      return;
+                    }
+                    setState(()  {
                       _bluetoothAllowed = true;
                     });
                   },

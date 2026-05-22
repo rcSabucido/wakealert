@@ -1,20 +1,62 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wakealert/background_ble_service.dart';
+import 'package:wakealert/database/database.dart';
+import 'package:wakealert/database/outbox_dao.dart';
+import 'package:wakealert/outbox/connectivity_outbox.dart';
+import 'package:wakealert/outbox/outbox_processor.dart';
+import 'package:wakealert/outbox/outbox_provider.dart';
+import 'package:wakealert/outbox/outbox_repository.dart';
 import 'package:wakealert/pages/contacts.dart';
 import 'package:wakealert/pages/home.dart';
 import 'package:wakealert/pages/onboarding.dart';
 import 'package:wakealert/pages/settings.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
-  runApp(const MyApp());
+import 'package:wakealert/prefs_names.dart' as PrefsNames;
+
+final appDb = AppDatabase();
+final outboxRepo = OutboxRepository(OutboxDao(appDb));
+
+Future<void> main() async {
+  debugPrint('Loading .env');
+  await dotenv.load();
+
+  final prefs = await SharedPreferences.getInstance();
+  prefs.setBool(PrefsNames.ONBOARDING_FINISHED, false);
+
+  final apiUrl = dotenv.env["API_URL"]!;
+  final processor = OutboxProcessor(
+    repository: outboxRepo,
+    dio: Dio(BaseOptions(baseUrl: apiUrl)),
+  );
+
+  processor.start();
+
+  final onboardingFinished = prefs.getBool(PrefsNames.ONBOARDING_FINISHED) ?? false;
+  debugPrint("onboardingFinished? $onboardingFinished");
+  if (onboardingFinished) {
+    debugPrint('Starting ble service');
+    initBackgroundBleService();
+  } else {
+    // Onboarding not finished, flush the queue first since fresh data is received after login/signup.
+    await outboxRepo.flushQueue();
+  }
+
+  ConnectivityOutbox(processor: processor);
+  runApp(MyApp(initialRoute: onboardingFinished ? '/home' : '/onboarding')); 
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final String initialRoute;
+  const MyApp({super.key, required this.initialRoute});
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      initialRoute: initialRoute,
       title: 'Flutter Demo',
       theme: ThemeData(
         // This is the theme of your application.
@@ -34,7 +76,10 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: .fromSeed(seedColor: const Color(0xFFFF6961)),
       ),
-      home: const AppScreen(title: 'Flutter Demo Home Page'),
+      routes: {
+        '/onboarding': (_) => const OnboardingPage(),
+        '/home':      (_) => const AppScreen(title: 'Flutter Demo Home Page'),
+      },
     );
   }
 }
@@ -131,17 +176,14 @@ class _AppScreenState extends State<AppScreen> {
   int _counter = 0;
   int _currentIndex = 0;
 
-
   // List of widgets for each page
   final List<Widget> _pages = [
     HomePage(),
     ContactsPage(),
     SettingsPage(),
-    OnboardingPage(),
   ];
 
   final List<GlobalKey<NavigatorState>> _navigatorKeys = [
-    GlobalKey<NavigatorState>(),
     GlobalKey<NavigatorState>(),
     GlobalKey<NavigatorState>(),
     GlobalKey<NavigatorState>(),
@@ -182,35 +224,37 @@ class _AppScreenState extends State<AppScreen> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
-    return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: List.generate(3, (index) {
-          return Navigator(
-            key: _navigatorKeys[index],
-            onGenerateRoute: (settings) {
-              return MaterialPageRoute(
-                builder: (_) => _pages[index],
-              );
-            },
-          );
-        }),
-      ),
-      bottomNavigationBar: BottomAppBar(
-        color: Colors.white,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 30),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              buildNavigationItem(Icons.home, 0),
-              buildNavigationItem(Icons.contacts, 1),
-              buildNavigationItem(Icons.settings, 2),
-              buildNavigationItem(Icons.person_pin_circle, 3),
-            ],
+    return OutboxProvider(
+      repository: outboxRepo,
+      child: Scaffold(
+        body: IndexedStack(
+          index: _currentIndex,
+          children: List.generate(3, (index) {
+            return Navigator(
+              key: _navigatorKeys[index],
+              onGenerateRoute: (settings) {
+                return MaterialPageRoute(
+                  builder: (_) => _pages[index],
+                );
+              },
+            );
+          }),
+        ),
+        bottomNavigationBar: BottomAppBar(
+          color: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 30),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                buildNavigationItem(Icons.home, 0),
+                buildNavigationItem(Icons.contacts, 1),
+                buildNavigationItem(Icons.settings, 2),
+              ],
+            ),
           ),
         ),
-      ),
+      )
     );
   }
 }

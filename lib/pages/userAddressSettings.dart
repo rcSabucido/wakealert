@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wakealert/components/labeledDropdown.dart';
 import 'package:wakealert/components/labeledTextBox.dart';
 import 'package:wakealert/components/subsectionHeader.dart';
+import 'package:wakealert/prefs_names.dart' as PrefsNames;
+
+import 'package:wakealert/services/psgc_address_service.dart';
+import 'package:wakealert/services/victim_service.dart';
+
+final addressLineSeparator = "\u{259E}";
 
 class UserAddressSettingsPage extends StatefulWidget {
   final VoidCallback onBack;
@@ -28,11 +35,162 @@ class _UserAddressSettingsPageState extends State<UserAddressSettingsPage> {
   final TextEditingController streetController = new TextEditingController();
   final TextEditingController subdivisionController = new TextEditingController();
 
+  List<Region>? regionList;
+  List<ProvinceOrHuc>? provinceHucList;
+  List<CityMun>? cityMunList;
+  List<Barangay>? barangayList;
+
   String? barangayOption;
-  String? provinceOption;
+  String? cityMunOption;
+  String? provinceHUCOption;
   String? regionOption;
 
+  bool regionFetched = false;
+  bool provinceHUCFetched = false;
+  bool cityMunFetched = false;
+  bool barangayFetched = false;
+
   _UserAddressSettingsPageState(this.onBack);
+
+  @override
+  void initState() {
+    super.initState();
+    loadSettings();
+  }
+
+  void loadSettings() {
+    SharedPreferences.getInstance().then((prefs) async {
+      // hack
+      final addressLineFull = prefs.getString(PrefsNames.ADDRESS_LINE)!.split(addressLineSeparator);
+      if (addressLineFull.length == 3) {
+        blkAndLotController.text = addressLineFull[0];
+        streetController.text = addressLineFull[1];
+        subdivisionController.text = addressLineFull[2];
+      }
+
+      String? barangay = prefs.getString(PrefsNames.BARANGAY);
+      if (barangay != null && barangay.isNotEmpty) {
+        final cityMun = prefs.getString(PrefsNames.CITY_MUN)!;
+        final provinceHUC = prefs.getString(PrefsNames.PROVINCE_OR_HUC)!;
+        final region = prefs.getString(PrefsNames.REGION)!;
+
+        debugPrint("region: ${region}");
+        debugPrint("provinceHUC: ${provinceHUC}");
+        debugPrint("cityMun: ${cityMun}");
+        debugPrint("barangay: ${barangay}");
+
+        setState(() {
+          barangayOption = barangay;
+          cityMunOption = cityMun;
+          provinceHUCOption = provinceHUC;
+          regionOption = region;
+        });
+
+        await _loadRegions(false);
+        await _loadProvinceHUC(region, false);
+        await _loadCityMunicipality(provinceHUC, false);
+        await _loadBarangay(cityMun);
+      } else {
+        await _loadRegions(true);
+      }
+    });
+  }
+
+  void onBackSave() {
+    SharedPreferences.getInstance().then((prefs) {
+      final addressLineList = [
+        blkAndLotController.text,
+        streetController.text,
+        subdivisionController.text
+      ];
+      final fullAddressLine = addressLineList.join(addressLineSeparator);
+
+      // hack
+      prefs.setString(PrefsNames.ADDRESS_LINE, fullAddressLine);
+
+      if (regionOption != null &&
+          provinceHUCOption != null &&
+          cityMunOption != null &&
+          barangayOption != null)
+      {
+        prefs.setString(PrefsNames.REGION, regionOption!);
+        prefs.setString(PrefsNames.PROVINCE_OR_HUC, provinceHUCOption!);
+        prefs.setString(PrefsNames.CITY_MUN, cityMunOption!);
+        prefs.setString(PrefsNames.BARANGAY, barangayOption!);
+
+
+        VictimService.enqueueUpdateAddressLine(
+          context: context,
+          addressId: prefs.getInt(PrefsNames.ADDRESS_LINE_ID)!,
+          barangayPsgc: barangayOption!,
+          addressLine: fullAddressLine,
+        );
+      }
+
+      onBack();
+    });
+  }
+
+  Future<void> _loadRegions(bool newRegion) async {
+    final client = PsgcClient();
+    final regions = await client.fetchRegions();
+    setState(() {
+      regionList = regions;
+      regionFetched = true;
+      provinceHUCFetched = false;
+      cityMunFetched = false;
+      barangayFetched = false;
+
+      if (newRegion) {
+        provinceHUCOption = null;
+        cityMunOption = null;
+        barangayOption = null;
+      }
+      debugPrint("region fetched");
+    });
+  }
+
+  Future<void> _loadProvinceHUC(String region, bool newProvinceHUC) async {
+    final client = PsgcClient();
+    final provinces = await client.fetchProvinces(region);
+    setState(() {
+      provinceHucList = provinces;
+      provinceHUCFetched = true;
+      cityMunFetched = false;
+      barangayFetched = false;
+
+      if (newProvinceHUC) {
+        cityMunOption = null;
+        barangayOption = null;
+      }
+      debugPrint("province or huc fetched");
+    });
+  }
+
+  Future<void> _loadCityMunicipality(String provinceOrHuc, bool newCityMun) async {
+    final client = PsgcClient();
+    final cityMuns = await client.fetchCities(provinceOrHuc);
+    setState(() {
+      cityMunList = cityMuns;
+      cityMunFetched = true;
+      barangayFetched = false;
+
+      if (newCityMun) {
+        barangayOption = null;
+      }
+      debugPrint("city mun fetched");
+    });
+  }
+
+  Future<void> _loadBarangay(String cityMun) async {
+    final client = PsgcClient();
+    final barangays = await client.fetchBarangays(cityMun);
+    setState(() {
+      barangayList = barangays;
+      barangayFetched = true;
+      debugPrint("barangays fetched");
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +207,7 @@ class _UserAddressSettingsPageState extends State<UserAddressSettingsPage> {
           children: [
             SubsectionHeader(
               title: "Address",
-              onBack: onBack,
+              onBack: onBackSave,
             ),
             Padding(
               padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
@@ -109,25 +267,28 @@ class _UserAddressSettingsPageState extends State<UserAddressSettingsPage> {
             Padding(
               padding: EdgeInsets.all(8.0),
               child: DropdownButtonFormField<String>(
-                value: barangayOption,
+                value: regionOption,
                 decoration: const InputDecoration(
-                  labelText: "Barangay:",
-                  hintText: "Select a barangay",
+                  labelText: "Region",
+                  hintText: "Select a region",
                   border: OutlineInputBorder(),
                 ),
-                items: const [
-                  DropdownMenuItem(value: "Barangay I", child: Text("Barangay I")),
-                  DropdownMenuItem(value: "Barangay II", child: Text("Barangay II")),
-                  DropdownMenuItem(value: "Barangay III", child: Text("Barangay III")),
-                ],
-                onChanged: (value) {
+                items: regionList?.map((region) =>
+                    DropdownMenuItem(
+                      value: region.regionPsgc,
+                      child: Text(region.regionName)))
+                  .toList(),
+                onChanged: !regionFetched ? null : (value) {
                   setState(() {
-                    barangayOption = value;    
+                    regionOption = value; 
                   });
+                  if (value != null) {
+                    _loadProvinceHUC(value, true);
+                  }
                 },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return "Please select a barangay";
+                    return "Please select a region";
                   }
                   return null;
                 },
@@ -136,21 +297,54 @@ class _UserAddressSettingsPageState extends State<UserAddressSettingsPage> {
             Padding(
               padding: EdgeInsets.all(8.0),
               child: DropdownButtonFormField<String>(
-                value: provinceOption,
+                value: provinceHUCOption,
                 decoration: const InputDecoration(
-                  labelText: "Province, Municipality or City",
-                  hintText: "Select a province, municipality or city",
+                  labelText: "Province or Highly Urbanized City",
+                  hintText: "Select a province or HUC",
                   border: OutlineInputBorder(),
                 ),
-                items: const [
-                  DropdownMenuItem(value: "City 1", child: Text("City 1")),
-                  DropdownMenuItem(value: "City 2", child: Text("City 2")),
-                  DropdownMenuItem(value: "City 3", child: Text("City 3")),
-                ],
-                onChanged: (value) {
+                items: provinceHucList?.map((provinceHuc) =>
+                    DropdownMenuItem(
+                      value: provinceHuc.provinceOrHucPsgc,
+                      child: Text(provinceHuc.provinceOrHucName)))
+                  .toList(),
+                onChanged: !provinceHUCFetched ? null : (value) {
                   setState(() {
-                    provinceOption = value;    
+                    provinceHUCOption = value; 
                   });
+                  if (value != null) {
+                    _loadCityMunicipality(value, true);
+                  }
+                },
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Please select a region";
+                  }
+                  return null;
+                },
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(8.0),
+              child: DropdownButtonFormField<String>(
+                value: cityMunOption,
+                decoration: const InputDecoration(
+                  labelText: "Municipality or City",
+                  hintText: "Select a municipality or city",
+                  border: OutlineInputBorder(),
+                ),
+                items: cityMunList?.map((cityMun) =>
+                    DropdownMenuItem(
+                      value: cityMun.cityMunPsgc,
+                      child: Text(cityMun.cityMunName)))
+                  .toList(),
+                onChanged: !cityMunFetched ? null : (value) {
+                  setState(() {
+                    cityMunOption = value; 
+                  });
+                  if (value != null) {
+                    _loadBarangay(value);
+                  }
                 },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -163,25 +357,25 @@ class _UserAddressSettingsPageState extends State<UserAddressSettingsPage> {
             Padding(
               padding: EdgeInsets.all(8.0),
               child: DropdownButtonFormField<String>(
-                value: regionOption,
+                value: barangayOption,
                 decoration: const InputDecoration(
-                  labelText: "Region",
-                  hintText: "Select a region",
+                  labelText: "Barangay:",
+                  hintText: "Select a barangay",
                   border: OutlineInputBorder(),
                 ),
-                items: const [
-                  DropdownMenuItem(value: "Region 1", child: Text("Region 1")),
-                  DropdownMenuItem(value: "Region 2", child: Text("Region 2")),
-                  DropdownMenuItem(value: "Region 3", child: Text("Region 3")),
-                ],
-                onChanged: (value) {
+                items: barangayList?.map((barangay) =>
+                    DropdownMenuItem(
+                      value: barangay.barangayPsgc,
+                      child: Text(barangay.barangayName)))
+                  .toList(),
+                onChanged: !barangayFetched ? null : (value) {
                   setState(() {
-                    regionOption = value;    
+                    barangayOption = value; 
                   });
                 },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return "Please select a region";
+                    return "Please select a barangay";
                   }
                   return null;
                 },

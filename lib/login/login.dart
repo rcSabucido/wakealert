@@ -1,5 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:wakealert/background_ble_service.dart';
+import 'package:wakealert/models/contact.dart';
+import 'package:wakealert/outbox/outbox_provider.dart';
+import 'package:wakealert/prefs_names.dart' as PrefsNames;
+import 'package:wakealert/services/contact_service.dart';
+import 'package:wakealert/services/psgc_parser.dart';
+import 'package:wakealert/services/victim_service.dart';
 import 'package:wakealert/signup/sign_up.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/http.dart' as http;
+
+import 'package:wakealert/services/user_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'dart:convert';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -77,9 +91,9 @@ class _LoginPageState extends State<LoginPage> {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your password';
                   }
-                  if (value.length < 6) {
-                    return 'Password must be at least 6 characters';
-                  }
+                  // if (value.length < 4) {
+                  //   return 'Password must be at least 4 characters';
+                  // }
                   return null;
                 },
               ),
@@ -94,12 +108,116 @@ class _LoginPageState extends State<LoginPage> {
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 15),
                   ),
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      // TODO: Implement login logic
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Logging in...')),
+                  onPressed: () async {
+                    if (!_formKey.currentState!.validate()) return;
+
+                    try {
+                      final authResp = await AuthService.login(
+                        email: _emailController.text,
+                        password: _passwordController.text,
                       );
+
+                      if (!mounted) return;
+
+                      if (authResp.status == 200 && authResp.body != null) {
+                        final token = authResp.body!['token'];
+                        final user_id = authResp.body!['user']['mobile_user_id'];
+                        final email = authResp.body!['user']['email'];
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Logged in.')),
+                        );
+                        debugPrint("token: ${token}");
+                        debugPrint("user_id: ${user_id}");
+                        debugPrint("email: ${email}");
+
+                        // Get list of contacts from API.
+                        List<Contact> contactsList = await ContactService.getContactsByClient(user_id);
+                        final mapList = contactsList
+                          .map((c) => c.toMap())
+                          .toList();
+                        debugPrint("list of contacts: ${mapList}");
+
+                        final prefs = await SharedPreferences.getInstance();
+
+                        // Save user info to prefs
+                        prefs.setString(PrefsNames.EMAIL, email);
+                        prefs.setInt(PrefsNames.MOBILE_USER_ID, user_id);
+
+                        prefs.setString(PrefsNames.CONTACTS, json.encode(mapList));
+
+                        final victim = await VictimService.getVictimByMobileUser(user_id);
+                        final victimDetails = await VictimService.getVictimDetails(victim.victimId);
+
+                        final res = await VictimService.getVictimAddressID(victim.victimId);
+
+                        if (res["address_id"] != null && res["address_id"] > 0) {
+                          debugPrint("after login - address_id exists: ${res["address_id"]}");
+                          prefs.setInt(PrefsNames.ADDRESS_LINE_ID, res["address_id"]);
+
+                          final addressEntry = await VictimService.getAddressLine(res["address_id"]);
+                          prefs.setString(PrefsNames.ADDRESS_LINE, addressEntry["address_line"]);
+                          final barangayCode = addressEntry["barangay_id"];
+                          prefs.setString(PrefsNames.BARANGAY, barangayCode);
+
+                          prefs.setString(PrefsNames.CITY_MUN, PsgcParser.cityOrMun(barangayCode));
+                          prefs.setString(PrefsNames.PROVINCE_OR_HUC, PsgcParser.provinceOrHuc(barangayCode));
+                          prefs.setString(PrefsNames.REGION, PsgcParser.region(barangayCode));
+                        } else {
+                          debugPrint("after login - address_id does not exist!");
+                          final res = await VictimService.createAddressLine(victim.victimId);
+                          prefs.setInt(PrefsNames.ADDRESS_LINE_ID, res["address_id"]);
+                          debugPrint("after login - new address_id: ${res["address_id"]}");
+                          prefs.setString(PrefsNames.ADDRESS_LINE, "");
+                          prefs.setString(PrefsNames.REGION, "");
+                          prefs.setString(PrefsNames.PROVINCE_OR_HUC, "");
+                          prefs.setString(PrefsNames.CITY_MUN, "");
+                          prefs.setString(PrefsNames.BARANGAY, "");
+
+                          await VictimService.setVictimAddressID(
+                            victimId: victim.victimId,
+                            addressId: res["address_id"]
+                          );
+                        }
+
+                        // Save relevant IDs for later.
+                        prefs.setInt(PrefsNames.MEDICAL_INFO_ID, victim.medicalInfoId);
+                        prefs.setInt(PrefsNames.VICTIM_ID, victim.victimId);
+
+                        // Set preferences to blank/defaults.
+                        prefs.setString(PrefsNames.FIRST_NAME, victimDetails["firstName"]);
+                        prefs.setString(PrefsNames.LAST_NAME, victimDetails["lastName"]);
+                        prefs.setString(PrefsNames.BIRTH_DATE, victimDetails["birthDate"]);
+
+                        prefs.setString(PrefsNames.PREGNANCY_STATUS, victimDetails["pregnancyStatus"]);
+                        prefs.setString(PrefsNames.BLOOD_TYPE, victimDetails["bloodType"]);
+                        prefs.setString(PrefsNames.ORGAN_DONOR, victimDetails["organDonor"]);
+
+                        prefs.setStringList(PrefsNames.ALLERGIES, victimDetails["allergies"].split(", "));
+                        prefs.setStringList(PrefsNames.MEDICATION, victimDetails["medication"].split(", "));
+                        prefs.setStringList(PrefsNames.MEDICAL_HISTORY, victimDetails["medicalHistory"].split(", "));
+                        prefs.setString(PrefsNames.LAST_DIAGNOSIS, victimDetails["lastDiagnosis"]);
+                        prefs.setString(PrefsNames.LAST_DIAGNOSIS_DATE, victimDetails["diagnosisDate"]);
+                        prefs.setString(PrefsNames.PLACE_OF_DIAGNOSIS, victimDetails["placeOfDiagnosis"]);
+                        prefs.setString(PrefsNames.MEDICAL_NOTES, victimDetails["medicalNote"]);
+
+                        prefs.setString(PrefsNames.VOICE_ACCENT, "en-PH");
+                        prefs.setString(PrefsNames.VOICE_NAME, "en-PH-RosaNeural");
+                        prefs.setString(PrefsNames.VOICE_SPEED, "+0%");
+                        prefs.setString(PrefsNames.VOICE_PITCH, "+0Hz");
+
+                        debugPrint('Starting ble service');
+                        initBackgroundBleService();
+
+                        prefs.setBool(PrefsNames.ONBOARDING_FINISHED, true);
+
+                        Navigator.of(context).pushReplacementNamed('/home');
+                      } else {
+                        final msg = authResp.body?['message'] ?? 'Invalid email or password';
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+                      }
+                    } catch (e) {
+                      debugPrint("Error: ${e}");
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error accessing server: ${e}")));
                     }
                   },
                   child: const Text(
