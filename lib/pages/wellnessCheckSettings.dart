@@ -1,4 +1,8 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_background_service/flutter_background_service.dart';
+import 'package:pro_mpack/pro_mpack.dart';
 import 'package:wakealert/components/settingsRedirect.dart';
 import 'package:wakealert/components/subsectionHeader.dart';
 import 'package:wakealert/components/labeledDropdown.dart';
@@ -8,6 +12,7 @@ import 'package:wakealert/components/dropdown.dart';
 import 'package:wakealert/components/splitCard.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wakealert/prefs_names.dart' as PrefsNames;
 
 class WellnessCheckSettingsPage extends StatefulWidget {
   final VoidCallback onBack;
@@ -30,12 +35,8 @@ class WellnessCheckSettingsPage extends StatefulWidget {
 class _WellnessCheckSettingsPageState extends State<WellnessCheckSettingsPage> {
   late final VoidCallback onBack;
 
-  final TextEditingController firstNameController = new TextEditingController();
-  final TextEditingController lastNameController = new TextEditingController();
-  final TextEditingController editController = new TextEditingController();
-
-  String? wellnessCheckInterval;
-  bool checkEnabled = true;
+  String? wellnessCheckInterval = "60";
+  bool checkEnabled = false;
 
   _WellnessCheckSettingsPageState(this.onBack);
 
@@ -48,8 +49,39 @@ class _WellnessCheckSettingsPageState extends State<WellnessCheckSettingsPage> {
   void loadInfo() {
     SharedPreferences.getInstance().then((prefs) {
       setState(() {
+        final checkInterval = prefs.getInt(PrefsNames.WELLNESS_CHECK_INTERVAL) ?? 60;
+        wellnessCheckInterval = "${checkInterval}";
+        checkEnabled = prefs.getBool(PrefsNames.WELLNESS_CHECK_ENABLED) ?? false;
       });
     });
+  }
+
+  Future<void> onBackSave() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    prefs.setInt(PrefsNames.WELLNESS_CHECK_INTERVAL,
+      wellnessCheckInterval != null ? int.parse(wellnessCheckInterval!) : 60);
+    prefs.setBool(PrefsNames.WELLNESS_CHECK_ENABLED, checkEnabled);
+
+    updateDeviceCheck();
+
+    onBack();
+  }
+
+  void updateDeviceCheck() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final Uint8List startBytes = serialize([
+      1,
+      prefs.getBool(PrefsNames.WELLNESS_CHECK_ENABLED) ?? false,
+      prefs.getInt(PrefsNames.WELLNESS_CHECK_INTERVAL) ?? 60,
+    ]);
+
+    FlutterBackgroundService().invoke('bleWrite', 
+      {
+        "bytes": startBytes,
+      }
+    );
   }
 
   @override
@@ -67,7 +99,7 @@ class _WellnessCheckSettingsPageState extends State<WellnessCheckSettingsPage> {
           children: [
             SubsectionHeader(
               title: "Wellness Check Settings",
-              onBack: onBack,
+              onBack: onBackSave,
             ),
             Padding(
               padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
@@ -120,13 +152,15 @@ class _WellnessCheckSettingsPageState extends State<WellnessCheckSettingsPage> {
                   border: OutlineInputBorder(),
                 ),
                 items: const [
+                  DropdownMenuItem(value: "2", child: Text("2 minutes")),
+                  DropdownMenuItem(value: "5", child: Text("5 minutes")),
                   DropdownMenuItem(value: "30", child: Text("30 minutes")),
-                  DropdownMenuItem(value: "60", child: Text("60 minutes")),
-                  DropdownMenuItem(value: "120", child: Text("12 minutes")),
+                  DropdownMenuItem(value: "60", child: Text("1 hour")),
+                  DropdownMenuItem(value: "120", child: Text("2 hours")),
                 ],
                 onChanged: (value) {
                   setState(() {
-                    wellnessCheckInterval = value;    
+                    wellnessCheckInterval = value;
                   });
                 },
                 validator: (value) {

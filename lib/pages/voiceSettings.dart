@@ -417,16 +417,21 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
 
                     ScreenLoader.show(context);
 
+                    final prefs = await SharedPreferences.getInstance();
+                    final firstName = prefs.getString(PrefsNames.FIRST_NAME) ?? "";
+
                     var tts = await getTtsBytes('Wake word detected. Do you want me to continue contacting your emergency contacts and services?');
                     var ttsAccept = await getTtsBytes('Command accepted. Calling emergency services.');
                     var ttsReject = await getTtsBytes('Command cancelled.');
-                    var ttsPaired = await getTtsBytes('Device paired.'); // TODO: With name.
-                    var ttsUnpaired = await getTtsBytes('Device disconnected.');
+                    var ttsPaired = await getTtsBytes('The Wake alert device has connected successfully. Good day, Commander ${firstName}.');
+                    var ttsUnpaired = await getTtsBytes('Wake alert disconnected.');
                     var ttsWellnessCheck = await getTtsBytes('Hello. This is a wellness check from wake alert. Are you okay?');
                     var ttsNextCheck = await getTtsBytes('Command received. I will remind you in the next interval.');
                     var ttsWellnessNo = await getTtsBytes('Command received. Do you want me to contact your emergency contacts and services?');
                     var ttsWellnessNoResponse = await getTtsBytes('User has not responded. Do you want me to contact your emergency contacts and services?');
-                    var ttsVoiceSaved = await getTtsBytes('Voice settings updated.'); // TODO: With name.
+                    var ttsVoiceSaved = await getTtsBytes('Voice settings updated. Hello, Commander ${firstName}.');
+                    var ttsVoiceWellnessEnabled = await getTtsBytes('Wellness check enabled.');
+                    var ttsVoiceWellnessDisabled = await getTtsBytes('Wellness check disabled.');
 
                     debugPrint("Sending speech samples via Bluetooth LE...");
 
@@ -462,19 +467,26 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
                           'bytes': ttsNextCheck,
                         },
                         {
-                          'name': 'wake_word_wellness_no.mp3',
+                          'name': 'wake_wellness_user_no.mp3',
                           'bytes': ttsWellnessNo,
                         },
                         {
-                          'name': 'wake_word_wellness_no_response.mp3',
+                          'name': 'wake_wellness_no_response.mp3',
                           'bytes': ttsWellnessNoResponse,
                         },
                         {
-                          'name': 'wake_word_voice_settings.mp3',
+                          'name': 'wake_voice_settings.mp3',
                           'bytes': ttsVoiceSaved,
                         },
+                        {
+                          'name': 'wellness_enabled.mp3',
+                          'bytes': ttsVoiceWellnessEnabled,
+                        },
+                        {
+                          'name': 'wellness_disabled.mp3',
+                          'bytes': ttsVoiceWellnessDisabled,
+                        },
                       ],
-                      'onFinish': 'hideScreen'
                     });
                   },
                 ),

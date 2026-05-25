@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -9,10 +10,12 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:pro_mpack/pro_mpack.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'dart:typed_data';
 
 import 'package:wakealert/components/screenLoader.dart';
+import 'package:wakealert/prefs_names.dart' as PrefsNames;
 
 const _notificationChannelId = 'ble_foreground_channel';
 const _notificationId = 1001;
@@ -202,6 +205,19 @@ Future<void> _runBleConnection(
 
   device.cancelWhenDisconnected(charSub);
 
+  final prefs = await SharedPreferences.getInstance();
+
+  final checkInterval = prefs.getInt(PrefsNames.WELLNESS_CHECK_INTERVAL) ?? 60;
+  final checkEnabled = prefs.getBool(PrefsNames.WELLNESS_CHECK_ENABLED) ?? false;
+
+  final Uint8List startBytes = serialize([
+    10,
+    checkEnabled,
+    checkInterval
+  ]);
+
+  await writeChar!.write(startBytes, withoutResponse: false);
+
   await targetChar.setNotifyValue(true);
 
   service.on('bleWrite').listen((data) async {
@@ -253,6 +269,11 @@ void _onDataReceived(
   FlutterLocalNotificationsPlugin notifications,
 ) {
   debugPrint('[BLE] Received ${bytes.length} bytes: $bytes');
+  final String distressData = "Distress signal";
+
+  if (utf8.decode(bytes) == distressData) {
+    debugPrint("Distress signal received.");
+  }
 
   // Forward the raw bytes to the UI isolate as a hex string list
   final hex = bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).toList();
@@ -309,10 +330,10 @@ Future<void> sendBlobTransfer(
   String blobName,
   Uint8List data, {
   int? forcedMaxPayload,
-  Duration interChunkDelay = const Duration(milliseconds: 70),
+  //Duration interChunkDelay = const Duration(milliseconds: 70),
 }) async {
   // ── 1. Negotiate MTU ────────────────────────────────────────────────────
-  await device.requestMtu(512);
+  await device.requestMtu(400);
   await Future.delayed(const Duration(milliseconds: 500));
 
   final int actualMtu = await device.mtu.first;
@@ -417,14 +438,23 @@ Future<void> sendBlobTransfer(
       chunk,
     ]);
 
-    try {
-      await characteristic.write(
-        chunkBytes,
-        withoutResponse: false,
-      );
-    } catch (e) {
-      debugPrint('[BLE] Chunk $i write failed: $e');
-      rethrow;
+    final retries = 30;
+
+    for (var i = 0; i < retries; i++) {
+      try {
+        await characteristic.write(
+          chunkBytes,
+          withoutResponse: false,
+        );
+        break;
+      } catch (e) {
+        debugPrint('[BLE Write Fail] Chunk $i write failed: $e');
+        if (i + 1 >= retries) {
+          rethrow;
+        }
+        debugPrint("[BLE Retrying] Retrying..................");
+        await Future.delayed(const Duration(milliseconds: 5000));
+      }
     }
 
     debugPrint(
@@ -432,9 +462,9 @@ Future<void> sendBlobTransfer(
       'payload=${chunk.length} | wire=${chunkBytes.length}',
     );
 
-    if (interChunkDelay > Duration.zero && i < numChunks - 1) {
-      await Future.delayed(interChunkDelay);
-    }
+    //if (interChunkDelay > Duration.zero && i < numChunks - 1) {
+    //  await Future.delayed(interChunkDelay);
+    //}
   }
 
   debugPrint('[BLE] Blob transfer complete: "$blobName"');

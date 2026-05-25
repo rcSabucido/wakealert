@@ -34,3 +34,6 @@ const VOICE_ACCENT = "voiceAccent";
 const VOICE_NAME = "voiceName";
 const VOICE_SPEED = "voiceSpeed";
 const VOICE_PITCH = "voicePitch";
+
+const WELLNESS_CHECK_ENABLED = "wellnessCheckEnabled";
+const WELLNESS_CHECK_INTERVAL = "wellnessCheckInterval";
