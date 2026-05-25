@@ -8,6 +8,7 @@ import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:geolocator/geolocator.dart';
 
 import 'package:pro_mpack/pro_mpack.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,6 +17,7 @@ import 'dart:typed_data';
 
 import 'package:wakealert/components/screenLoader.dart';
 import 'package:wakealert/prefs_names.dart' as PrefsNames;
+import 'package:wakealert/services/alert_service.dart';
 
 const _notificationChannelId = 'ble_foreground_channel';
 const _notificationId = 1001;
@@ -273,6 +275,20 @@ void _onDataReceived(
 
   if (utf8.decode(bytes) == distressData) {
     debugPrint("Distress signal received.");
+
+    final LocationSettings locationSettings = LocationSettings(
+      accuracy: LocationAccuracy.high,
+      distanceFilter: 100,
+    );
+
+    Geolocator.getCurrentPosition(locationSettings: locationSettings).then((position) async {
+      final prefs = await SharedPreferences.getInstance();
+      await AlertService.addAlert(
+        victimId: prefs.getInt(PrefsNames.VICTIM_ID)!,
+        latitude: position.latitude,   
+        longitude: position.longitude,   
+      );
+    });
   }
 
   // Forward the raw bytes to the UI isolate as a hex string list
