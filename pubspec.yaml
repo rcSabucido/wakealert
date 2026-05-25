@@ -51,6 +51,8 @@ dependencies:
   drift: ^2.33.0
   sqlite3: ^3.3.1
   dio: ^5.9.2
+  geolocator: ^14.0.2
+  flutter_sms: ^3.0.1
 
 dev_dependencies:
   flutter_test:

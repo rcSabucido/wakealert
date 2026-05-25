@@ -1,4 +1,8 @@
+import 'dart:async';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:wakealert/components/screenLoader.dart';
 import 'package:wakealert/components/settingsRedirect.dart';
 import 'package:wakealert/components/subsectionHeader.dart';
 import 'package:wakealert/components/labeledDropdown.dart';
@@ -99,6 +103,7 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
   Iterable<Voice> voices = <Voice>[];
 
   late AudioPlayer player = AudioPlayer();
+  StreamSubscription? _dataSub;
 
   @override
   void initState() {
@@ -129,6 +134,12 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
         voicePitchSelection = {prefs.getString(PrefsNames.VOICE_PITCH) ?? "+0Hz"};
       });
     });
+
+    _dataSub = FlutterBackgroundService().on('batchTransferFinished').listen((event) {
+      setState(() {
+        ScreenLoader.hide();
+      });
+    });
   }
 
   void loadSpecificVoices() async {
@@ -156,6 +167,20 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
   }
 
   _VoiceSettingsPageState(this.onBack);
+
+  Future<Uint8List> getTtsBytes(String text) async {
+      var tts = Communicate(
+        text: text,
+        voice: voiceName ?? 'en-PH-JamesNeural',
+        rate: voiceSpeedSelection.first,
+        pitch: voicePitchSelection.first,
+        volume: '+20%',
+      );
+
+      debugPrint("TTS - Fetching sample");
+
+      return await tts.toBytes();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -388,34 +413,68 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
               child: FullWidthButton(
                   text: "Temporary Debug Button",
                   onPressed: () async {
-                    debugPrint('=== Fetching example speech ===');
+                    debugPrint('=== Fetching speeches ===');
 
-                    final tts = Communicate(
-                      text: 'Wake word detected. Do you want me to continue contacting your emergency contacts and emergency services?',
-                      voice: voiceName ?? 'en-PH-JamesNeural',
-                      rate: voiceSpeedSelection.first,
-                      pitch: voicePitchSelection.first,
-                      volume: '+20%',
-                    );
+                    ScreenLoader.show(context);
 
-                    debugPrint("TTS - Fetching sample");
-
-                    final bytes = await tts.toBytes();
-
-                    //final source = BytesSource(bytes, mimeType: "audio/mpeg");
-
-                    /*
-                    debugPrint("TTS Player - Setting source");
-                    await player.setSource(source);
-                    debugPrint("TTS Player - Resuming player");
-                    await player.resume();
-                    */
+                    var tts = await getTtsBytes('Wake word detected. Do you want me to continue contacting your emergency contacts and services?');
+                    var ttsAccept = await getTtsBytes('Command accepted. Calling emergency services.');
+                    var ttsReject = await getTtsBytes('Command cancelled.');
+                    var ttsPaired = await getTtsBytes('Device paired.'); // TODO: With name.
+                    var ttsUnpaired = await getTtsBytes('Device disconnected.');
+                    var ttsWellnessCheck = await getTtsBytes('Hello. This is a wellness check from wake alert. Are you okay?');
+                    var ttsNextCheck = await getTtsBytes('Command received. I will remind you in the next interval.');
+                    var ttsWellnessNo = await getTtsBytes('Command received. Do you want me to contact your emergency contacts and services?');
+                    var ttsWellnessNoResponse = await getTtsBytes('User has not responded. Do you want me to contact your emergency contacts and services?');
+                    var ttsVoiceSaved = await getTtsBytes('Voice settings updated.'); // TODO: With name.
 
                     debugPrint("Sending speech samples via Bluetooth LE...");
 
-                    FlutterBackgroundService().invoke('blobTransfer', {
-                      'name': 'wake_word_detected.mp3',
-                      'bytes': bytes,
+                    FlutterBackgroundService().invoke('blobTransferBatch', 
+                      {
+                        "data": [
+                        {
+                          'name': 'wake_word_detected.mp3',
+                          'bytes': tts,
+                        },
+                        {
+                          'name': 'wake_word_accepted.mp3',
+                          'bytes': ttsAccept,
+                        },
+                        {
+                          'name': 'wake_word_rejected.mp3',
+                          'bytes': ttsReject,
+                        },
+                        {
+                          'name': 'wake_word_paired.mp3',
+                          'bytes': ttsPaired,
+                        },
+                        {
+                          'name': 'wake_word_unpaired.mp3',
+                          'bytes': ttsUnpaired,
+                        },
+                        {
+                          'name': 'wake_word_check.mp3',
+                          'bytes': ttsWellnessCheck,
+                        },
+                        {
+                          'name': 'wake_word_next_check.mp3',
+                          'bytes': ttsNextCheck,
+                        },
+                        {
+                          'name': 'wake_word_wellness_no.mp3',
+                          'bytes': ttsWellnessNo,
+                        },
+                        {
+                          'name': 'wake_word_wellness_no_response.mp3',
+                          'bytes': ttsWellnessNoResponse,
+                        },
+                        {
+                          'name': 'wake_word_voice_settings.mp3',
+                          'bytes': ttsVoiceSaved,
+                        },
+                      ],
+                      'onFinish': 'hideScreen'
                     });
                   },
                 ),

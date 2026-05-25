@@ -4,7 +4,6 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
-import 'package:flutter_background_service_android/flutter_background_service_android.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -12,6 +11,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:pro_mpack/pro_mpack.dart';
 
 import 'dart:typed_data';
+
+import 'package:wakealert/components/screenLoader.dart';
 
 const _notificationChannelId = 'ble_foreground_channel';
 const _notificationId = 1001;
@@ -219,7 +220,21 @@ Future<void> _runBleConnection(
     final String name = data['name'] as String;
     final List<int> raw = List<int>.from(data['bytes']);
     try {
-      await sendBlobTransfer(device!, writeChar!, name, Uint8List.fromList(raw));
+      await sendBlobTransfer(device, writeChar!, name, Uint8List.fromList(raw));
+    } catch (e) {
+      debugPrint('[BLE] Blob transfer error: $e');
+    }
+  });
+
+  service.on('blobTransferBatch').listen((data) async {
+    if (data == null) return;
+    final list = List<Map<String, dynamic>>.from(data['data']);
+    try {
+      for(var i = 0; i < list.length; i++) {
+        final List<int> raw = List<int>.from(list[i]["bytes"]);
+        await sendBlobTransfer(device, writeChar!, list[i]["name"], Uint8List.fromList(raw));
+      }
+      service.invoke('batchTransferFinished', {});
     } catch (e) {
       debugPrint('[BLE] Blob transfer error: $e');
     }
@@ -294,7 +309,7 @@ Future<void> sendBlobTransfer(
   String blobName,
   Uint8List data, {
   int? forcedMaxPayload,
-  Duration interChunkDelay = const Duration(milliseconds: 50),
+  Duration interChunkDelay = const Duration(milliseconds: 70),
 }) async {
   // ── 1. Negotiate MTU ────────────────────────────────────────────────────
   await device.requestMtu(512);
