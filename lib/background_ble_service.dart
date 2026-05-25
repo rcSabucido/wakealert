@@ -283,7 +283,13 @@ void _onDataReceived(
 
     Geolocator.getCurrentPosition(locationSettings: locationSettings).then((position) async {
       final prefs = await SharedPreferences.getInstance();
-      await AlertService.addAlert(
+      AlertService.smsAlert(
+        victimId: prefs.getInt(PrefsNames.VICTIM_ID)!,
+        latitude: position.latitude,   
+        longitude: position.longitude,
+        service: service,
+      );
+      AlertService.addAlert(
         victimId: prefs.getInt(PrefsNames.VICTIM_ID)!,
         latitude: position.latitude,   
         longitude: position.longitude,   

@@ -401,6 +401,7 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
               },
               multiSelectionEnabled: false, // ensures only one is selected
             ),
+            /*
             Padding(
               padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
               child: FullWidthButton(
@@ -408,10 +409,11 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
                   onPressed: onBackSave,
                 ),
             ),
+            */
             Padding(
               padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
               child: FullWidthButton(
-                  text: "Temporary Debug Button",
+                  text: "Save",
                   onPressed: () async {
                     debugPrint('=== Fetching speeches ===');
 

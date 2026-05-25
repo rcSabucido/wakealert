@@ -1,5 +1,8 @@
+import 'package:another_telephony/telephony.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_background_service/flutter_background_service.dart';
+import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wakealert/background_ble_service.dart';
 import 'package:wakealert/database/database.dart';
@@ -16,15 +19,18 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:wakealert/prefs_names.dart' as PrefsNames;
 
+final String? _emergencyNumber = dotenv.env['EMERGENCY_NUMBER'];
+  
 final appDb = AppDatabase();
 final outboxRepo = OutboxRepository(OutboxDao(appDb));
+final Telephony telephony = Telephony.instance;
 
 Future<void> main() async {
   debugPrint('Loading .env');
   await dotenv.load();
 
   final prefs = await SharedPreferences.getInstance();
-  prefs.setBool(PrefsNames.ONBOARDING_FINISHED, false);
+  //prefs.setBool(PrefsNames.ONBOARDING_FINISHED, false);
 
   final apiUrl = dotenv.env["API_URL"]!;
   final processor = OutboxProcessor(
@@ -182,6 +188,24 @@ class _AppScreenState extends State<AppScreen> {
     ContactsPage(),
     SettingsPage(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _listenForCalls();
+  }
+
+  void _listenForCalls() {
+    final service = FlutterBackgroundService();
+
+    // Listen for call requests from the background service
+    service.on('triggerCall').listen((data) async {
+      final phone = data?['phone'] as String?;
+      if (phone != null) {
+        await FlutterPhoneDirectCaller.callNumber(phone);
+      }
+    });
+  }
 
   final List<GlobalKey<NavigatorState>> _navigatorKeys = [
     GlobalKey<NavigatorState>(),
