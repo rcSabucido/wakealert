@@ -138,9 +138,9 @@ Future<void> _runBleConnection(
   scanSub.cancel();
 
   if (targetDevice == null) {
-    _updateNotification(notifications, 'Device not found. Retrying in 30 s…');
+    _updateNotification(notifications, 'Device not found. Retrying in 3 s…');
     // Retry after a delay
-    await Future.delayed(const Duration(seconds: 30));
+    await Future.delayed(const Duration(seconds: 3));
     return _runBleConnection(service, notifications);
   }
 

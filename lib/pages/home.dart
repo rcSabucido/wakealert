@@ -3,7 +3,9 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:liquid_progress_indicator_v2/liquid_progress_indicator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simple_ripple_animation/simple_ripple_animation.dart';
+import 'package:wakealert/prefs_names.dart' as PrefsNames;
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -26,10 +28,24 @@ class _HomePageState extends State<HomePage> {
   StreamSubscription? _bleSub;
   int batteryPercentage = 75;
 
+  String firstName = "";
+  String lastName = "";
+
   @override
   void initState() {
     super.initState();
     _listenToState();
+    loadInfo();
+  }
+
+  void loadInfo() {
+    SharedPreferences.getInstance().then((prefs) {
+      setState(() {
+          firstName = prefs.getString(PrefsNames.FIRST_NAME) ?? "";
+          lastName = prefs.getString(PrefsNames.LAST_NAME) ?? "";
+        }
+      );
+    });
   }
 
   void _listenToState() {
@@ -88,17 +104,17 @@ class _HomePageState extends State<HomePage> {
                             shrinkWrap: true,
                             children: [
                               Text(
-                                "Welcome back,",
+                                "Welcome back.",
                                 style: TextStyle(fontSize: 12)
                                 ),
                                 SizedBox(height: 1),
-                              Text(
-                                "John Doe",
+                              firstName != "" ? Text(
+                                "${firstName} ${lastName}",
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 17,
-                                  ),
-                              )
+                                ),
+                              ) : Center(),
                             ],
                           ),
                         )
