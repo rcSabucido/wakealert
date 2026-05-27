@@ -124,10 +124,10 @@ class _HomePageState extends State<HomePage> {
                   Center(
                     child: Padding(
                       padding: const EdgeInsets.only(right: 40.0),
-                      child: CircleAvatar(
-                        radius: 22,
-                        backgroundColor: Colors.white,
-                        child: Icon(Icons.person, size: 22)
+                      child: Container(
+                        width: 56,
+                        height: 56,
+                        child: const Image(image: AssetImage('images/logo_white.png')),
                       ),
                     ),
                   )
@@ -140,7 +140,10 @@ class _HomePageState extends State<HomePage> {
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
-        child: Column(
+        child: 
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 40, horizontal: 40),
+              child: Column(
           // Column is also a layout widget. It takes a list of children and
           // arranges them vertically. By default, it sizes itself to fit its
           // children horizontally, and tries to be as tall as its parent.
@@ -156,7 +159,7 @@ class _HomePageState extends State<HomePage> {
           // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(_isPaired ? "Your WakeAlert device has paired successfully" : "Pair your WakeAlert device to your Bluetooth",
+            Text(_isPaired ? "Your WakeAlert device has paired successfully." : "Pair your WakeAlert device to your Bluetooth WakeAlert device.",
             textAlign: TextAlign.center,
             style: const TextStyle(
               fontWeight: FontWeight.bold,
@@ -239,6 +242,7 @@ class _HomePageState extends State<HomePage> {
             )
           ],
         ),
+      ),
       ),
     );
   }
