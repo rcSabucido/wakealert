@@ -55,7 +55,6 @@ class AlertService {
       });
 
       debugPrint("Trying to call: ${loaded.first.phoneNumber}");
-      //await FlutterPhoneDirectCaller.callNumber(loaded.first.phoneNumber);
       service.invoke('triggerCall', {'phone': loaded.first.phoneNumber});
 
   }

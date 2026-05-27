@@ -49,21 +49,38 @@ class _MedicalInformationPageState extends State<MedicalInformationPage> {
 
   void _loadMedicalInfo() {
     SharedPreferences.getInstance().then((prefs) {
-      _loadContactsState(prefs);
+      _loadMedicalState(prefs);
     });
   }
 
-  void _loadContactsState(SharedPreferences prefs) {
+  void _loadMedicalState(SharedPreferences prefs) {
     debugPrint("Medical info sharedprefs loaded");
 
+    final _allergies = prefs.getStringList(PrefsNames.ALLERGIES)!;
+    final _medication = prefs.getStringList(PrefsNames.MEDICATION)!;
+    final _medicalHistory = prefs.getStringList(PrefsNames.MEDICAL_HISTORY)!;
+    final _lastDiagnosisOption = prefs.getString(PrefsNames.LAST_DIAGNOSIS);
+    final _lastDiagnosisDate = prefs.getString(PrefsNames.LAST_DIAGNOSIS_DATE);
+    final _hospital = prefs.getString(PrefsNames.PLACE_OF_DIAGNOSIS);
+    final _medicalNotes = prefs.getString(PrefsNames.MEDICAL_NOTES) ?? "";
+
+    debugPrint("_loadMedicalState details:");
+    debugPrint("allergies: ${_allergies}");
+    debugPrint("medication: ${_medication}");
+    debugPrint("medicalHistory: ${_medicalHistory}");
+    debugPrint("lastDiagnosisOption: ${_lastDiagnosisOption}");
+    debugPrint("lastDiagnosisDate: ${_lastDiagnosisDate}");
+    debugPrint("hospital: ${_hospital}");
+    debugPrint("medicalNotes: ${_medicalNotes}");
+
     setState(() {
-      allergies = prefs.getStringList(PrefsNames.ALLERGIES)!;
-      medication = prefs.getStringList(PrefsNames.MEDICATION)!;
-      medicalHistory = prefs.getStringList(PrefsNames.MEDICAL_HISTORY)!;
-      lastDiagnosisOption = prefs.getString(PrefsNames.LAST_DIAGNOSIS);
-      lastDiagnosisDate = prefs.getString(PrefsNames.LAST_DIAGNOSIS_DATE);
-      hospital = prefs.getString(PrefsNames.PLACE_OF_DIAGNOSIS);
-      medicalNotesController.text = prefs.getString(PrefsNames.MEDICAL_NOTES) ?? "";
+      allergies = _allergies;
+      medication = _medication;
+      medicalHistory = _medicalHistory;
+      lastDiagnosisOption = _lastDiagnosisOption;
+      lastDiagnosisDate = _lastDiagnosisDate;
+      hospital = _hospital;
+      medicalNotesController.text = _medicalNotes;
     });
   }
 
@@ -163,7 +180,8 @@ class _MedicalInformationPageState extends State<MedicalInformationPage> {
               hospital: hospital,
               selected: lastDiagnosisOption != null &&
               medicalHistory.contains(lastDiagnosisOption) ?
-              lastDiagnosisOption : medicalHistory[0],
+              // Null check to prevent crashing after signing up.
+              lastDiagnosisOption : medicalHistory.length > 0 ? medicalHistory[0] : null,
               onChanged: (resultMap) {
                 setState(() {
                   if (resultMap.containsKey("lastDiagnosis")) {
