@@ -17,6 +17,7 @@ import 'package:wakealert/pages/home.dart';
 import 'package:wakealert/pages/onboarding.dart';
 import 'package:wakealert/pages/settings.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:wakealert/pages/viewInformation.dart';
 
 import 'package:wakealert/prefs_names.dart' as PrefsNames;
 
@@ -84,8 +85,13 @@ class MyApp extends StatelessWidget {
         colorScheme: .fromSeed(seedColor: const Color(0xFFFF6961)),
       ),
       routes: {
-        '/onboarding': (_) => const OnboardingPage(),
-        '/home':      (_) => const AppScreen(title: 'Flutter Demo Home Page'),
+        '/onboarding':  (_) => const OnboardingPage(),
+        '/alert':       (_) => ViewInformationPage(onBack: () {
+            final service = FlutterBackgroundService();
+            service.invoke('navigateTo', {'route': "/home"});
+          },
+        ),
+        '/home':        (_) => const AppScreen(title: 'Flutter Demo Home Page'),
       },
     );
   }
@@ -212,9 +218,15 @@ class _AppScreenState extends State<AppScreen> {
 
     // Listen for call requests from the background service
     service.on('triggerCall').listen((data) async {
-      final phone = data?['phone'] as String?;
+      final phone = data ? ['phone'] as String?;
       if (phone != null) {
         await FlutterPhoneDirectCaller.callNumber(phone);
+      }
+    });
+    service.on('navigateTo').listen((event) {
+      final route = event ? ['route'] as String?;
+      if (route != null && mounted) {
+        Navigator.of(context).pushNamed(route);
       }
     });
   }

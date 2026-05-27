@@ -2,6 +2,7 @@
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'package:wakealert/services/psgc_parser.dart';
 
 /// Immutable Region
 class Region {
@@ -117,6 +118,31 @@ class PsgcClient {
     final list = jsonDecode(resp.body) as List;
     return list.map((e) => Barangay.fromJson(e)).toList();
   }
+
+  Future<String> fullAddress(
+    String barangayPsgc,
+  ) async {
+    final regionCode      = PsgcParser.region(barangayPsgc);
+    final provinceHucCode = PsgcParser.provinceOrHuc(barangayPsgc);
+    final cityMunCode     = PsgcParser.cityOrMun(barangayPsgc);
+
+    final regionF   = fetchRegions();
+    final provinceF = fetchProvinces(regionCode);
+    final cityF     = fetchCities(provinceHucCode);
+    final barangayF = fetchBarangays(cityMunCode);
+
+    final regions    = await regionF;
+    final provinces  = await provinceF;
+    final cities     = await cityF;
+    final barangays  = await barangayF;
+
+    final region   = regions.firstWhere((r) => r.regionPsgc == regionCode);
+    final province = provinces.firstWhere((p) => p.provinceOrHucPsgc == provinceHucCode);
+    final city     = cities.firstWhere((c) => c.cityMunPsgc == cityMunCode);
+    final barangay = barangays.firstWhere((b) => b.barangayPsgc == barangayPsgc);
+
+    return '${barangay.barangayName}, ${city.cityMunName}, ${province.provinceOrHucName}, ${region.regionName}';
+}
 
   void close() => _client.close();
 }

@@ -1,25 +1,9 @@
 import 'package:flutter/material.dart';
 
 class MedicalHistoryModalPage extends StatelessWidget {
-  final List<String> initialSelection;
+  final List<String> historyOptions;
 
-  const MedicalHistoryModalPage({super.key, required this.initialSelection});
-
-  // These are now just the items to be displayed
-  final List<String> historyOptions = const [
-    "Diabetes (Type 2)", 
-    "Asthma", 
-    "Hypertension", 
-    "High Blood Pressure", 
-    "Osteoporosis", 
-    "Arthritis",
-    "Heart Disease",
-    "Thyroid Disorder",
-    "Chronic Kidney Disease",
-    "Anemia",
-    "Epilepsy",
-    "High Cholesterol"
-  ];
+  const MedicalHistoryModalPage({super.key, required this.historyOptions});
 
   @override
   Widget build(BuildContext context) {

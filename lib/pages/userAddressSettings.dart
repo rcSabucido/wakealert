@@ -97,7 +97,7 @@ class _UserAddressSettingsPageState extends State<UserAddressSettingsPage> {
   }
 
   void onBackSave() {
-    SharedPreferences.getInstance().then((prefs) {
+    SharedPreferences.getInstance().then((prefs) async {
       final addressLineList = [
         blkAndLotController.text,
         streetController.text,
@@ -118,6 +118,16 @@ class _UserAddressSettingsPageState extends State<UserAddressSettingsPage> {
         prefs.setString(PrefsNames.CITY_MUN, cityMunOption!);
         prefs.setString(PrefsNames.BARANGAY, barangayOption!);
 
+        final fullAddressF = await PsgcClient().fullAddress(barangayOption!);
+        final fullAddress = fullAddressF.trim();
+        var addressLine = fullAddressLine.replaceAll(addressLineSeparator, " ");
+        debugPrint("address Line: ${addressLine}");
+        if (addressLine.isNotEmpty && fullAddress.isNotEmpty) {
+          addressLine += ", ";
+        }
+        addressLine += fullAddress;
+
+        prefs.setString(PrefsNames.FULL_ADDRESS, addressLine);
 
         VictimService.enqueueUpdateAddressLine(
           context: context,

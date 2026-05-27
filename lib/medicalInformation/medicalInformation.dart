@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_background_service/flutter_background_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wakealert/medicalInformation/lastDiagnosis.dart';
 import 'package:wakealert/medicalInformation/allergies.dart';
 import 'package:wakealert/medicalInformation/medicalHistory.dart';
 import 'package:wakealert/medicalInformation/currentMedication.dart';
+import 'package:wakealert/prefs_names.dart' as PrefsNames;
 
 class MedicalInfoScreen extends StatefulWidget {
   const MedicalInfoScreen({super.key});
@@ -12,17 +15,49 @@ class MedicalInfoScreen extends StatefulWidget {
 }
 
 class _MedicalInfoScreenState extends State<MedicalInfoScreen> {
-  List<String> selectedDiagnosis = ["Diabetes (Type 2)"];
-  List<String> selectedAllergies = ["Eczema", "Anaphylaxis"];
-  List<String> selectedHistory = ["Diabetes (Type 2)", "Asthma", "Hypertension"];
-  List<String> selectedMedications = ["Insulin", "Penicillin", "Morphine", "Metformin"];
+  List<String> selectedDiagnosis = [];
+  List<String>? selectedAllergies;
+  List<String>? selectedHistory;
+  List<String>? selectedMedications;
+
+  String? diagnosisDate;
+  String? hospital;
+  String? medicalNotes;
+
+  bool _otherPressed = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _loadInfo();
+  }
+
+  void _loadInfo() {
+    SharedPreferences.getInstance().then((prefs) {
+      setState(() {
+        selectedAllergies = prefs.getStringList(PrefsNames.ALLERGIES);
+        selectedMedications = prefs.getStringList(PrefsNames.MEDICATION);
+        selectedHistory = prefs.getStringList(PrefsNames.MEDICAL_HISTORY);
+
+        final _sd = prefs.getString(PrefsNames.LAST_DIAGNOSIS);
+        if (_sd != null) {
+          selectedDiagnosis = [_sd];
+        }
+
+        diagnosisDate = prefs.getString(PrefsNames.LAST_DIAGNOSIS_DATE);
+        hospital = prefs.getString(PrefsNames.PLACE_OF_DIAGNOSIS);
+        medicalNotes = prefs.getString(PrefsNames.MEDICAL_NOTES) ?? "";
+      });
+    });
+  }
 
   //  NAVIGATION FUNCTIONS
   void _showDiagnosisPicker() {
     Navigator.push(
       context,
       PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => DiagnosisModalPage(initialSelection: selectedDiagnosis),
+        pageBuilder: (context, animation, secondaryAnimation) => DiagnosisModalPage(diagnosisOption: selectedDiagnosis ?? []),
         transitionDuration: Duration.zero,
         reverseTransitionDuration: Duration.zero,
       ),
@@ -33,7 +68,7 @@ class _MedicalInfoScreenState extends State<MedicalInfoScreen> {
     Navigator.push(
       context,
       PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => AllergiesModalPage(initialSelection: selectedAllergies),
+        pageBuilder: (context, animation, secondaryAnimation) => AllergiesModalPage(allergyOptions: selectedAllergies ?? []),
         transitionDuration: Duration.zero,
         reverseTransitionDuration: Duration.zero,
       ),
@@ -44,7 +79,7 @@ class _MedicalInfoScreenState extends State<MedicalInfoScreen> {
     Navigator.push(
       context,
       PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => MedicalHistoryModalPage(initialSelection: selectedHistory),
+        pageBuilder: (context, animation, secondaryAnimation) => MedicalHistoryModalPage(historyOptions: selectedHistory ?? []),
         transitionDuration: Duration.zero,
         reverseTransitionDuration: Duration.zero,
       ),
@@ -55,7 +90,7 @@ class _MedicalInfoScreenState extends State<MedicalInfoScreen> {
     Navigator.push(
       context,
       PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => CurrentMedicationModalPage(initialSelection: selectedMedications),
+        pageBuilder: (context, animation, secondaryAnimation) => CurrentMedicationModalPage(medicationOptions: selectedMedications ?? []),
         transitionDuration: Duration.zero,
         reverseTransitionDuration: Duration.zero,
       ),
@@ -75,8 +110,14 @@ class _MedicalInfoScreenState extends State<MedicalInfoScreen> {
               child: Row(
                 children: [
                   Expanded(
-                    child: GestureDetector(
-                      onTap: () => Navigator.pop(context),
+                    child: Listener(
+                      onPointerDown: (_) {
+                        if (_otherPressed) {
+                          Navigator.popUntil(context, ModalRoute.withName('/home'));
+                          return;
+                        }
+                        Navigator.pop(context);
+                      },
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 18),
                         decoration: BoxDecoration(color: Colors.blueGrey[200]),
@@ -88,12 +129,17 @@ class _MedicalInfoScreenState extends State<MedicalInfoScreen> {
                   ),
                   const SizedBox(width: 3),
                   Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 18),
-                      decoration: const BoxDecoration(color: Color(0xFFEF5350)),
-                      child: const Text("MEDICAL\nINFORMATION",
-                          textAlign: TextAlign.right,
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 25)),
+                    child: Listener(
+                      onPointerDown: (_) => setState(() => _otherPressed = true),
+                      onPointerUp: (_) => setState(() => _otherPressed = false),
+                      onPointerCancel: (_) => setState(() => _otherPressed = false),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 18),
+                        decoration: const BoxDecoration(color: Color(0xFFEF5350)),
+                        child: const Text("MEDICAL\nINFORMATION",
+                            textAlign: TextAlign.right,
+                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 25)),
+                      ),
                     ),
                   ),
                 ],
@@ -129,11 +175,11 @@ class _MedicalInfoScreenState extends State<MedicalInfoScreen> {
                                   ),
                                 ),
                                 const SizedBox(width: 10),
-                                const Expanded(
+                                Expanded(
                                   flex: 2,
                                   child: InfoTile(
                                     label: "Diagnosis Date",
-                                    value: "YYYY-MM-DD",
+                                    value: diagnosisDate ?? "",
                                     showIcon: true, // Keep true for alignment
                                     hideIconVisually: true, // New property to hide it
                                   ),
@@ -149,11 +195,11 @@ class _MedicalInfoScreenState extends State<MedicalInfoScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    _buildDynamicGridSection("Allergies", selectedAllergies, true, _openAllergiesPicker),
+                    _buildDynamicGridSection("Allergies", selectedAllergies ?? [], true, _openAllergiesPicker),
                     const SizedBox(height: 16),
-                    _buildDynamicGridSection("Medical History", selectedHistory, true, _openHistoryPicker),
+                    _buildDynamicGridSection("Medical History", selectedHistory ?? [], true, _openHistoryPicker),
                     const SizedBox(height: 16),
-                    _buildDynamicGridSection("Current Medication", selectedMedications, true, _openMedicationPicker),
+                    _buildDynamicGridSection("Current Medication", selectedMedications ?? [], true, _openMedicationPicker),
                     const SizedBox(height: 30),
                   ],
                 ),

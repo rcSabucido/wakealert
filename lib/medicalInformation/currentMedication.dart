@@ -1,15 +1,9 @@
 import 'package:flutter/material.dart';
 
 class CurrentMedicationModalPage extends StatelessWidget {
-  final List<String> initialSelection;
+  final List<String> medicationOptions;
 
-  const CurrentMedicationModalPage({super.key, required this.initialSelection});
-
-  final List<String> medicationOptions = const [
-    "Insulin", "Penicillin", "Morphine", "Vicodin", "Percocet", "Metformin",
-    "Amlodipine", "Atorvastatin", "Albuterol", "Omeprazole", "Losartan",
-    "Gabapentin", "Levothyroxine"
-  ];
+  const CurrentMedicationModalPage({super.key, required this.medicationOptions});
 
   @override
   Widget build(BuildContext context) {

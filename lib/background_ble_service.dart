@@ -294,6 +294,7 @@ void _onDataReceived(
         latitude: position.latitude,   
         longitude: position.longitude,   
       );
+      service.invoke('navigateTo', {'route': "/alert"});
     });
   }
 
