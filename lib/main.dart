@@ -2,6 +2,7 @@ import 'package:another_telephony/telephony.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
+import 'package:flutter_libphonenumber/flutter_libphonenumber.dart' as Flutterlibphonenumber;
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wakealert/background_ble_service.dart';
@@ -28,6 +29,7 @@ final Telephony telephony = Telephony.instance;
 Future<void> main() async {
   debugPrint('Loading .env');
   await dotenv.load();
+  await Flutterlibphonenumber.init();
 
   final prefs = await SharedPreferences.getInstance();
   //prefs.setBool(PrefsNames.ONBOARDING_FINISHED, false);
