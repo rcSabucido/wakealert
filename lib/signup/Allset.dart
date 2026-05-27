@@ -78,6 +78,11 @@ class AllSetPage extends StatelessWidget {
                 ),
                 onPressed: () async {
                   if (fromLogin) {
+                    final prefs = await SharedPreferences.getInstance();
+                    debugPrint('Starting ble service');
+                    initBackgroundBleService();
+
+                    prefs.setBool(PrefsNames.ONBOARDING_FINISHED, true);
                     Navigator.of(context).pushReplacementNamed('/home');
                     return;
                   }

@@ -32,7 +32,6 @@ Future<void> main() async {
   await Flutterlibphonenumber.init();
 
   final prefs = await SharedPreferences.getInstance();
-  prefs.setBool(PrefsNames.ONBOARDING_FINISHED, false);
 
   final apiUrl = dotenv.env["API_URL"]!;
   final processor = OutboxProcessor(
@@ -185,11 +184,22 @@ class _AppScreenState extends State<AppScreen> {
   int _currentIndex = 0;
 
   // List of widgets for each page
-  final List<Widget> _pages = [
+  late final List<Widget> _pages = [
     HomePage(),
     ContactsPage(),
-    SettingsPage(),
+    SettingsPage(onSignOut: () => _signOut()),
   ];
+
+  void _signOut() async {
+    await outboxRepo.flushQueue();
+    final service = FlutterBackgroundService();
+    service.invoke('stopService');
+
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setBool(PrefsNames.ONBOARDING_FINISHED, false);
+
+    Navigator.pushNamedAndRemoveUntil(context, '/onboarding', ModalRoute.withName('/'));
+  }
 
   @override
   void initState() {

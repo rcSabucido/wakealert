@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_background_service/flutter_background_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wakealert/components/fullWidthHeader.dart';
 import 'package:wakealert/components/fullWidthIconButton.dart';
+import 'package:wakealert/main.dart';
 import 'package:wakealert/pages/settingsInformation.dart';
 import 'package:wakealert/pages/viewInformation.dart';
 import 'package:wakealert/pages/voiceSettings.dart';
 import 'package:wakealert/pages/wellnessCheckSettings.dart';
+import 'package:wakealert/prefs_names.dart' as PrefsNames;
 
 class SettingsPage extends StatefulWidget {
-  const SettingsPage({super.key});
+  final VoidCallback onSignOut;
+
+  const SettingsPage({super.key, required this.onSignOut});
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -114,6 +120,13 @@ class _SettingsPageState extends State<SettingsPage> {
                     context,
                     MaterialPageRoute(builder: (context) => _pages[2]),
                 );
+              },
+            ),
+            FullWidthIconButton(
+              text: "Sign Out",
+              icon: Icons.door_sliding_sharp,
+              onPressed: () async {
+                widget.onSignOut();
               },
             ),
           ],

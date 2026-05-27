@@ -207,15 +207,13 @@ class _LoginPageState extends State<LoginPage> {
                         prefs.setString(PrefsNames.VOICE_SPEED, "+0%");
                         prefs.setString(PrefsNames.VOICE_PITCH, "+0Hz");
 
-                        debugPrint('Starting ble service');
-                        initBackgroundBleService();
-
-                        prefs.setBool(PrefsNames.ONBOARDING_FINISHED, true);
-
                         final locationStatus = await Permission.locationAlways.status;
                         final btStatus  = await Permission.bluetoothScan.status;
+                        final smsStatus = await Permission.sms.status;
+                        final callingStatus  = await Permission.phone.status;
 
-                        if (locationStatus.isDenied || btStatus.isDenied) {
+                        if (locationStatus.isDenied || btStatus.isDenied ||
+                            smsStatus.isDenied || callingStatus.isDenied) {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -223,6 +221,11 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           );
                         } else {
+                          debugPrint('Starting ble service');
+                          initBackgroundBleService();
+
+                          prefs.setBool(PrefsNames.ONBOARDING_FINISHED, true);
+
                           Navigator.of(context).pushReplacementNamed('/home');
                         }
                       } else {

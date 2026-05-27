@@ -4,12 +4,16 @@ class FullWidthIconButton extends StatelessWidget {
   final String text;
   final IconData icon;
   final VoidCallback onPressed;
+  final Color? backgroundColor;
+  final Color? foregroundColor;
 
   const FullWidthIconButton({
     Key? key,
     required this.text,
     required this.icon,
     required this.onPressed,
+    this.backgroundColor,
+    this.foregroundColor
   }) : super(key: key);
 
   @override
@@ -20,8 +24,8 @@ class FullWidthIconButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFFFF6961),
-          foregroundColor: Colors.white,
+          backgroundColor: backgroundColor ?? const Color(0xFFFF6961),
+          foregroundColor: foregroundColor ?? Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
