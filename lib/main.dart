@@ -32,7 +32,7 @@ Future<void> main() async {
   await Flutterlibphonenumber.init();
 
   final prefs = await SharedPreferences.getInstance();
-  //prefs.setBool(PrefsNames.ONBOARDING_FINISHED, false);
+  prefs.setBool(PrefsNames.ONBOARDING_FINISHED, false);
 
   final apiUrl = dotenv.env["API_URL"]!;
   final processor = OutboxProcessor(

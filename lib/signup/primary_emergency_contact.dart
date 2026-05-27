@@ -173,7 +173,7 @@ class _PrimaryEmergencyContactState extends State<PrimaryEmergencyContact> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const OnboardingPermissions(),
+                        builder: (context) => const OnboardingPermissions(fromLogin: false),
                       ),
                     );
                   }

@@ -3,7 +3,9 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:wakealert/signup/Allset.dart';
 
 class OnboardingPermissions extends StatefulWidget {
-  const OnboardingPermissions({super.key});
+  final bool fromLogin;
+
+  const OnboardingPermissions({super.key, required this.fromLogin});
 
   @override
   State<OnboardingPermissions> createState() => _OnboardingPermissionsState();
@@ -12,6 +14,8 @@ class OnboardingPermissions extends StatefulWidget {
 class _OnboardingPermissionsState extends State<OnboardingPermissions> {
   bool _locationAllowed = false;
   bool _bluetoothAllowed = false;
+  bool _smsAllowed = false;
+  bool _callingAllowed = false;
   
   @override
   void initState() {
@@ -22,11 +26,15 @@ class _OnboardingPermissionsState extends State<OnboardingPermissions> {
   Future<void> _checkPermissions() async {
     final loc = await Permission.locationAlways.status;
     final bt  = await Permission.bluetoothScan.status;
+    final sms = await Permission.sms.status;
+    final call  = await Permission.phone.status;
 
     if (mounted) {
       setState(() {
         _locationAllowed  = loc.isGranted;
         _bluetoothAllowed = bt.isGranted;
+        _smsAllowed       = sms.isGranted;
+        _callingAllowed   = call.isGranted;
       });
     }
   }
@@ -89,6 +97,9 @@ class _OnboardingPermissionsState extends State<OnboardingPermissions> {
                       debugPrint("[Permissions] Permission.locationAlways not granted!");
                       return;
                     }
+                    setState(() {
+                      _locationAllowed = true;
+                    });
                   },
                   child: _locationAllowed
                       ? const Icon(Icons.check, color: Colors.white, size: 20)
@@ -139,7 +150,7 @@ class _OnboardingPermissionsState extends State<OnboardingPermissions> {
                       debugPrint("[Permissions] Permission.bluetooth not granted!");
                       return;
                     }
-                    setState(()  {
+                    setState(() {
                       _bluetoothAllowed = true;
                     });
                   },
@@ -150,11 +161,94 @@ class _OnboardingPermissionsState extends State<OnboardingPermissions> {
               ],
             ),
 
-             const Spacer(),
+            const SizedBox(height: 20),
 
+            // SMS Permission Row
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  "Send Text Messages",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(100, 40),
+                    backgroundColor: _smsAllowed
+                        ? Colors.redAccent
+                        : const Color(0xFFF4EEEE),
+                    foregroundColor: _smsAllowed
+                        ? Colors.white
+                        : const Color(0xFFFF6961),
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onPressed: () async {
+                    final status = await Permission.sms.request();
+                    print('sms status = $status');
+                    if (!status.isGranted) {
+                      debugPrint("[Permissions] Permission.sms not granted!");
+                      return;
+                    }
+                    setState(() {
+                      _smsAllowed = true;
+                    });
+                  },
+                  child: _smsAllowed
+                      ? const Icon(Icons.check, color: Colors.white, size: 20)
+                      : const Text("Allow", style: TextStyle(fontSize: 16)),
+                ),
+              ],
+            ),
 
-            // Thank you message appears only when both are allowed
-            if (_locationAllowed && _bluetoothAllowed) ...[
+            const SizedBox(height: 20),
+
+            // Calling Permission Row
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  "Make Calls",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(100, 40),
+                    backgroundColor: _callingAllowed
+                        ? Colors.redAccent
+                        : const Color(0xFFF4EEEE),
+                    foregroundColor: _callingAllowed
+                        ? Colors.white
+                        : const Color(0xFFFF6961),
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onPressed: () async {
+                    final status = await Permission.phone.request();
+                    print('phone status = $status');
+                    if (!status.isGranted) {
+                      debugPrint("[Permissions] Permission.phone not granted!");
+                      return;
+                    }
+                    setState(() {
+                      _callingAllowed = true;
+                    });
+                  },
+                  child: _callingAllowed
+                      ? const Icon(Icons.check, color: Colors.white, size: 20)
+                      : const Text("Allow", style: TextStyle(fontSize: 16)),
+                ),
+              ],
+            ),
+
+            const Spacer(),
+
+            // Thank you message appears only when all are allowed
+            if (_locationAllowed && _bluetoothAllowed && _smsAllowed && _callingAllowed) ...[
               const SizedBox(height: 0),
               const Text(
                 "Thank you! for your\nCooperation.",
@@ -204,14 +298,14 @@ class _OnboardingPermissionsState extends State<OnboardingPermissions> {
                   ),
                 ),
                 onPressed: () {
-                  if (_locationAllowed && _bluetoothAllowed) {
+                  if (_locationAllowed && _bluetoothAllowed && _callingAllowed && _locationAllowed) {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const AllSetPage()),
+                      MaterialPageRoute(builder: (context) => AllSetPage(fromLogin: widget.fromLogin)),
                     );
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Please allow both permissions to continue")),
+                      const SnackBar(content: Text("Please allow all permissions to continue")),
                     );
                   }
                 },

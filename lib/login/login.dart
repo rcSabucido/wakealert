@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:wakealert/background_ble_service.dart';
 import 'package:wakealert/models/contact.dart';
 import 'package:wakealert/outbox/outbox_provider.dart';
@@ -6,6 +7,7 @@ import 'package:wakealert/prefs_names.dart' as PrefsNames;
 import 'package:wakealert/services/contact_service.dart';
 import 'package:wakealert/services/psgc_parser.dart';
 import 'package:wakealert/services/victim_service.dart';
+import 'package:wakealert/signup/permissions.dart';
 import 'package:wakealert/signup/sign_up.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
@@ -210,7 +212,19 @@ class _LoginPageState extends State<LoginPage> {
 
                         prefs.setBool(PrefsNames.ONBOARDING_FINISHED, true);
 
-                        Navigator.of(context).pushReplacementNamed('/home');
+                        final locationStatus = await Permission.locationAlways.status;
+                        final btStatus  = await Permission.bluetoothScan.status;
+
+                        if (locationStatus.isDenied || btStatus.isDenied) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const OnboardingPermissions(fromLogin: true),
+                            ),
+                          );
+                        } else {
+                          Navigator.of(context).pushReplacementNamed('/home');
+                        }
                       } else {
                         final msg = authResp.body?['message'] ?? 'Invalid email or password';
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));

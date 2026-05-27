@@ -15,7 +15,9 @@ import 'package:wakealert/services/user_service.dart';
 import 'package:wakealert/services/victim_service.dart';
 
 class AllSetPage extends StatelessWidget {
-  const AllSetPage({super.key});
+  final bool fromLogin;
+
+  const AllSetPage({super.key, required this.fromLogin});
 
   @override
   Widget build(BuildContext context) {
@@ -75,6 +77,11 @@ class AllSetPage extends StatelessWidget {
                   ),
                 ),
                 onPressed: () async {
+                  if (fromLogin) {
+                    Navigator.of(context).pushReplacementNamed('/home');
+                    return;
+                  }
+
                   final prefs = await SharedPreferences.getInstance();
                   final raw = prefs.getString(PrefsNames.CONTACTS);
                   if (raw == null) return;
