@@ -251,6 +251,10 @@ Future<void> _runBleConnection(
       for(var i = 0; i < list.length; i++) {
         final List<int> raw = List<int>.from(list[i]["bytes"]);
         await sendBlobTransfer(device, writeChar!, list[i]["name"], Uint8List.fromList(raw));
+        service.invoke('batchTransferProgress', {
+          'current': i,
+          'length': list.length
+        });
       }
       service.invoke('batchTransferFinished', {});
     } catch (e) {

@@ -105,6 +105,8 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
   late AudioPlayer player = AudioPlayer();
   StreamSubscription? _dataSub;
 
+  bool transferOngoing = false;
+
   @override
   void initState() {
     super.initState();
@@ -401,15 +403,6 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
               },
               multiSelectionEnabled: false, // ensures only one is selected
             ),
-            /*
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
-              child: FullWidthButton(
-                  text: "Save",
-                  onPressed: onBackSave,
-                ),
-            ),
-            */
             Padding(
               padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
               child: FullWidthButton(
@@ -434,6 +427,8 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
                     var ttsVoiceSaved = await getTtsBytes('Voice settings updated. Hello, Commander ${firstName}.');
                     var ttsVoiceWellnessEnabled = await getTtsBytes('Wellness check enabled.');
                     var ttsVoiceWellnessDisabled = await getTtsBytes('Wellness check disabled.');
+                    var ttsBatteryLow = await getTtsBytes('Battery low.');
+                    var ttsBatteryFull = await getTtsBytes('Battery full.');
 
                     debugPrint("Sending speech samples via Bluetooth LE...");
 
@@ -488,7 +483,19 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
                           'name': 'wellness_disabled.mp3',
                           'bytes': ttsVoiceWellnessDisabled,
                         },
+                        {
+                          'name': 'battery_full.mp3',
+                          'bytes': ttsBatteryFull,
+                        },
+                        {
+                          'name': 'battery_low.mp3',
+                          'bytes': ttsBatteryLow,
+                        },
                       ],
+                    });
+
+                    setState(() {
+                      transferOngoing = true;
                     });
                   },
                 ),
