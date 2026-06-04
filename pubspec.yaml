@@ -51,6 +51,12 @@ dependencies:
   drift: ^2.33.0
   sqlite3: ^3.3.1
   dio: ^5.9.2
+  geolocator: ^14.0.2
+  url_launcher: ^6.3.2
+  sms_flutter_plus: ^1.0.0
+  another_telephony: ^0.4.1
+  flutter_phone_direct_caller: ^2.2.1
+  flutter_libphonenumber: ^2.7.0
 
 dev_dependencies:
   flutter_test:
@@ -78,6 +84,7 @@ flutter:
 
   assets:
     - images/logo.png
+    - images/logo_white.png
     - .env
     
   # To add assets to your application, add an assets section, like this:

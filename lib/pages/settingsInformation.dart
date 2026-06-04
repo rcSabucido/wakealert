@@ -45,52 +45,57 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
 
   _SettingsInformationPageState(this.onBack);
 
+  Future<int> onSave() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString(PrefsNames.FIRST_NAME, firstNameController.text);
+    prefs.setString(PrefsNames.LAST_NAME, lastNameController.text);
+    prefs.setString(PrefsNames.BIRTH_DATE, birthDateController.text);
+
+    VictimService.enqueueUpdateVictim(
+      context: context,
+      victimId: prefs.getInt(PrefsNames.VICTIM_ID)!,
+      firstName: firstNameController.text,
+      lastName: lastNameController.text,
+      birthDate: birthDateController.text
+    );
+
+    prefs.setString(PrefsNames.PREGNANCY_STATUS, pregnancyStatusOption!);
+    prefs.setString(PrefsNames.BLOOD_TYPE, bloodTypeOption!);
+    prefs.setString(PrefsNames.ORGAN_DONOR, organDonorOption!);
+
+    MedicalInfoService.enqueueUpdateMedicalInfo(
+      context: context,
+      medicalInfoId: prefs.getInt(PrefsNames.MEDICAL_INFO_ID)!,
+      allergies: prefs.getStringList(PrefsNames.ALLERGIES)!.join(", "),
+      medication: prefs.getStringList(PrefsNames.MEDICATION)!.join(", "),
+      medicalNotes: prefs.getString(PrefsNames.MEDICAL_NOTES),
+      lastDiagnosisDate: prefs.getString(PrefsNames.LAST_DIAGNOSIS_DATE),
+      lastDiagnosisHospitalName: prefs.getString(PrefsNames.PLACE_OF_DIAGNOSIS),
+      pregnancyStatusName: prefs.getString(PrefsNames.PREGNANCY_STATUS),
+      donorStatusName: prefs.getString(PrefsNames.ORGAN_DONOR),
+      bloodTypeName: prefs.getString(PrefsNames.BLOOD_TYPE),
+    );
+
+    final diagnoses = prefs.getStringList(PrefsNames.MEDICAL_HISTORY)!;
+    final lastDiagnosis = prefs.getString(PrefsNames.LAST_DIAGNOSIS);
+    final index = lastDiagnosis != null ? diagnoses.indexOf(lastDiagnosis) : -1;
+
+    MedicalHistoryService.enqueueDeleteHistoryByInfo(
+      context: context,
+      medicalInfoId: prefs.getInt(PrefsNames.MEDICAL_INFO_ID)!,
+    );
+    MedicalHistoryService.enqueueUpsertDiagnosisList(
+      context: context,
+      medicalInfoId: prefs.getInt(PrefsNames.MEDICAL_INFO_ID)!,
+      diagnoses: diagnoses,
+      mostRecentIndex: index,
+    );
+
+    return 0;
+  }
+
   void onBackSave() {
-    SharedPreferences.getInstance().then((prefs) {
-      prefs.setString(PrefsNames.FIRST_NAME, firstNameController.text);
-      prefs.setString(PrefsNames.LAST_NAME, lastNameController.text);
-      prefs.setString(PrefsNames.BIRTH_DATE, birthDateController.text);
-
-      VictimService.enqueueUpdateVictim(
-        context: context,
-        victimId: prefs.getInt(PrefsNames.VICTIM_ID)!,
-        firstName: firstNameController.text,
-        lastName: lastNameController.text,
-        birthDate: birthDateController.text
-      );
-
-      prefs.setString(PrefsNames.PREGNANCY_STATUS, pregnancyStatusOption!);
-      prefs.setString(PrefsNames.BLOOD_TYPE, bloodTypeOption!);
-      prefs.setString(PrefsNames.ORGAN_DONOR, organDonorOption!);
-
-      MedicalInfoService.enqueueUpdateMedicalInfo(
-        context: context,
-        medicalInfoId: prefs.getInt(PrefsNames.MEDICAL_INFO_ID)!,
-        allergies: prefs.getStringList(PrefsNames.ALLERGIES)!.join(", "),
-        medication: prefs.getStringList(PrefsNames.MEDICATION)!.join(", "),
-        medicalNotes: prefs.getString(PrefsNames.MEDICAL_NOTES),
-        lastDiagnosisDate: prefs.getString(PrefsNames.LAST_DIAGNOSIS_DATE),
-        lastDiagnosisHospitalName: prefs.getString(PrefsNames.PLACE_OF_DIAGNOSIS),
-        pregnancyStatusName: prefs.getString(PrefsNames.PREGNANCY_STATUS),
-        donorStatusName: prefs.getString(PrefsNames.ORGAN_DONOR),
-        bloodTypeName: prefs.getString(PrefsNames.BLOOD_TYPE),
-      );
-
-      final diagnoses = prefs.getStringList(PrefsNames.MEDICAL_HISTORY)!;
-      final lastDiagnosis = prefs.getString(PrefsNames.LAST_DIAGNOSIS);
-      final index = lastDiagnosis != null ? diagnoses.indexOf(lastDiagnosis!) : -1;
-
-      MedicalHistoryService.enqueueDeleteHistoryByInfo(
-        context: context,
-        medicalInfoId: prefs.getInt(PrefsNames.MEDICAL_INFO_ID)!,
-      );
-      MedicalHistoryService.enqueueUpsertDiagnosisList(
-        context: context,
-        medicalInfoId: prefs.getInt(PrefsNames.MEDICAL_INFO_ID)!,
-        diagnoses: diagnoses,
-        mostRecentIndex: index,
-      );
-
+    onSave().then((_) {
       onBack();
     });
   }
@@ -296,16 +301,20 @@ class _SettingsInformationPageState extends State<SettingsInformationPage> {
             SettingsRedirect(
               title: "User Address",
               onPressed: () {
-                setState(() {
-                  _currentIndex = 0;
+                onSave().then((_) {
+                  setState(() {
+                    _currentIndex = 0;
+                  });
                 });
               },
             ),
             SettingsRedirect(
               title: "User Medical Information",
               onPressed: () {
-                setState(() {
-                  _currentIndex = 1;
+                onSave().then((_) {
+                  setState(() {
+                    _currentIndex = 1;
+                  });
                 });
               },
             ),

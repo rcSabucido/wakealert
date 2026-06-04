@@ -4,6 +4,7 @@ import 'package:wakealert/models/contact.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:wakealert/pages/contactConfirmedView.dart';
+import 'package:wakealert/phone_number.dart';
 import 'package:wakealert/prefs_names.dart' as PrefsNames;
 import 'package:wakealert/services/contact_service.dart';
 
@@ -54,18 +55,26 @@ class _EditContactViewState extends State<EditContactView> {
   void _saveContact() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final prefs = await SharedPreferences.getInstance();
+    final parsed = await PhoneNumber.format(_phoneController.text.trim());
+
+    if (parsed == null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Please input a valid Philippine national or international phone number.")));
+      return;
+    }
+    debugPrint("Parsed number: ${parsed}");
 
     final originalContact = widget.contact;
     final updated = widget.contact.copyWith(
-      firstName: _firstNameController.text.trim(),
-      lastName:  _lastNameController.text.trim(),
-      phoneNumber:_phoneController.text.trim(),
-      relationship:_selectedRelationship,
-      isPrimary:  _isPrimary,
+      firstName:      _firstNameController.text.trim(),
+      lastName:       _lastNameController.text.trim(),
+      phoneNumber:    parsed,
+      relationship:   _selectedRelationship,
+      isPrimary:      _isPrimary,
     );
 
-    debugPrint("updated: ${updated}");
+    debugPrint("Updated: ${updated}");
+
+    final prefs = await SharedPreferences.getInstance();
 
     try {
       if (_isPrimary) {
@@ -163,7 +172,7 @@ class _EditContactViewState extends State<EditContactView> {
                     TextFormField(
                       controller: _phoneController,
                       keyboardType: TextInputType.phone,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      inputFormatters: [FilteringTextInputFormatter.allow(RegExp("[0-9\+\s]+"))],
                       decoration: const InputDecoration(
                         labelText: 'Phone Number:',
                         border: OutlineInputBorder(),
@@ -171,7 +180,7 @@ class _EditContactViewState extends State<EditContactView> {
                       validator: (v) {
                         if (v == null || v.isEmpty) return 'Required';
                         if (v.length < 7 || v.length > 15) {
-                          return '7-15 digits';
+                          return '7-15 digits (e.g. +639xxxxxxxxx or 09xxxxxxxxx)';
                         }
                         return null;
                       },

@@ -1,17 +1,23 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
-import 'package:flutter_background_service_android/flutter_background_service_android.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:geolocator/geolocator.dart';
 
 import 'package:pro_mpack/pro_mpack.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'dart:typed_data';
+
+import 'package:wakealert/components/screenLoader.dart';
+import 'package:wakealert/prefs_names.dart' as PrefsNames;
+import 'package:wakealert/services/alert_service.dart';
 
 const _notificationChannelId = 'ble_foreground_channel';
 const _notificationId = 1001;
@@ -132,9 +138,9 @@ Future<void> _runBleConnection(
   scanSub.cancel();
 
   if (targetDevice == null) {
-    _updateNotification(notifications, 'Device not found. Retrying in 30 s…');
+    _updateNotification(notifications, 'Device not found. Retrying in 3 s…');
     // Retry after a delay
-    await Future.delayed(const Duration(seconds: 30));
+    await Future.delayed(const Duration(seconds: 3));
     return _runBleConnection(service, notifications);
   }
 
@@ -201,6 +207,19 @@ Future<void> _runBleConnection(
 
   device.cancelWhenDisconnected(charSub);
 
+  final prefs = await SharedPreferences.getInstance();
+
+  final checkInterval = prefs.getInt(PrefsNames.WELLNESS_CHECK_INTERVAL) ?? 60;
+  final checkEnabled = prefs.getBool(PrefsNames.WELLNESS_CHECK_ENABLED) ?? false;
+
+  final Uint8List startBytes = serialize([
+    10,
+    checkEnabled,
+    checkInterval
+  ]);
+
+  await writeChar!.write(startBytes, withoutResponse: false);
+
   await targetChar.setNotifyValue(true);
 
   service.on('bleWrite').listen((data) async {
@@ -219,7 +238,21 @@ Future<void> _runBleConnection(
     final String name = data['name'] as String;
     final List<int> raw = List<int>.from(data['bytes']);
     try {
-      await sendBlobTransfer(device!, writeChar!, name, Uint8List.fromList(raw));
+      await sendBlobTransfer(device, writeChar!, name, Uint8List.fromList(raw));
+    } catch (e) {
+      debugPrint('[BLE] Blob transfer error: $e');
+    }
+  });
+
+  service.on('blobTransferBatch').listen((data) async {
+    if (data == null) return;
+    final list = List<Map<String, dynamic>>.from(data['data']);
+    try {
+      for(var i = 0; i < list.length; i++) {
+        final List<int> raw = List<int>.from(list[i]["bytes"]);
+        await sendBlobTransfer(device, writeChar!, list[i]["name"], Uint8List.fromList(raw));
+      }
+      service.invoke('batchTransferFinished', {});
     } catch (e) {
       debugPrint('[BLE] Blob transfer error: $e');
     }
@@ -238,6 +271,32 @@ void _onDataReceived(
   FlutterLocalNotificationsPlugin notifications,
 ) {
   debugPrint('[BLE] Received ${bytes.length} bytes: $bytes');
+  final String distressData = "Distress signal";
+
+  if (utf8.decode(bytes) == distressData) {
+    debugPrint("Distress signal received.");
+
+    final LocationSettings locationSettings = LocationSettings(
+      accuracy: LocationAccuracy.high,
+      distanceFilter: 100,
+    );
+
+    Geolocator.getCurrentPosition(locationSettings: locationSettings).then((position) async {
+      final prefs = await SharedPreferences.getInstance();
+      AlertService.smsAlert(
+        victimId: prefs.getInt(PrefsNames.VICTIM_ID)!,
+        latitude: position.latitude,   
+        longitude: position.longitude,
+        service: service,
+      );
+      AlertService.addAlert(
+        victimId: prefs.getInt(PrefsNames.VICTIM_ID)!,
+        latitude: position.latitude,   
+        longitude: position.longitude,   
+      );
+      service.invoke('navigateTo', {'route': "/alert"});
+    });
+  }
 
   // Forward the raw bytes to the UI isolate as a hex string list
   final hex = bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).toList();
@@ -294,10 +353,10 @@ Future<void> sendBlobTransfer(
   String blobName,
   Uint8List data, {
   int? forcedMaxPayload,
-  Duration interChunkDelay = const Duration(milliseconds: 50),
+  //Duration interChunkDelay = const Duration(milliseconds: 70),
 }) async {
   // ── 1. Negotiate MTU ────────────────────────────────────────────────────
-  await device.requestMtu(512);
+  await device.requestMtu(400);
   await Future.delayed(const Duration(milliseconds: 500));
 
   final int actualMtu = await device.mtu.first;
@@ -402,14 +461,23 @@ Future<void> sendBlobTransfer(
       chunk,
     ]);
 
-    try {
-      await characteristic.write(
-        chunkBytes,
-        withoutResponse: false,
-      );
-    } catch (e) {
-      debugPrint('[BLE] Chunk $i write failed: $e');
-      rethrow;
+    final retries = 30;
+
+    for (var i = 0; i < retries; i++) {
+      try {
+        await characteristic.write(
+          chunkBytes,
+          withoutResponse: false,
+        );
+        break;
+      } catch (e) {
+        debugPrint('[BLE Write Fail] Chunk $i write failed: $e');
+        if (i + 1 >= retries) {
+          rethrow;
+        }
+        debugPrint("[BLE Retrying] Retrying..................");
+        await Future.delayed(const Duration(milliseconds: 5000));
+      }
     }
 
     debugPrint(
@@ -417,9 +485,9 @@ Future<void> sendBlobTransfer(
       'payload=${chunk.length} | wire=${chunkBytes.length}',
     );
 
-    if (interChunkDelay > Duration.zero && i < numChunks - 1) {
-      await Future.delayed(interChunkDelay);
-    }
+    //if (interChunkDelay > Duration.zero && i < numChunks - 1) {
+    //  await Future.delayed(interChunkDelay);
+    //}
   }
 
   debugPrint('[BLE] Blob transfer complete: "$blobName"');

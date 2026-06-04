@@ -1,6 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_auto_size_text/flutter_auto_size_text.dart';
+import 'package:flutter_background_service/flutter_background_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wakealert/medicalInformation/medicalInformation.dart';
+import 'package:wakealert/models/contact.dart';
+import 'package:wakealert/prefs_names.dart' as PrefsNames;
 
 class ViewInformationPage extends StatefulWidget {
   final VoidCallback onBack;
@@ -12,6 +18,86 @@ class ViewInformationPage extends StatefulWidget {
 }
 
 class _ViewInformationPageState extends State<ViewInformationPage> {
+  String fullName = "";
+  String birthDate = "";
+  String pregnancyStatus = "Unknown";
+  String organDonorStatus = "Unknown";
+  String bloodType = "Unknown";
+  String phoneNumber = "";
+  String relationship = "";
+  String fullAddress = "";
+  int age = 0;
+
+  bool _otherPressed = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _loadInfo();
+  }
+
+  int calculateAge(String birthDateString) {
+    final birthDate = DateTime.parse(birthDateString);
+    final today = DateTime.now();
+    final currentDate = DateTime(today.year, today.month, today.day);
+
+    if (birthDate.isAfter(currentDate)) {
+      throw ArgumentError('Birth date cannot be in the future.');
+    }
+
+    int years = currentDate.year - birthDate.year;
+
+    final hasBirthdayPassedThisYear = 
+        (currentDate.month > birthDate.month) ||
+        (currentDate.month == birthDate.month && 
+         currentDate.day >= birthDate.day);
+
+    if (!hasBirthdayPassedThisYear) {
+      years--;
+    }
+
+    return years;
+  }
+
+  void _loadInfo() {
+    SharedPreferences.getInstance().then((prefs) {
+      setState(() {
+        fullName = "${prefs.getString(PrefsNames.FIRST_NAME) ?? ""} ${prefs.getString(PrefsNames.LAST_NAME) ?? ""}";
+        birthDate = prefs.getString(PrefsNames.BIRTH_DATE) ?? "";
+
+        pregnancyStatus = prefs.getString(PrefsNames.PREGNANCY_STATUS) ?? "No";
+        organDonorStatus = prefs.getString(PrefsNames.ORGAN_DONOR) ?? "No";
+        bloodType = prefs.getString(PrefsNames.BLOOD_TYPE) ?? "O-";
+
+        fullAddress = prefs.getString(PrefsNames.FULL_ADDRESS) ?? "";
+
+        age = calculateAge(birthDate);
+
+        final raw = prefs.getString(PrefsNames.CONTACTS);
+        if (raw == null) return;
+
+        final List<dynamic> list = json.decode(raw);
+        final loaded = list.map((e) => Contact.fromJson(e)).toList();
+
+        loaded.sort((a, b) {
+          // true (1) comes before false (0)
+          int primaryCmp = b.isPrimary ? 1 : 0 - (a.isPrimary ? 1 : 0);
+          if (primaryCmp != 0) return primaryCmp;
+
+          // secondary ordering: alphabetically by last name, then first
+          int lastCmp = a.lastName.compareTo(b.lastName);
+          return lastCmp != 0 ? lastCmp : a.firstName.compareTo(b.firstName);
+        });
+
+        if (loaded.length > 0 && loaded.first.isPrimary) {
+          phoneNumber = loaded.first.phoneNumber;
+          relationship = loaded.first.relationship.name;
+        }
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,18 +111,32 @@ class _ViewInformationPageState extends State<ViewInformationPage> {
               child: Row(
                 children: [
                   Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 18),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFEF5350), // Active Tab
-                      ),
-                      child: const Text(
-                        "USER\nINFORMATION",
-                        textAlign: TextAlign.left,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 25, 
+                    child: Listener(
+                      onPointerDown: (_) {
+                        debugPrint("onPointerDown");
+                        setState(() => _otherPressed = true);
+                      },
+                      onPointerUp: (_) {
+                        debugPrint("onPointerUp");
+                        setState(() => _otherPressed = false);
+                      },
+                      onPointerCancel: (_) {
+                        debugPrint("onPointerCancel");
+                        setState(() => _otherPressed = false);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 18),
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFEF5350), // Active Tab
+                        ),
+                        child: const Text(
+                          "USER\nINFORMATION",
+                          textAlign: TextAlign.left,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 25, 
+                          ),
                         ),
                       ),
                     ),
@@ -44,8 +144,18 @@ class _ViewInformationPageState extends State<ViewInformationPage> {
                   // This is the small white space 
                   const SizedBox(width: 3), 
                   Expanded(
-                    child: GestureDetector(
-                      onTap: () {
+                    child: Listener(
+                      onPointerDown: (_) {
+                        debugPrint("onPointerDown other");
+                        if (_otherPressed) {
+                          debugPrint("other is pressed");
+
+                          Navigator.pop(context);
+                          return;
+                        }
+
+                        _loadInfo();
+
                         Navigator.push(
                           context,
                           PageRouteBuilder(
@@ -81,41 +191,41 @@ class _ViewInformationPageState extends State<ViewInformationPage> {
               child: ListView(
                 padding: const EdgeInsets.all(8),
                 children: [
-                  const IntrinsicHeight(
-                    child: const Row(
+                  IntrinsicHeight(
+                    child: Row(
                       children: [
-                        Expanded(flex: 2, child: InfoTile(label: "Full Name", value: "Juan Dela Cruz")),
-                        SizedBox(width: 12),
-                        Expanded(flex: 1, child: InfoTile(label: "Blood Type", value: "A+")),
+                        Expanded(flex: 2, child: InfoTile(label: "Full Name", value: fullName)),
+                        const SizedBox(width: 12),
+                        Expanded(flex: 1, child: InfoTile(label: "Blood Type", value: bloodType)),
                       ],
                     ),
                   ),
                   const SizedBox(height: 16),
-                  const IntrinsicHeight(
-                    child: const Row(
+                  IntrinsicHeight(
+                    child: Row(
                       children: [
-                        Expanded(flex: 2, child: InfoTile(label: "Date of Birth", value: "YYYY/MM/DD")),
-                        SizedBox(width: 12),
-                        Expanded(flex: 1, child: InfoTile(label: "Age", value: "21")),
+                        Expanded(flex: 2, child: InfoTile(label: "Date of Birth", value: birthDate)),
+                        const SizedBox(width: 12),
+                        Expanded(flex: 1, child: InfoTile(label: "Age", value: age <= 0 ? "" : "${age}")),
                       ],
                     ),
                   ),
                   const SizedBox(height: 16),
-                  const IntrinsicHeight(
-                    child: const Row(
+                  IntrinsicHeight(
+                    child: Row(
                       children: [
-                        Expanded(flex: 2, child: InfoTile(label: "Primary Contact", value: "09XXXXXXXXX", singleLine: true,)),
+                        Expanded(flex: 2, child: InfoTile(label: "Primary Contact", value: phoneNumber, singleLine: true,)),
                         SizedBox(width: 12),
-                        Expanded(flex: 1, child: InfoTile(label: "Relationship", value: "FAMILY", singleLine: true)),
+                        Expanded(flex: 1, child: InfoTile(label: "Relationship", value: relationship, singleLine: true)),
                       ],
                     ),
                   ),
                   const SizedBox(height: 16),
-                  const InfoTile(label: "Address", value: "Blk X Lot X Subdivision, Barangay, City"),
+                  InfoTile(label: "Address", value: fullAddress),
                   const SizedBox(height: 16),
-                  const InfoTile(label: "Pregnancy Status", value: "Unknown"),
+                  InfoTile(label: "Pregnancy Status", value: pregnancyStatus),
                   const SizedBox(height: 16),
-                  const InfoTile(label: "Organ Donor", value: "Yes"),
+                  InfoTile(label: "Organ Donor", value: organDonorStatus),
                 ],
               ),
             ),

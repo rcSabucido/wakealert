@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:wakealert/phone_number.dart';
 import 'package:wakealert/signup/permissions.dart';
 import 'package:wakealert/models/contact.dart';
 
@@ -88,8 +90,14 @@ class _PrimaryEmergencyContactState extends State<PrimaryEmergencyContact> {
                 ),
                 textAlign: TextAlign.left,
                 keyboardType: TextInputType.phone,
-                validator: (value) =>
-                    value == null || value.isEmpty ? 'Enter number' : null,
+                inputFormatters: [FilteringTextInputFormatter.allow(RegExp("[0-9\+\s]+"))],
+                validator: (v) {
+                  if (v == null || v.isEmpty) return 'Enter number (e.g. +639xxxxxxxxx or 09xxxxxxxxx)';
+                  if (v.length < 7 || v.length > 15) {
+                    return '7-15 digits (e.g. +639xxxxxxxxx or 09xxxxxxxxx)';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 15),
 
@@ -152,11 +160,18 @@ class _PrimaryEmergencyContactState extends State<PrimaryEmergencyContact> {
                 ),
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
+                    final parsed = await PhoneNumber.format(_numberController.text);
+
+                    if (parsed == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Please input a valid Philippine national or international phone number.")));
+                      return;
+                    }
+
                     List<Contact> contacts = [
                       Contact(
                         firstName: _firstNameController.text,
                         lastName: _lastNameController.text,
-                        phoneNumber: _numberController.text,
+                        phoneNumber: parsed,
                         relationship: _selectedRelation!,
                         isPrimary: true,
                       )
@@ -173,7 +188,7 @@ class _PrimaryEmergencyContactState extends State<PrimaryEmergencyContact> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const OnboardingPermissions(),
+                        builder: (context) => const OnboardingPermissions(fromLogin: false),
                       ),
                     );
                   }

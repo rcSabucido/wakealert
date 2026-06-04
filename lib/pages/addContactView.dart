@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:wakealert/outbox/outbox_provider.dart';
 import 'package:wakealert/outbox/outbox_repository.dart';
 import 'package:wakealert/pages/contactConfirmedView.dart';
+import 'package:wakealert/phone_number.dart';
 import 'package:wakealert/prefs_names.dart' as PrefsNames;
 import 'package:wakealert/services/contact_service.dart';
 
@@ -38,24 +39,21 @@ class _AddContactViewState extends State<AddContactView> {
   void _saveContact() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final newContact = Contact(
-      firstName:   _firstNameController.text.trim(),
-      lastName:    _lastNameController.text.trim(),
-      phoneNumber: _phoneController.text.trim(),
-      relationship:_selectedRelationship!,
-      isPrimary:   _isPrimary,
-    );
+    final parsed = await PhoneNumber.format(_phoneController.text.trim());
 
-    /*
-    final newContact = await ContactService.addContact(
-      clientUserId:     prefs.getInt(PrefsNames.MOBILE_USER_ID)!,
-      firstName:        _firstNameController.text.trim(),
-      lastName:         _lastNameController.text.trim(),
-      phoneNumber:      _phoneController.text.trim(),
-      relationshipName: _selectedRelationship!.name,
-      isPrimary:        _isPrimary,
+    if (parsed == null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Please input a valid Philippine national or international phone number.")));
+      return;
+    }
+    debugPrint("Parsed number: ${parsed}");
+
+    final newContact = Contact(
+      firstName:    _firstNameController.text.trim(),
+      lastName:     _lastNameController.text.trim(),
+      phoneNumber:  parsed,
+      relationship: _selectedRelationship!,
+      isPrimary:    _isPrimary,
     );
-    */
 
     final prefs = await SharedPreferences.getInstance();
 
@@ -141,14 +139,16 @@ class _AddContactViewState extends State<AddContactView> {
                     TextFormField(
                       controller: _phoneController,
                       keyboardType: TextInputType.phone,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      inputFormatters: [FilteringTextInputFormatter.allow(RegExp("[0-9\+\s]+"))],
                       decoration: const InputDecoration(
                         labelText: 'Phone Number:',
                         border: OutlineInputBorder(),
                       ),
                       validator: (v) {
                         if (v == null || v.isEmpty) return 'Required';
-                        if (v.length < 7 || v.length > 15) return '7-15 digits';
+                        if (v.length < 7 || v.length > 15) {
+                          return '7-15 digits (e.g. +639xxxxxxxxx or 09xxxxxxxxx)';
+                        };
                         return null;
                       },
                     ),

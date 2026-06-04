@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:sqlite3/unstable/ffi_bindings.dart';
 import 'package:wakealert/background_ble_service.dart';
 import 'package:wakealert/models/contact.dart';
 import 'package:wakealert/outbox/outbox_provider.dart';
+import 'package:wakealert/pages/userAddressSettings.dart';
 import 'package:wakealert/prefs_names.dart' as PrefsNames;
 import 'package:wakealert/services/contact_service.dart';
+import 'package:wakealert/services/psgc_address_service.dart';
 import 'package:wakealert/services/psgc_parser.dart';
 import 'package:wakealert/services/victim_service.dart';
+import 'package:wakealert/signup/permissions.dart';
 import 'package:wakealert/signup/sign_up.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
@@ -159,6 +164,16 @@ class _LoginPageState extends State<LoginPage> {
                           final barangayCode = addressEntry["barangay_id"];
                           prefs.setString(PrefsNames.BARANGAY, barangayCode);
 
+                          final fullAddressF = await PsgcClient().fullAddress(barangayCode);
+                          final fullAddress = fullAddressF.trim();
+                          var addressLine = addressEntry["address_line"].replace(addressLineSeparator, " ");
+                          if (addressLine != null && addressLine.length > 0 && fullAddress.length > 0) {
+                            addressLine += ", ";
+                          }
+                          addressLine += fullAddress;
+
+                          prefs.setString(PrefsNames.FULL_ADDRESS, addressLine);
+
                           prefs.setString(PrefsNames.CITY_MUN, PsgcParser.cityOrMun(barangayCode));
                           prefs.setString(PrefsNames.PROVINCE_OR_HUC, PsgcParser.provinceOrHuc(barangayCode));
                           prefs.setString(PrefsNames.REGION, PsgcParser.region(barangayCode));
@@ -205,12 +220,27 @@ class _LoginPageState extends State<LoginPage> {
                         prefs.setString(PrefsNames.VOICE_SPEED, "+0%");
                         prefs.setString(PrefsNames.VOICE_PITCH, "+0Hz");
 
-                        debugPrint('Starting ble service');
-                        initBackgroundBleService();
+                        final locationStatus = await Permission.locationAlways.status;
+                        final btStatus  = await Permission.bluetoothScan.status;
+                        final smsStatus = await Permission.sms.status;
+                        final callingStatus  = await Permission.phone.status;
 
-                        prefs.setBool(PrefsNames.ONBOARDING_FINISHED, true);
+                        if (locationStatus.isDenied || btStatus.isDenied ||
+                            smsStatus.isDenied || callingStatus.isDenied) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const OnboardingPermissions(fromLogin: true),
+                            ),
+                          );
+                        } else {
+                          debugPrint('Starting ble service');
+                          initBackgroundBleService();
 
-                        Navigator.of(context).pushReplacementNamed('/home');
+                          prefs.setBool(PrefsNames.ONBOARDING_FINISHED, true);
+
+                          Navigator.of(context).pushReplacementNamed('/home');
+                        }
                       } else {
                         final msg = authResp.body?['message'] ?? 'Invalid email or password';
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));

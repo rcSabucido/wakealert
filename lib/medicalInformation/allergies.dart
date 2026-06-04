@@ -1,15 +1,9 @@
 import 'package:flutter/material.dart';
 
 class AllergiesModalPage extends StatelessWidget {
-  final List<String> initialSelection;
+  final List<String> allergyOptions;
 
-  const AllergiesModalPage({super.key, required this.initialSelection});
-
-  final List<String> allergyOptions = const [
-    "Eczema", "Anaphylaxis", "Asthma", "Urticaria",
-    "Allergic Rhinitis", "Shrimp", "Peanuts", "Dust Mites",
-    "Penicillin", "Latex", "Pollen", "Cat Dander", "Dairy"
-  ];
+  const AllergiesModalPage({super.key, required this.allergyOptions});
 
   @override
   Widget build(BuildContext context) {

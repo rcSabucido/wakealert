@@ -3,7 +3,9 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:liquid_progress_indicator_v2/liquid_progress_indicator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simple_ripple_animation/simple_ripple_animation.dart';
+import 'package:wakealert/prefs_names.dart' as PrefsNames;
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -26,10 +28,24 @@ class _HomePageState extends State<HomePage> {
   StreamSubscription? _bleSub;
   int batteryPercentage = 75;
 
+  String firstName = "";
+  String lastName = "";
+
   @override
   void initState() {
     super.initState();
     _listenToState();
+    loadInfo();
+  }
+
+  void loadInfo() {
+    SharedPreferences.getInstance().then((prefs) {
+      setState(() {
+          firstName = prefs.getString(PrefsNames.FIRST_NAME) ?? "";
+          lastName = prefs.getString(PrefsNames.LAST_NAME) ?? "";
+        }
+      );
+    });
   }
 
   void _listenToState() {
@@ -88,17 +104,17 @@ class _HomePageState extends State<HomePage> {
                             shrinkWrap: true,
                             children: [
                               Text(
-                                "Welcome back,",
+                                "Welcome back.",
                                 style: TextStyle(fontSize: 12)
                                 ),
                                 SizedBox(height: 1),
-                              Text(
-                                "John Doe",
+                              firstName != "" ? Text(
+                                "${firstName} ${lastName}",
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 17,
-                                  ),
-                              )
+                                ),
+                              ) : Center(),
                             ],
                           ),
                         )
@@ -108,10 +124,10 @@ class _HomePageState extends State<HomePage> {
                   Center(
                     child: Padding(
                       padding: const EdgeInsets.only(right: 40.0),
-                      child: CircleAvatar(
-                        radius: 22,
-                        backgroundColor: Colors.white,
-                        child: Icon(Icons.person, size: 22)
+                      child: Container(
+                        width: 56,
+                        height: 56,
+                        child: const Image(image: AssetImage('images/logo_white.png')),
                       ),
                     ),
                   )
@@ -124,7 +140,10 @@ class _HomePageState extends State<HomePage> {
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
-        child: Column(
+        child: 
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 40, horizontal: 40),
+              child: Column(
           // Column is also a layout widget. It takes a list of children and
           // arranges them vertically. By default, it sizes itself to fit its
           // children horizontally, and tries to be as tall as its parent.
@@ -140,7 +159,7 @@ class _HomePageState extends State<HomePage> {
           // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(_isPaired ? "Your WakeAlert device has paired successfully" : "Pair your WakeAlert device to your Bluetooth",
+            Text(_isPaired ? "Your WakeAlert device has paired successfully." : "Pair your WakeAlert device to your Bluetooth WakeAlert device.",
             textAlign: TextAlign.center,
             style: const TextStyle(
               fontWeight: FontWeight.bold,
@@ -223,6 +242,7 @@ class _HomePageState extends State<HomePage> {
             )
           ],
         ),
+      ),
       ),
     );
   }

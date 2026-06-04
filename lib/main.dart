@@ -1,5 +1,9 @@
+import 'package:another_telephony/telephony.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_background_service/flutter_background_service.dart';
+import 'package:flutter_libphonenumber/flutter_libphonenumber.dart' as Flutterlibphonenumber;
+import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wakealert/background_ble_service.dart';
 import 'package:wakealert/database/database.dart';
@@ -13,18 +17,22 @@ import 'package:wakealert/pages/home.dart';
 import 'package:wakealert/pages/onboarding.dart';
 import 'package:wakealert/pages/settings.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:wakealert/pages/viewInformation.dart';
 
 import 'package:wakealert/prefs_names.dart' as PrefsNames;
 
+final String? _emergencyNumber = dotenv.env['EMERGENCY_NUMBER'];
+  
 final appDb = AppDatabase();
 final outboxRepo = OutboxRepository(OutboxDao(appDb));
+final Telephony telephony = Telephony.instance;
 
 Future<void> main() async {
   debugPrint('Loading .env');
   await dotenv.load();
+  await Flutterlibphonenumber.init();
 
   final prefs = await SharedPreferences.getInstance();
-  prefs.setBool(PrefsNames.ONBOARDING_FINISHED, false);
 
   final apiUrl = dotenv.env["API_URL"]!;
   final processor = OutboxProcessor(
@@ -77,8 +85,13 @@ class MyApp extends StatelessWidget {
         colorScheme: .fromSeed(seedColor: const Color(0xFFFF6961)),
       ),
       routes: {
-        '/onboarding': (_) => const OnboardingPage(),
-        '/home':      (_) => const AppScreen(title: 'Flutter Demo Home Page'),
+        '/onboarding':  (_) => const OnboardingPage(),
+        '/alert':       (_) => ViewInformationPage(onBack: () {
+            final service = FlutterBackgroundService();
+            service.invoke('navigateTo', {'route': "/home"});
+          },
+        ),
+        '/home':        (_) => const AppScreen(title: 'Flutter Demo Home Page'),
       },
     );
   }
@@ -177,11 +190,46 @@ class _AppScreenState extends State<AppScreen> {
   int _currentIndex = 0;
 
   // List of widgets for each page
-  final List<Widget> _pages = [
+  late final List<Widget> _pages = [
     HomePage(),
     ContactsPage(),
-    SettingsPage(),
+    SettingsPage(onSignOut: () => _signOut()),
   ];
+
+  void _signOut() async {
+    await outboxRepo.flushQueue();
+    final service = FlutterBackgroundService();
+    service.invoke('stopService');
+
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setBool(PrefsNames.ONBOARDING_FINISHED, false);
+
+    Navigator.pushNamedAndRemoveUntil(context, '/onboarding', ModalRoute.withName('/'));
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _listenForCalls();
+  }
+
+  void _listenForCalls() {
+    final service = FlutterBackgroundService();
+
+    // Listen for call requests from the background service
+    service.on('triggerCall').listen((data) async {
+      final phone = data ? ['phone'] as String?;
+      if (phone != null) {
+        await FlutterPhoneDirectCaller.callNumber(phone);
+      }
+    });
+    service.on('navigateTo').listen((event) {
+      final route = event ? ['route'] as String?;
+      if (route != null && mounted) {
+        Navigator.of(context).pushNamed(route);
+      }
+    });
+  }
 
   final List<GlobalKey<NavigatorState>> _navigatorKeys = [
     GlobalKey<NavigatorState>(),

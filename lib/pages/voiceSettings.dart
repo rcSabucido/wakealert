@@ -1,4 +1,8 @@
+import 'dart:async';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:wakealert/components/screenLoader.dart';
 import 'package:wakealert/components/settingsRedirect.dart';
 import 'package:wakealert/components/subsectionHeader.dart';
 import 'package:wakealert/components/labeledDropdown.dart';
@@ -99,6 +103,7 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
   Iterable<Voice> voices = <Voice>[];
 
   late AudioPlayer player = AudioPlayer();
+  StreamSubscription? _dataSub;
 
   @override
   void initState() {
@@ -129,6 +134,12 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
         voicePitchSelection = {prefs.getString(PrefsNames.VOICE_PITCH) ?? "+0Hz"};
       });
     });
+
+    _dataSub = FlutterBackgroundService().on('batchTransferFinished').listen((event) {
+      setState(() {
+        ScreenLoader.hide();
+      });
+    });
   }
 
   void loadSpecificVoices() async {
@@ -156,6 +167,20 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
   }
 
   _VoiceSettingsPageState(this.onBack);
+
+  Future<Uint8List> getTtsBytes(String text) async {
+      var tts = Communicate(
+        text: text,
+        voice: voiceName ?? 'en-PH-JamesNeural',
+        rate: voiceSpeedSelection.first,
+        pitch: voicePitchSelection.first,
+        volume: '+20%',
+      );
+
+      debugPrint("TTS - Fetching sample");
+
+      return await tts.toBytes();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -376,6 +401,7 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
               },
               multiSelectionEnabled: false, // ensures only one is selected
             ),
+            /*
             Padding(
               padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
               child: FullWidthButton(
@@ -383,39 +409,86 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
                   onPressed: onBackSave,
                 ),
             ),
+            */
             Padding(
               padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
               child: FullWidthButton(
-                  text: "Temporary Debug Button",
+                  text: "Save",
                   onPressed: () async {
-                    debugPrint('=== Fetching example speech ===');
+                    debugPrint('=== Fetching speeches ===');
 
-                    final tts = Communicate(
-                      text: 'Wake word detected. Do you want me to continue contacting your emergency contacts and emergency services?',
-                      voice: voiceName ?? 'en-PH-JamesNeural',
-                      rate: voiceSpeedSelection.first,
-                      pitch: voicePitchSelection.first,
-                      volume: '+20%',
-                    );
+                    ScreenLoader.show(context);
 
-                    debugPrint("TTS - Fetching sample");
+                    final prefs = await SharedPreferences.getInstance();
+                    final firstName = prefs.getString(PrefsNames.FIRST_NAME) ?? "";
 
-                    final bytes = await tts.toBytes();
-
-                    //final source = BytesSource(bytes, mimeType: "audio/mpeg");
-
-                    /*
-                    debugPrint("TTS Player - Setting source");
-                    await player.setSource(source);
-                    debugPrint("TTS Player - Resuming player");
-                    await player.resume();
-                    */
+                    var tts = await getTtsBytes('Wake word detected. Do you want me to continue contacting your emergency contacts and services?');
+                    var ttsAccept = await getTtsBytes('Command accepted. Calling emergency services.');
+                    var ttsReject = await getTtsBytes('Command cancelled.');
+                    var ttsPaired = await getTtsBytes('The Wake alert device has connected successfully. Good day, Commander ${firstName}.');
+                    var ttsUnpaired = await getTtsBytes('Wake alert disconnected.');
+                    var ttsWellnessCheck = await getTtsBytes('Hello. This is a wellness check from wake alert. Are you okay?');
+                    var ttsNextCheck = await getTtsBytes('Command received. I will remind you in the next interval.');
+                    var ttsWellnessNo = await getTtsBytes('Command received. Do you want me to contact your emergency contacts and services?');
+                    var ttsWellnessNoResponse = await getTtsBytes('User has not responded. Do you want me to contact your emergency contacts and services?');
+                    var ttsVoiceSaved = await getTtsBytes('Voice settings updated. Hello, Commander ${firstName}.');
+                    var ttsVoiceWellnessEnabled = await getTtsBytes('Wellness check enabled.');
+                    var ttsVoiceWellnessDisabled = await getTtsBytes('Wellness check disabled.');
 
                     debugPrint("Sending speech samples via Bluetooth LE...");
 
-                    FlutterBackgroundService().invoke('blobTransfer', {
-                      'name': 'wake_word_detected.mp3',
-                      'bytes': bytes,
+                    FlutterBackgroundService().invoke('blobTransferBatch', 
+                      {
+                        "data": [
+                        {
+                          'name': 'wake_word_detected.mp3',
+                          'bytes': tts,
+                        },
+                        {
+                          'name': 'wake_word_accepted.mp3',
+                          'bytes': ttsAccept,
+                        },
+                        {
+                          'name': 'wake_word_rejected.mp3',
+                          'bytes': ttsReject,
+                        },
+                        {
+                          'name': 'wake_word_paired.mp3',
+                          'bytes': ttsPaired,
+                        },
+                        {
+                          'name': 'wake_word_unpaired.mp3',
+                          'bytes': ttsUnpaired,
+                        },
+                        {
+                          'name': 'wake_word_check.mp3',
+                          'bytes': ttsWellnessCheck,
+                        },
+                        {
+                          'name': 'wake_word_next_check.mp3',
+                          'bytes': ttsNextCheck,
+                        },
+                        {
+                          'name': 'wake_wellness_user_no.mp3',
+                          'bytes': ttsWellnessNo,
+                        },
+                        {
+                          'name': 'wake_wellness_no_response.mp3',
+                          'bytes': ttsWellnessNoResponse,
+                        },
+                        {
+                          'name': 'wake_voice_settings.mp3',
+                          'bytes': ttsVoiceSaved,
+                        },
+                        {
+                          'name': 'wellness_enabled.mp3',
+                          'bytes': ttsVoiceWellnessEnabled,
+                        },
+                        {
+                          'name': 'wellness_disabled.mp3',
+                          'bytes': ttsVoiceWellnessDisabled,
+                        },
+                      ],
                     });
                   },
                 ),

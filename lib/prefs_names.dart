@@ -23,6 +23,7 @@ const LAST_DIAGNOSIS_DATE = "lastDiagnosisDate";
 const PLACE_OF_DIAGNOSIS = "placeOfDiagnosis";
 const MEDICAL_NOTES = "medicalNotes";
 
+const FULL_ADDRESS = "fullAddress";
 const ADDRESS_LINE = "addressLine";
 const ADDRESS_LINE_ID = "addressLineId"; // int
 const REGION = "region";
@@ -34,3 +35,6 @@ const VOICE_ACCENT = "voiceAccent";
 const VOICE_NAME = "voiceName";
 const VOICE_SPEED = "voiceSpeed";
 const VOICE_PITCH = "voicePitch";
+
+const WELLNESS_CHECK_ENABLED = "wellnessCheckEnabled";
+const WELLNESS_CHECK_INTERVAL = "wellnessCheckInterval";

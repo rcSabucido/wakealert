@@ -1,22 +1,9 @@
 import 'package:flutter/material.dart';
 
 class DiagnosisModalPage extends StatelessWidget {
-  final List<String> initialSelection;
+  final List<String> diagnosisOption;
 
-  const DiagnosisModalPage({super.key, required this.initialSelection});
-
-  final List<String> options = const [
-    "Diabetes (Type 2)", 
-    "Asthma", 
-    "Hypertension", 
-    "High Blood Pressure", 
-    "Osteoporosis",
-    "Arthritis",
-    "Hyperlipidemia",
-    "Anxiety Disorder",
-    "COPD",
-    "Heart Disease"
-  ];
+  const DiagnosisModalPage({super.key, required this.diagnosisOption});
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +31,7 @@ class DiagnosisModalPage extends StatelessWidget {
             ),
             Expanded(
               child: ListView.builder(
-                itemCount: options.length,
+                itemCount: diagnosisOption.length,
                 itemBuilder: (context, index) {
                   return Container(
                     margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
@@ -53,7 +40,7 @@ class DiagnosisModalPage extends StatelessWidget {
                       color: const Color(0xFFE55A5A),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: Text(options[index], 
+                    child: Text(diagnosisOption[index], 
                       textAlign: TextAlign.center,
                       style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w500)),
                   );
