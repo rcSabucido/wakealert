@@ -8,6 +8,7 @@ import 'package:wakealert/components/subsectionHeader.dart';
 import 'package:wakealert/components/labeledDropdown.dart';
 import 'package:wakealert/components/dropdown.dart';
 import 'package:wakealert/components/fullWidthButton.dart';
+import 'package:wakealert/components/fullWidthProgressButton.dart';
 import 'package:wakealert/components/labeledTextBox.dart';
 
 import 'package:edge_tts/src/voices.dart';
@@ -103,9 +104,12 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
   Iterable<Voice> voices = <Voice>[];
 
   late AudioPlayer player = AudioPlayer();
+
   StreamSubscription? _dataSub;
+  StreamSubscription? _progressSub;
 
   bool transferOngoing = false;
+  double transferProgress = 0.0;
 
   @override
   void initState() {
@@ -117,13 +121,16 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
     player.setReleaseMode(ReleaseMode.stop);
   }
 
-  Future<void> onBackSave() async {
+  Future<void> onSave() async {
     final prefs = await SharedPreferences.getInstance();
     prefs.setString(PrefsNames.VOICE_ACCENT, voiceAccent!);
     prefs.setString(PrefsNames.VOICE_NAME, voiceName!);
     prefs.setString(PrefsNames.VOICE_SPEED, voiceSpeedSelection.first);
     prefs.setString(PrefsNames.VOICE_PITCH, voicePitchSelection.first);
+  }
 
+  Future<void> onBackSave() async {
+    await onSave();
     this.onBack();
   }
 
@@ -137,9 +144,18 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
       });
     });
 
-    _dataSub = FlutterBackgroundService().on('batchTransferFinished').listen((event) {
+    _dataSub = FlutterBackgroundService().on('batchTransferFinished').listen((event) async {
       setState(() {
-        ScreenLoader.hide();
+        //ScreenLoader.hide();
+        transferOngoing = false;
+      });
+      await onSave();
+    });
+    _progressSub = FlutterBackgroundService().on('batchTransferProgress').listen((event) {
+      setState(() {
+        if (event != null && event['current'] != null && event['length'] != null) {
+          transferProgress = 0.5 + ((event['current']! / event['length']!) * 0.5);
+        }
       });
     });
   }
@@ -184,6 +200,11 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
       return await tts.toBytes();
   }
 
+  Future<bool> isBleConnected() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('ble_connected') ?? false;
+  }
+
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -200,6 +221,7 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
             SubsectionHeader(
               title: "Voice Settings",
               onBack: onBackSave,
+              isDisabled: transferOngoing,
             ),
             Padding(
               padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
@@ -405,100 +427,157 @@ class _VoiceSettingsPageState extends State<VoiceSettingsPage> {
             ),
             Padding(
               padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
-              child: FullWidthButton(
-                  text: "Save",
-                  onPressed: () async {
-                    debugPrint('=== Fetching speeches ===');
+              child:
+                  transferOngoing ?
+                  FullWidthProgressButton(
+                    progress: transferProgress,
+                    onPressed: () {},
+                  ) :
+                  FullWidthButton(
+                    text: "Save",
+                    onPressed: () async {
+                      debugPrint('=== Fetching speeches ===');
 
-                    ScreenLoader.show(context);
+                      //ScreenLoader.show(context);
+                      
+                      var isConnected = await isBleConnected();
+                      if (!isConnected) {
+                        setState(() {
+                          transferOngoing = false;
+                          transferProgress = 0.0;
+                        });
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Failed to send audio. Please pair with the WakeAlert device first.")));
+                        return;
+                      }
 
-                    final prefs = await SharedPreferences.getInstance();
-                    final firstName = prefs.getString(PrefsNames.FIRST_NAME) ?? "";
+                      final prefs = await SharedPreferences.getInstance();
+                      final firstName = prefs.getString(PrefsNames.FIRST_NAME) ?? "";
 
-                    var tts = await getTtsBytes('Wake word detected. Do you want me to continue contacting your emergency contacts and services?');
-                    var ttsAccept = await getTtsBytes('Command accepted. Calling emergency services.');
-                    var ttsReject = await getTtsBytes('Command cancelled.');
-                    var ttsPaired = await getTtsBytes('The Wake alert device has connected successfully. Good day, Commander ${firstName}.');
-                    var ttsUnpaired = await getTtsBytes('Wake alert disconnected.');
-                    var ttsWellnessCheck = await getTtsBytes('Hello. This is a wellness check from wake alert. Are you okay?');
-                    var ttsNextCheck = await getTtsBytes('Command received. I will remind you in the next interval.');
-                    var ttsWellnessNo = await getTtsBytes('Command received. Do you want me to contact your emergency contacts and services?');
-                    var ttsWellnessNoResponse = await getTtsBytes('User has not responded. Do you want me to contact your emergency contacts and services?');
-                    var ttsVoiceSaved = await getTtsBytes('Voice settings updated. Hello, Commander ${firstName}.');
-                    var ttsVoiceWellnessEnabled = await getTtsBytes('Wellness check enabled.');
-                    var ttsVoiceWellnessDisabled = await getTtsBytes('Wellness check disabled.');
-                    var ttsBatteryLow = await getTtsBytes('Battery low.');
-                    var ttsBatteryFull = await getTtsBytes('Battery full.');
+                      setState(() {
+                        transferOngoing = true;
+                        transferProgress = 0.0;
+                      });
 
-                    debugPrint("Sending speech samples via Bluetooth LE...");
-
-                    FlutterBackgroundService().invoke('blobTransferBatch', 
-                      {
-                        "data": [
+                      final ttsRequests = [
                         {
                           'name': 'wake_word_detected.mp3',
-                          'bytes': tts,
+                          'text':
+                              'Wake word detected. Do you want me to continue contacting your emergency contacts and services?',
                         },
                         {
                           'name': 'wake_word_accepted.mp3',
-                          'bytes': ttsAccept,
+                          'text': 'Command accepted. Calling emergency services.',
                         },
                         {
                           'name': 'wake_word_rejected.mp3',
-                          'bytes': ttsReject,
+                          'text': 'Command cancelled.',
                         },
                         {
                           'name': 'wake_word_paired.mp3',
-                          'bytes': ttsPaired,
+                          'text':
+                              'The Wake alert device has connected successfully. Good day, Commander $firstName.',
                         },
                         {
                           'name': 'wake_word_unpaired.mp3',
-                          'bytes': ttsUnpaired,
+                          'text': 'Wake alert disconnected.',
                         },
                         {
                           'name': 'wake_word_check.mp3',
-                          'bytes': ttsWellnessCheck,
+                          'text':
+                              'Hello. This is a wellness check from wake alert. Are you okay?',
                         },
                         {
                           'name': 'wake_word_next_check.mp3',
-                          'bytes': ttsNextCheck,
+                          'text': 'Command received. I will remind you in the next interval.',
                         },
                         {
                           'name': 'wake_wellness_user_no.mp3',
-                          'bytes': ttsWellnessNo,
+                          'text':
+                              'Command received. Do you want me to contact your emergency contacts and services?',
                         },
                         {
                           'name': 'wake_wellness_no_response.mp3',
-                          'bytes': ttsWellnessNoResponse,
+                          'text':
+                              'User has not responded. Do you want me to contact your emergency contacts and services?',
                         },
                         {
                           'name': 'wake_voice_settings.mp3',
-                          'bytes': ttsVoiceSaved,
+                          'text': 'Voice settings updated. Hello, Commander $firstName.',
                         },
                         {
                           'name': 'wellness_enabled.mp3',
-                          'bytes': ttsVoiceWellnessEnabled,
+                          'text': 'Wellness check enabled.',
                         },
                         {
                           'name': 'wellness_disabled.mp3',
-                          'bytes': ttsVoiceWellnessDisabled,
+                          'text': 'Wellness check disabled.',
                         },
                         {
                           'name': 'battery_full.mp3',
-                          'bytes': ttsBatteryFull,
+                          'text': 'Battery full.',
                         },
                         {
                           'name': 'battery_low.mp3',
-                          'bytes': ttsBatteryLow,
+                          'text': 'Battery low.',
                         },
-                      ],
-                    });
+                      ];
 
-                    setState(() {
-                      transferOngoing = true;
-                    });
+                      var i = 0;
+                      var hasFail = false;
+
+                      final data = await Future.wait(
+                        ttsRequests.map((request) async {
+                          try {
+                            final bytes = await getTtsBytes(request['text'] as String);
+
+                            setState(() {
+                              transferProgress = (i / ttsRequests.length) * 0.5;
+                            });
+                            i += 1;
+
+                            debugPrint("Fetching ${request['text']}...");
+
+                            return {
+                              'name': request['name'],
+                              'bytes': bytes,
+                            };
+                          } catch (e) {
+                            hasFail = true;
+                            return null;
+                          }
+                        }),
+                      );
+
+                      if (hasFail) {
+                        setState(() {
+                          transferProgress = 0;
+                          transferOngoing = false;
+                        });
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Failed to receive audio. Internet connection is unstable.")));
+                        return;
+                      }
+
+                      isConnected = await isBleConnected();
+
+                      if (!isConnected) {
+                        setState(() {
+                          transferOngoing = false;
+                          transferProgress = 0.0;
+                        });
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Failed to send audio. Not connected to WakeAlert device.")));
+                        return;
+                      }
+
+                      debugPrint("Sending speech samples via Bluetooth LE...");
+
+                      FlutterBackgroundService().invoke(
+                        'blobTransferBatch',
+                        {
+                          "data": data,
+                        },
+                      );
                   },
-                ),
+              ),
             ),
           ],
         ),
