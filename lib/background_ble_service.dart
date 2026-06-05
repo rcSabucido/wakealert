@@ -151,6 +151,8 @@ Future<void> _runBleConnection(
     if (state == BluetoothConnectionState.disconnected) {
       debugPrint('[BLE] Disconnected: ${device.disconnectReason?.description}');
       service.invoke('bleState', {'state': 'disconnected'});
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('ble_connected', false);
       _updateNotification(notifications, 'Disconnected. Reconnecting…');
       // Re-run the whole flow
       await Future.delayed(const Duration(seconds: 3));
@@ -165,6 +167,8 @@ Future<void> _runBleConnection(
     _updateNotification(notifications, 'Connecting…');
     await device.connect(license: License.free, timeout: const Duration(seconds: 15));
     service.invoke('bleState', {'state': 'connected', 'name': device.platformName});
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('ble_connected', true);
   } catch (e) {
     debugPrint('[BLE] Connect error: $e');
     _updateNotification(notifications, 'Connection failed. Retrying…');
@@ -251,6 +255,10 @@ Future<void> _runBleConnection(
       for(var i = 0; i < list.length; i++) {
         final List<int> raw = List<int>.from(list[i]["bytes"]);
         await sendBlobTransfer(device, writeChar!, list[i]["name"], Uint8List.fromList(raw));
+        service.invoke('batchTransferProgress', {
+          'current': i,
+          'length': list.length
+        });
       }
       service.invoke('batchTransferFinished', {});
     } catch (e) {
