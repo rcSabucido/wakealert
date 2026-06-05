@@ -27,9 +27,9 @@ class AlertService {
     });
     await telephony.sendSms(
 	    to: _emergencyNumber!,
-	    message: "[WakeAlert Client Info] ${jsonStr}",
+	    message: "[WakeAlert Client Info] $jsonStr",
 	    statusListener: (SendStatus status) {
-	      print('SMS status: $status');
+	      debugPrint('SMS status: $status');
 	    },
     );
 
@@ -42,7 +42,7 @@ class AlertService {
     final loaded = list.map((e) => Contact.fromJson(e)).toList();
     final filtered = loaded.where((n) => n.isPrimary).toList();
 
-    if (filtered.length == 0) {
+    if (filtered.isEmpty) {
       return;
     }
 
@@ -53,9 +53,9 @@ class AlertService {
 
     await telephony.sendSms(
       to: filtered.first.phoneNumber,
-      message: "[WakeAlert]\r\nGood day! ${firstName} ${lastName} has sent an emergency alert.\r\nCurrent location: ${latitude}, ${longitude}\r\n[This is an auto-generated message.]",
+      message: "[WakeAlert]\r\nGood day! $firstName $lastName has sent an emergency alert.\r\nCurrent location: $latitude, $longitude\r\n[This is an auto-generated message.]",
       statusListener: (SendStatus status) {
-        print('SMS status: $status');
+        debugPrint('SMS status: $status');
       },
     );
 
