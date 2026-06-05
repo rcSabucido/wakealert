@@ -20,12 +20,12 @@ class AlertService {
     required double longitude,
     required ServiceInstance service,
   }) async {
-      var jsonStr = jsonEncode({
-          'victim_id': victimId,
-          'latitude': '$latitude',
-          'longitude': '$longitude',
-      });
-      await telephony.sendSms(
+    var jsonStr = jsonEncode({
+        'victim_id': victimId,
+        'latitude': '$latitude',
+        'longitude': '$longitude',
+    });
+    await telephony.sendSms(
 	    to: _emergencyNumber!,
 	    message: "[WakeAlert Client Info] ${jsonStr}",
 	    statusListener: (SendStatus status) {
@@ -33,30 +33,33 @@ class AlertService {
 	    },
     );
 
+    final prefs = await SharedPreferences.getInstance();
 
-      final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(PrefsNames.CONTACTS);
+    if (raw == null) return;
 
-      final raw = prefs.getString(PrefsNames.CONTACTS);
-      if (raw == null) return;
+    final List<dynamic> list = json.decode(raw);
+    final loaded = list.map((e) => Contact.fromJson(e)).toList();
+    final filtered = loaded.where((n) => n.isPrimary).toList();
 
-      final List<dynamic> list = json.decode(raw);
-      final loaded = list.map((e) => Contact.fromJson(e)).toList();
+    if (filtered.length == 0) {
+      return;
+    }
 
-      debugPrint("Sorting contacts");
+    debugPrint("Trying to call: ${filtered.first.phoneNumber}");
 
-      loaded.sort((a, b) {
-        // true (1) comes before false (0)
-        int primaryCmp = a.isPrimary ? 1 : 0 - (b.isPrimary ? 1 : 0);
-        if (primaryCmp != 0) return primaryCmp;
+    final firstName = prefs.getString(PrefsNames.FIRST_NAME);
+    final lastName = prefs.getString(PrefsNames.LAST_NAME);
 
-        // secondary ordering: alphabetically by last name, then first
-        int lastCmp = a.lastName.compareTo(b.lastName);
-        return lastCmp != 0 ? lastCmp : a.firstName.compareTo(b.firstName);
-      });
+    await telephony.sendSms(
+      to: filtered.first.phoneNumber,
+      message: "[WakeAlert]\r\nGood day! ${firstName} ${lastName} has sent an emergency alert.\r\nCurrent location: ${latitude}, ${longitude}\r\n[This is an auto-generated message.]",
+      statusListener: (SendStatus status) {
+        print('SMS status: $status');
+      },
+    );
 
-      debugPrint("Trying to call: ${loaded.first.phoneNumber}");
-      service.invoke('triggerCall', {'phone': loaded.first.phoneNumber});
-
+    service.invoke('triggerCall', {'phone': filtered.first.phoneNumber});
   }
   static Future<void> addAlert({
     required int victimId,
