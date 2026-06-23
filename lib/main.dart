@@ -28,8 +28,10 @@ final outboxRepo = OutboxRepository(OutboxDao(appDb));
 final Telephony telephony = Telephony.instance;
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
   debugPrint('Loading .env');
-  await dotenv.load();
+  await dotenv.load(fileName: ".env");
   await Flutterlibphonenumber.init();
 
   final prefs = await SharedPreferences.getInstance();

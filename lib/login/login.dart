@@ -166,7 +166,7 @@ class _LoginPageState extends State<LoginPage> {
 
                           final fullAddressF = await PsgcClient().fullAddress(barangayCode);
                           final fullAddress = fullAddressF.trim();
-                          var addressLine = addressEntry["address_line"].replace(addressLineSeparator, " ");
+                          var addressLine = addressEntry["address_line"].replaceAll(addressLineSeparator, " ");
                           if (addressLine != null && addressLine.length > 0 && fullAddress.length > 0) {
                             addressLine += ", ";
                           }
