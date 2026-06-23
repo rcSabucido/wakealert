@@ -279,6 +279,13 @@ void _onDataReceived(
   FlutterLocalNotificationsPlugin notifications,
 ) {
   debugPrint('[BLE] Received ${bytes.length} bytes: $bytes');
+
+  final dec = utf8.decode(bytes);
+
+  if (dec.startsWith("Battery: ")) {
+    service.invoke('batteryLevel', {'level': int.parse(dec.substring("Battery: ".length))});
+  }
+
   final String distressData = "Distress signal";
 
   if (utf8.decode(bytes) == distressData) {

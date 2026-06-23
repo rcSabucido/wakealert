@@ -26,6 +26,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   bool _isPaired = false;
   StreamSubscription? _bleSub;
+  StreamSubscription? _batterySub;
   int batteryPercentage = 75;
 
   String firstName = "";
@@ -69,8 +70,19 @@ class _HomePageState extends State<HomePage> {
         }
       });
     });
-  }
 
+    _batterySub = FlutterBackgroundService()
+        .on('batteryUpdate')
+        .listen((data) {
+      if (data == null) return;
+      setState(() {
+          final level = data['level'] as int;
+          setState(() {
+            batteryPercentage = level;
+          });
+        });
+      });
+  }
 
   @override
   Widget build(BuildContext context) {
